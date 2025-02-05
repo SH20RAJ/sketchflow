@@ -1,38 +1,34 @@
 import "./globals.css";
 
 export const metadata = {
-  // Basic metadata
-  title: "SaaS Template - Launch Your SaaS Faster",
-  description: "Production-ready SaaS template with authentication, payments, email integration and more. Built with Next.js, Tailwind CSS, and Shadcn UI.",
+  title: "SketchyKids - Fun Interactive Learning for Children",
+  description: "SketchyKids helps children learn through interactive and engaging activities, fostering creativity and knowledge.",
   
-  // Open Graph / Facebook
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://your-domain.com',
-    siteName: 'SaaS Template',
-    title: 'SaaS Template - Launch Your SaaS Faster',
-    description: 'Production-ready SaaS template with authentication, payments, email integration and more.',
+    url: 'https://sketchykids.com',
+    siteName: 'SketchyKids',
+    title: 'SketchyKids - Fun Interactive Learning for Children',
+    description: 'Discover engaging activities that help children learn through creativity and fun.',
     images: [
       {
-        url: 'https://your-domain.com/og-image.jpg',
+        url: 'https://sketchykids.com/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'SaaS Template Preview',
+        alt: 'SketchyKids Learning Platform',
       },
     ],
   },
   
-  // Twitter
   twitter: {
     card: 'summary_large_image',
-    title: 'SaaS Template - Launch Your SaaS Faster',
-    description: 'Production-ready SaaS template with authentication, payments, email integration and more.',
-    creator: '@yourtwitterhandle',
-    images: ['https://your-domain.com/twitter-image.jpg'],
+    title: 'SketchyKids - Fun Interactive Learning for Children',
+    description: 'Discover engaging activities that help children learn through creativity and fun.',
+    creator: '@sketchykids',
+    images: ['https://sketchykids.com/twitter-image.jpg'],
   },
   
-  // Robots
   robots: {
     index: true,
     follow: true,
@@ -45,78 +41,56 @@ export const metadata = {
     },
   },
   
-  // Icons
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon-16x16.png',
     apple: '/apple-touch-icon.png',
-    other: {
-      rel: 'apple-touch-icon-precomposed',
-      url: '/apple-touch-icon-precomposed.png',
-    },
   },
   
-  // Manifest
   manifest: '/site.webmanifest',
   
-  // Verification
   verification: {
-    google: 'your-google-site-verification',
-    yandex: 'your-yandex-verification',
-    yahoo: 'your-yahoo-verification',
-    other: {
-      me: ['your-email@domain.com'],
-    },
+    google: 'google-site-verification-code',
+    bing: 'bing-verification-code',
   },
   
-  // Alternative languages
   alternates: {
-    canonical: 'https://your-domain.com',
+    canonical: 'https://sketchykids.com',
     languages: {
-      'en-US': 'https://your-domain.com',
-      'es-ES': 'https://your-domain.com/es',
+      'en-US': 'https://sketchykids.com',
+      'es-ES': 'https://sketchykids.com/es',
     },
   },
   
-  // Additional metadata
-  category: 'technology',
-  classification: 'Software Development',
-  creator: 'Your Company Name',
-  publisher: 'Your Company Name',
+  category: 'education',
+  creator: 'SketchyKids Team',
+  publisher: 'SketchyKids Inc.',
+  
+  keywords: [
+    'children learning',
+    'interactive activities',
+    'educational games',
+    'creative learning',
+    'kids education',
+    'fun learning',
+    'child development',
+    'educational technology',
+    'learning through play',
+    'sketchy kids'
+  ],
+  
+  appleWebApp: {
+    capable: true,
+    title: 'SketchyKids',
+    statusBarStyle: 'default',
+  },
+  
   formatDetection: {
     telephone: false,
     date: false,
     address: false,
     email: false,
   },
-  
-  // Keywords
-  keywords: [
-    'saas template',
-    'next.js template',
-    'react template',
-    'authentication',
-    'payment integration',
-    'email integration',
-    'tailwind css',
-    'shadcn ui',
-    'deployment',
-    'documentation'
-  ],
-  
-  // App specific
-  appleWebApp: {
-    capable: true,
-    title: 'SaaS Template',
-    statusBarStyle: 'black-translucent',
-  },
-  
-  // Archives and assets
-  assets: ['https://your-domain.com/assets'],
-  archives: ['https://your-domain.com/archives'],
-  
-  // Bookmarks
-  bookmarks: ['https://your-domain.com/featured'],
 };
 
 export const viewport = {
