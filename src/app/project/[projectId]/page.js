@@ -10,6 +10,7 @@ export default function ProjectPage({ params }) {
   const { data: session, status } = useSession();
   const [projectData, setProjectData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -25,15 +26,17 @@ export default function ProjectPage({ params }) {
         }
         const data = await response.json();
         setProjectData(data);
+        setError(null);
       } catch (error) {
         console.error('Error:', error);
+        setError(error.message);
         router.push('/projects');
       } finally {
         setLoading(false);
       }
     };
 
-    if (status === 'authenticated') {
+    if (status === 'authenticated' && params.projectId) {
       fetchProject();
     }
   }, [params.projectId, router, status]);
@@ -46,9 +49,25 @@ export default function ProjectPage({ params }) {
     );
   }
 
+  if (error) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-red-500">Error: {error}</div>
+      </div>
+    );
+  }
+
   if (!projectData) {
     return null;
   }
 
-  return <Editor projectId={params.projectId} initialData={projectData} />;
+  return (
+    <Editor
+      projectId={params.projectId}
+      initialData={{
+        markdown: projectData.markdown?.content || '',
+        excalidraw: projectData.diagram?.content || { elements: [], appState: {} },
+      }}
+    />
+  );
 }

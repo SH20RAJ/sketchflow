@@ -9,18 +9,10 @@ export async function GET(request, { params }) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return new NextResponse('User not found', { status: 404 });
-    }
-
-    const project = await prisma.project.findFirst({
+    const project = await prisma.project.findUnique({
       where: {
         id: params.projectId,
-        userId: user.id,
+        userId: session.user.id,
       },
       include: {
         diagrams: true,
@@ -43,6 +35,65 @@ export async function GET(request, { params }) {
   }
 }
 
+export async function DELETE(request, { params }) {
+  try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    const deletedProject = await prisma.project.deleteMany({
+      where: {
+        id: params.projectId,
+        userId: session.user.id,
+      },
+    });
+
+    if (deletedProject.count === 0) {
+      return new NextResponse('Project not found or unauthorized', { status: 404 });
+    }
+
+    return new NextResponse('Project deleted', { status: 200 });
+  } catch (error) {
+    console.error('Error:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
+}
+
+export async function PATCH(request, { params }) {
+  try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    const body = await request.json();
+    const updatedProject = await prisma.project.updateMany({
+      where: {
+        id: params.projectId,
+        userId: session.user.id,
+      },
+      data: {
+        name: body.name,
+        description: body.description,
+      },
+    });
+
+    if (updatedProject.count === 0) {
+      return new NextResponse('Project not found or unauthorized', { status: 404 });
+    }
+
+    const project = await prisma.project.findUnique({
+      where: { id: params.projectId },
+    });
+
+    return NextResponse.json(project);
+  } catch (error) {
+    console.error('Error:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
+}
+
 export async function POST(request, { params }) {
   try {
     const session = await auth();
@@ -50,18 +101,10 @@ export async function POST(request, { params }) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return new NextResponse('User not found', { status: 404 });
-    }
-
-    const project = await prisma.project.findFirst({
+    const project = await prisma.project.findUnique({
       where: {
         id: params.projectId,
-        userId: user.id,
+        userId: session.user.id,
       },
       include: {
         diagrams: true,
