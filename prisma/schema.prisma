@@ -71,6 +71,7 @@ model Project {
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   diagrams    Diagram[]
+  markdowns   Markdown[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -81,6 +82,18 @@ model Diagram {
   id        String   @id @default(cuid())
   name      String
   content   Json
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+model Markdown {
+  id        String   @id @default(cuid())
+  name      String
+  content   String   @db.Text
   projectId String
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
