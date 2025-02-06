@@ -1,86 +1,95 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import Github from "next-auth/providers/github";
 import { prisma } from "./prisma";
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import { getUserFromEmail } from "./lib/user";
-
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
-
-  providers: [ 
-    // Github,
-     Google],
+  providers: [
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
+  ],
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
   callbacks: {
     async signIn({ account, profile }) {
-      console.log("account", account);
-      console.log("profile", profile);
-      if (!profile?.email) {
-        throw new Error("No profile");
-      }
+      try {
+        if (!profile?.email) {
+          throw new Error("Email is required");
+        }
 
-      let baseUsername = profile.name.replace(/\s+/g, "").toLowerCase();
-      let username = baseUsername;
-      let usernameExists = true;
-      let counter = 1;
+        let baseUsername = profile.name?.replace(/\s+/g, "").toLowerCase() || 
+                          profile.email.split('@')[0];
+        let username = baseUsername;
+        let counter = 1;
 
-      while (usernameExists) {
-        const existingUser = await prisma.user.findFirst({
-          where: { username },
-        });
+        while (true) {
+          const existingUser = await prisma.user.findFirst({
+            where: { username },
+          });
 
-        if (!existingUser) {
-          usernameExists = false;
-        } else {
+          if (!existingUser) break;
           username = `${baseUsername}${counter}`;
           counter++;
         }
+
+        await prisma.user.upsert({
+          where: { email: profile.email },
+          create: {
+            email: profile.email,
+            name: profile.name || username,
+            username,
+            image: profile.picture || null,
+          },
+          update: {
+            name: profile.name,
+            image: profile.picture || null,
+          },
+        });
+
+        return true;
+      } catch (error) {
+        console.error('Sign in error:', error);
+        return false;
       }
-
-      const password = Math.random().toString(36).slice(-8);
-
-      let user = await prisma.user.upsert({
-        where: { email: profile.email },
-        create: {
-          email: profile.email,
-          name: profile.name,
-          username,
-          password,
-          image: profile.avatar_url || profile.picture,
-        },
-        update: {
-          // name: profile.name,
-          image: profile.avatar_url || profile.picture,
-        },
-      });
-
-      // console.log("session",session);
-      return true;
     },
-    async redirect() {
-      return "/";
-    },
-    async session({session, token}) {
-      session.user.userId = token.id;
-      session.user.username = token.username
-      return session;
+    async session({ session, token }) {
+      try {
+        if (session?.user?.email) {
+          const user = await getUserFromEmail(session.user.email);
+          session.user.id = user.id;
+          session.user.username = user.username;
+        }
+        return session;
+      } catch (error) {
+        console.error('Session error:', error);
+        return session;
+      }
     },
     async jwt({ token, user }) {
-    // console.log("Ddsvdvs",/*  */token,user);
-      if (user) {
-        console.log("some user",user);
-        let cs = await getUserFromEmail(token.email);
-        console.log("cs",cs);
-        token.id = user.id;
-        token.username = cs.username
-        token.id = cs.id
+      try {
+        if (user) {
+          token.id = user.id;
+          token.username = user.username;
+        }
+        return token;
+      } catch (error) {
+        console.error('JWT error:', error);
+        return token;
       }
-      // console.log("user", user);
-      return token;
+    },
+    async redirect({ url, baseUrl }) {
+      return url.startsWith(baseUrl) ? url : '/projects';
     },
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  debug: process.env.NODE_ENV === 'development',
 });

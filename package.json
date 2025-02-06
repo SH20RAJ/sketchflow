@@ -59,7 +59,7 @@
     "input-otp": "^1.4.2",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.323.0",
-    "next": "14.1.0",
+    "next": "^14.2.23",
     "next-auth": "^4.24.5",
     "next-themes": "^0.4.4",
     "react": "^18",
@@ -87,7 +87,7 @@
     "eslint-config-next": "15.1.5",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "vercel": "^40.1.0",
+    "vercel": "^41.0.1",
     "wrangler": "^3.107.2"
   }
 }
