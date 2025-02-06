@@ -18,51 +18,77 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   session: {
     strategy: "jwt",
-  },
-  cookies: {
-    sessionToken: {
-      name: `__Secure-next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: true
-      }
-    }
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async signIn({ account, profile }) {
+    async signIn({ user, account, profile, email, credentials }) {
       try {
         if (!profile?.email) {
           throw new Error("Email is required");
         }
 
+        // Check if user exists with this email
+        const existingUser = await prisma.user.findUnique({
+          where: { email: profile.email },
+          include: { accounts: true },
+        });
+
+        if (existingUser) {
+          // If user exists but doesn't have a Google account linked
+          if (!existingUser.accounts.some(acc => acc.provider === 'google')) {
+            // Link the Google account to the existing user
+            await prisma.account.create({
+              data: {
+                userId: existingUser.id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token,
+                session_state: account.session_state,
+              },
+            });
+          }
+          return true;
+        }
+
+        // If no user exists, create new user with Google account
         let baseUsername = profile.name?.replace(/\s+/g, "").toLowerCase() || 
                           profile.email.split('@')[0];
         let username = baseUsername;
         let counter = 1;
 
         while (true) {
-          const existingUser = await prisma.user.findFirst({
+          const existingUsername = await prisma.user.findUnique({
             where: { username },
           });
-
-          if (!existingUser) break;
+          if (!existingUsername) break;
           username = `${baseUsername}${counter}`;
           counter++;
         }
 
-        await prisma.user.upsert({
-          where: { email: profile.email },
-          create: {
+        await prisma.user.create({
+          data: {
             email: profile.email,
             name: profile.name || username,
             username,
             image: profile.picture || null,
-          },
-          update: {
-            name: profile.name,
-            image: profile.picture || null,
+            accounts: {
+              create: {
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token,
+                session_state: account.session_state,
+              },
+            },
           },
         });
 
