@@ -1,32 +1,32 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "SketchyKids - Fun Interactive Learning for Children",
-  description: "SketchyKids helps children learn through interactive and engaging activities, fostering creativity and knowledge.",
+  title: "SketchFlow - Collaborative Whiteboard for Creative Teams",
+  description: "SketchFlow empowers teams to brainstorm, design, and collaborate in real-time on a shared digital canvas.",
   
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://sketchykids.com',
-    siteName: 'SketchyKids',
-    title: 'SketchyKids - Fun Interactive Learning for Children',
-    description: 'Discover engaging activities that help children learn through creativity and fun.',
+    url: 'https://sketchflow.app',
+    siteName: 'SketchFlow',
+    title: 'SketchFlow - Collaborative Whiteboard for Creative Teams',
+    description: 'Unleash creativity with our real-time collaborative digital whiteboard for teams.',
     images: [
       {
-        url: 'https://sketchykids.com/og-image.jpg',
+        url: 'https://sketchflow.app/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'SketchyKids Learning Platform',
+        alt: 'SketchFlow Collaborative Whiteboard',
       },
     ],
   },
   
   twitter: {
     card: 'summary_large_image',
-    title: 'SketchyKids - Fun Interactive Learning for Children',
-    description: 'Discover engaging activities that help children learn through creativity and fun.',
-    creator: '@sketchykids',
-    images: ['https://sketchykids.com/twitter-image.jpg'],
+    title: 'SketchFlow - Collaborative Whiteboard for Creative Teams',
+    description: 'Unleash creativity with our real-time collaborative digital whiteboard for teams.',
+    creator: '@sketchflow',
+    images: ['https://sketchflow.app/twitter-image.jpg'],
   },
   
   robots: {
@@ -55,33 +55,33 @@ export const metadata = {
   },
   
   alternates: {
-    canonical: 'https://sketchykids.com',
+    canonical: 'https://sketchflow.app',
     languages: {
-      'en-US': 'https://sketchykids.com',
-      'es-ES': 'https://sketchykids.com/es',
+      'en-US': 'https://sketchflow.app',
+      'es-ES': 'https://sketchflow.app/es',
     },
   },
   
-  category: 'education',
-  creator: 'SketchyKids Team',
-  publisher: 'SketchyKids Inc.',
+  category: 'productivity',
+  creator: 'SketchFlow Team',
+  publisher: 'SketchFlow Inc.',
   
   keywords: [
-    'children learning',
-    'interactive activities',
-    'educational games',
-    'creative learning',
-    'kids education',
-    'fun learning',
-    'child development',
-    'educational technology',
-    'learning through play',
-    'sketchy kids'
+    'collaborative whiteboard',
+    'real-time collaboration',
+    'team brainstorming',
+    'digital canvas',
+    'creative tools',
+    'remote collaboration',
+    'visual thinking',
+    'design collaboration',
+    'team productivity',
+    'sketch flow'
   ],
   
   appleWebApp: {
     capable: true,
-    title: 'SketchyKids',
+    title: 'SketchFlow',
     statusBarStyle: 'default',
   },
   
