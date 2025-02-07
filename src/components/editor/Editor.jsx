@@ -10,35 +10,80 @@ import { MarkdownEditor } from "./MarkdownEditor";
 import { useRouter } from "next/navigation";
 
 const DEFAULT_DATA = {
-  excalidraw: { elements: [], appState: {} },
-  markdown: '',
-  name: 'Untitled',
+  excalidraw: {
+    elements: [
+      {
+        type: "rectangle",
+        version: 141,
+        versionNonce: 361174001,
+        isDeleted: false,
+        id: "oDVXy8D6rom3H1-LLH2-f",
+        fillStyle: "hachure",
+        strokeWidth: 1,
+        strokeStyle: "solid",
+        roughness: 1,
+        opacity: 100,
+        angle: 0,
+        x: 100.50390625,
+        y: 93.67578125,
+        strokeColor: "#000000",
+        backgroundColor: "transparent",
+        width: 186.47265625,
+        height: 141.9765625,
+        seed: 1968410350,
+        groupIds: [],
+      },
+    ],
+    appState: { zenModeEnabled: false, viewBackgroundColor: "#a5d8ff" },
+    scrollToContent: true,
+  },
+  markdown: `
+# SketchFlow
+
+---
+
+A collaborative diagramming and markdown editor.
+
+  `,
+  name: "Untitled Project" + Math.floor(Math.random() * 1000),
 };
 
 export default function Editor({ projectId, initialData = {} }) {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
   const [excalidrawData, setExcalidrawData] = useState(DEFAULT_DATA.excalidraw);
   const [markdown, setMarkdown] = useState(DEFAULT_DATA.markdown);
+  const [projectName, setProjectName] = useState(DEFAULT_DATA.name);
+
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [projectName, setProjectName] = useState(DEFAULT_DATA.name);
   const [error, setError] = useState(null);
-  const [layout, setLayout] = useState("split"); // 'split', 'sketch', 'markdown'
+  const [layout, setLayout] = useState("split");
 
-  // Load initial data
   useEffect(() => {
-    if (initialData) {
-      if (initialData.diagrams?.[0]?.content) {
-        setExcalidrawData(initialData.diagrams[0].content);
+    const fetchProjectData = async () => {
+      try {
+        const response = await fetch(`/api/projects/${projectId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch project data');
+        }
+        const data = await response.json();
+        console.log("data",data);
+
+        setExcalidrawData(data.diagram ?.content || DEFAULT_DATA.excalidraw);
+        setMarkdown(data.markdown?.content || DEFAULT_DATA.markdown);
+        setProjectName(data.name || DEFAULT_DATA.name);
+      } catch (error) {
+        console.error('Error fetching project data:', error);
+        setError('Failed to load project data');
+      } finally {
+        setLoading(false);
       }
-      if (initialData.markdowns?.[0]?.content) {
-        setMarkdown(initialData.markdowns[0].content);
-      }
-      if (initialData.name) {
-        setProjectName(initialData.name);
-      }
-    }
-  }, [initialData]);
+    };
+
+    fetchProjectData();
+  }, [projectId]);
 
   const handleExcalidrawChange = useCallback((elements, appState) => {
     setExcalidrawData({ elements, appState });
@@ -54,9 +99,9 @@ export default function Editor({ projectId, initialData = {} }) {
 
     try {
       const response = await fetch(`/api/projects/${projectId}/save`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           excalidraw: excalidrawData,
@@ -68,27 +113,20 @@ export default function Editor({ projectId, initialData = {} }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to save project');
+        throw new Error(data.message || "Failed to save project");
       }
 
-      // Update local state with saved data
       if (data.success) {
-        if (data.project?.name) {
-          setProjectName(data.project.name);
-        }
-        if (data.diagram?.content) {
-          setExcalidrawData(data.diagram.content);
-        }
-        if (data.markdown?.content) {
-          setMarkdown(data.markdown.content);
-        }
+        setProjectName(data.project?.name || projectName);
+        setExcalidrawData(data.diagram?.content || excalidrawData);
+        setMarkdown(data.markdown?.content || markdown);
         setIsEditingName(false);
       } else {
-        throw new Error('Failed to save project');
+        throw new Error("Failed to save project");
       }
     } catch (err) {
-      console.error('Save error:', err);
-      setError(err.message || 'Failed to save project');
+      console.error("Save error:", err);
+      setError(err.message || "Failed to save project");
     } finally {
       setIsSaving(false);
     }
@@ -98,8 +136,17 @@ export default function Editor({ projectId, initialData = {} }) {
     setProjectName(e.target.value);
   }, []);
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <div className="h-screen flex flex-col">
+      <title>{projectName}</title>
       <div className="border-b p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {isEditingName ? (
@@ -178,24 +225,20 @@ export default function Editor({ projectId, initialData = {} }) {
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-50 text-red-500 p-2 text-sm">{error}</div>
-      )}
-
       <div className="flex-1 min-h-0">
         {layout === "split" ? (
-          <div className="grid grid-cols-2 h-full">
-            <div className="h-full border-r">
+          <div className="grid grid-cols-10 h-full">
+            <div className="col-span-3 h-full">
+              <MarkdownEditor
+                content={markdown}
+                onChange={handleMarkdownChange}
+              />
+            </div>
+            <div className="col-span-7 h-full">
               <Excalidraw
                 onChange={handleExcalidrawChange}
                 initialData={excalidrawData}
                 viewModeEnabled={false}
-              />
-            </div>
-            <div className="h-full">
-              <MarkdownEditor
-                content={markdown}
-                onChange={handleMarkdownChange}
               />
             </div>
           </div>

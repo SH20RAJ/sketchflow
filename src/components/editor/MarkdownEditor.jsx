@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 export function MarkdownEditor({ content, onChange }) {
   const [data, setData] = useState(content || "");
+  
 
   // Update data when content prop changes
   useEffect(() => {
@@ -17,9 +18,9 @@ export function MarkdownEditor({ content, onChange }) {
     <div className="w-full h-full min-h-[500px]">
       <Editor
         defaultValue={data}
-        value={data}
         disableLocalStorage={true}
-        onUpdate={({ editor }) => {
+        value={data}
+        onUpdate={(editor) => {          
           if (editor) {
             const markdown = editor.storage.markdown.getMarkdown();
             setData(markdown);

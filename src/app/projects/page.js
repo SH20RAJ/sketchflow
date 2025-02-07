@@ -81,6 +81,8 @@ export default function ProjectsPage() {
           name: 'New Project',
           description: '',
         }),
+
+
       });
 
       if (!response.ok) {

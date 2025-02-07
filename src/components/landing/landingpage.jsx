@@ -31,7 +31,7 @@ export default function LandingPage() {
                             SketchFlow empowers developers, teachers, and creative teams to collaborate through intuitive whiteboarding and diagramming. Unleash your creativity and boost productivity today!
                         </p>
                         <div className="flex justify-center gap-4">
-                            <Button size="lg" className="bg-blue-500 hover:bg-blue-600 text-white">Start Creating</Button>
+                            <Link href="/projects"><Button size="lg" className="bg-blue-500 hover:bg-blue-600 text-white">Start Creating</Button></Link>
                             <Button size="lg" variant="outline" className="text-blue-500 hover:bg-blue-50">Watch Demo</Button>
                         </div>
                     </div>

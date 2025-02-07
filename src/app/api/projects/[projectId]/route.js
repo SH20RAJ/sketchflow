@@ -29,9 +29,9 @@ export async function GET(request, { params }) {
     const mainMarkdown = project.markdowns[0];
 
     return NextResponse.json({
-      ...project,
-      diagram: mainDiagram,
       markdown: mainMarkdown,
+      diagram: mainDiagram,
+      ...project,
     });
   } catch (error) {
     console.error("Error:", error);
