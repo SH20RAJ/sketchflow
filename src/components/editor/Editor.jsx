@@ -115,8 +115,9 @@ export default function Editor({ projectId, initialData = {} }) {
       if (!response.ok) {
         throw new Error(data.message || "Failed to save project");
       }
-
+// diagram.content.appState.collaborators;
       if (data.success) {
+        data.diagram.content.appState.collaborators = [];
         setProjectName(data.project?.name || projectName);
         setExcalidrawData(data.diagram?.content || excalidrawData);
         setMarkdown(data.markdown?.content || markdown);
