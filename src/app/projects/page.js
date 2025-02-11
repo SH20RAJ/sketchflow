@@ -1,24 +1,31 @@
-'use client';
+"use client";
 
-import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import useSWR from 'swr';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Plus, Loader2, Pencil, Trash } from 'lucide-react';
-import { format } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DropdownMenuContent, 
-
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import useSWR from "swr";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Plus, Loader2, Pencil, Trash } from "lucide-react";
+import { format } from "date-fns";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenuContent,
   DropdownMenu,
   DropdownMenuSeparator,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuTrigger
- } from '@/components/ui/dropdown-menu';
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const fetcher = (...args) => fetch(...args).then(res => res.json());
+const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -26,52 +33,58 @@ export default function ProjectsPage() {
   const [isPending, startTransition] = useTransition();
   const [isCreating, setIsCreating] = useState(false);
 
-  const { data: projectsData, error: projectsError, mutate: mutateProjects } = useSWR(
-    status === 'authenticated' ? '/api/projects' : null,
-    fetcher
-  );
+  const {
+    data: projectsData,
+    error: projectsError,
+    mutate: mutateProjects,
+  } = useSWR(status === "authenticated" ? "/api/projects" : null, fetcher);
 
   const { data: subscriptionData, error: subscriptionError } = useSWR(
-    status === 'authenticated' ? '/api/subscription' : null,
+    status === "authenticated" ? "/api/subscription" : null,
     fetcher
   );
 
-  const isLoading = !projectsData && !projectsError || !subscriptionData && !subscriptionError;
+  const isLoading =
+    (!projectsData && !projectsError) ||
+    (!subscriptionData && !subscriptionError);
 
   const handleCreateProject = async () => {
     if (projectsData?.count >= 100 && !subscriptionData?.isPro) {
-      router.push('/pricing');
+      router.push("/pricing");
       return;
     }
 
     setIsCreating(true);
     try {
       const optimisticProject = {
-        id: 'temp-' + Date.now(),
-        name: 'New Project',
-        description: '',
+        id: "temp-" + Date.now(),
+        name: "New Project",
+        description: "",
         createdAt: new Date().toISOString(),
         isOptimistic: true,
       };
-      mutateProjects(prevData => ({
-        ...prevData,
-        projects: [optimisticProject, ...prevData.projects],
-        count: prevData.count + 1
-      }), false);
+      mutateProjects(
+        (prevData) => ({
+          ...prevData,
+          projects: [optimisticProject, ...prevData.projects],
+          count: prevData.count + 1,
+        }),
+        false
+      );
 
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'New Project', description: '' }),
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "New Project", description: "" }),
       });
 
-      if (!response.ok) throw new Error('Failed to create project');
+      if (!response.ok) throw new Error("Failed to create project");
 
       const newProject = await response.json();
       mutateProjects();
       router.push(`/project/${newProject.id}`);
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
       mutateProjects();
     } finally {
       setIsCreating(false);
@@ -80,27 +93,34 @@ export default function ProjectsPage() {
 
   const handleDeleteProject = async (projectId) => {
     try {
-      mutateProjects(prevData => ({
-        ...prevData,
-        projects: prevData.projects.filter(p => p.id !== projectId),
-        count: prevData.count - 1
-      }), false);
+      mutateProjects(
+        (prevData) => ({
+          ...prevData,
+          projects: prevData.projects.filter((p) => p.id !== projectId),
+          count: prevData.count - 1,
+        }),
+        false
+      );
 
-      const response = await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete project');
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete project");
       mutateProjects();
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
       mutateProjects();
     }
   };
 
-  if (status === 'unauthenticated') {
-    router.push('/login');
+  if (status === "unauthenticated") {
+    router.push("/login");
     return null;
   }
 
-  if (status === 'loading' || isLoading) {
+  if (status === "loading") return "";
+
+  if (status === "loading" || isLoading) {
     return (
       <div className="container mx-auto p-8">
         <title>Projects</title>
@@ -153,8 +173,13 @@ export default function ProjectsPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="cursor-pointer">
-                <AvatarImage src={session?.user?.image} alt={session?.user?.name} />
-                <AvatarFallback>{session?.user?.name?.charAt(0)}</AvatarFallback>
+                <AvatarImage
+                  src={session?.user?.image}
+                  alt={session?.user?.name}
+                />
+                <AvatarFallback>
+                  {session?.user?.name?.charAt(0)}
+                </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -163,7 +188,9 @@ export default function ProjectsPage() {
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()}>Log out</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => signOut()}>
+                Log out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
