@@ -15,7 +15,7 @@ export default function ProjectPage({ params }) {
 
   const fetchProject = useCallback(async () => {
     try {
-      const response = await fetch(`/api/projects/${params.projectId}`);
+      const response = await fetch(`/api/projects/shared/${params.projectId}`);
       if (!response.ok) {
         throw new Error("Failed to fetch project");
       }

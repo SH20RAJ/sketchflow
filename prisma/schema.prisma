@@ -74,6 +74,7 @@ model Project {
   markdowns   Markdown[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  shared      Boolean @default(false)
 
   @@index([userId])
 }
