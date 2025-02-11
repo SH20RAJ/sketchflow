@@ -34,8 +34,17 @@ export async function POST(req, { params }) {
       return new NextResponse("Project not found", { status: 404 });
     }
 
-    const existingDiagram = project.diagrams[0];
-    const existingMarkdown = project.markdowns[0];
+    let existingDiagram = project.diagrams[0];
+
+    existingDiagram.content.appState.collaborators = [];
+    console.log(
+      existingDiagram,
+      "ff",
+      existingDiagram.content.appState.collaborators
+    );
+    
+
+    let existingMarkdown = project.markdowns[0];
 
     try {
       const diagram = await prisma.diagram.upsert({

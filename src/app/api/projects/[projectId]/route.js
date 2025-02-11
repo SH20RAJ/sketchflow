@@ -25,8 +25,10 @@ export async function GET(request, { params }) {
     }
 
     // Get the main diagram and markdown
-    const mainDiagram = project.diagrams[0];
-    const mainMarkdown = project.markdowns[0];
+    let mainDiagram = project.diagrams[0];
+    let mainMarkdown = project.markdowns[0];
+
+    mainDiagram.content.appState.collaborators = [];
 
     return NextResponse.json({
       markdown: mainMarkdown,

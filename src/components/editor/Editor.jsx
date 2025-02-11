@@ -66,17 +66,17 @@ export default function Editor({ projectId, initialData = {} }) {
       try {
         const response = await fetch(`/api/projects/${projectId}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch project data');
+          throw new Error("Failed to fetch project data");
         }
         const data = await response.json();
-        console.log("data",data);
+        console.log("fetched data", data);
 
-        setExcalidrawData(data.diagram ?.content || DEFAULT_DATA.excalidraw);
+        setExcalidrawData(data.diagram?.content || DEFAULT_DATA.excalidraw);
         setMarkdown(data.markdown?.content || DEFAULT_DATA.markdown);
         setProjectName(data.name || DEFAULT_DATA.name);
       } catch (error) {
-        console.error('Error fetching project data:', error);
-        setError('Failed to load project data');
+        console.error("Error fetching project data:", error);
+        setError("Failed to load project data");
       } finally {
         setLoading(false);
       }
@@ -115,9 +115,11 @@ export default function Editor({ projectId, initialData = {} }) {
       if (!response.ok) {
         throw new Error(data.message || "Failed to save project");
       }
-// diagram.content.appState.collaborators;
+
       if (data.success) {
         data.diagram.content.appState.collaborators = [];
+        console.log("appstate data", data.diagram.content.appState);
+        
         setProjectName(data.project?.name || projectName);
         setExcalidrawData(data.diagram?.content || excalidrawData);
         setMarkdown(data.markdown?.content || markdown);
