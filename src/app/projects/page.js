@@ -1,68 +1,51 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Plus, Loader2, Pencil, Trash } from 'lucide-react';
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenuContent, 
+
+  DropdownMenu,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger
+ } from '@/components/ui/dropdown-menu';
+
+const fetcher = (...args) => fetch(...args).then(res => res.json());
 
 export default function ProjectsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [projects, setProjects] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
   const [isCreating, setIsCreating] = useState(false);
-  const [projectCount, setProjectCount] = useState(0);
-  const [subscription, setSubscription] = useState(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-      return;
-    }
+  const { data: projectsData, error: projectsError, mutate: mutateProjects } = useSWR(
+    status === 'authenticated' ? '/api/projects' : null,
+    fetcher
+  );
 
-    const fetchProjects = async () => {
-      try {
-        const [projectsRes, subscriptionRes] = await Promise.all([
-          fetch('/api/projects'),
-          fetch('/api/subscription')
-        ]);
-        
-        if (!projectsRes.ok || !subscriptionRes.ok) {
-          throw new Error('Failed to fetch data');
-        }
+  const { data: subscriptionData, error: subscriptionError } = useSWR(
+    status === 'authenticated' ? '/api/subscription' : null,
+    fetcher
+  );
 
-        const projectsData = await projectsRes.json();
-        const subscriptionData = await subscriptionRes.json();
-
-        setProjects(projectsData.projects);
-        setProjectCount(projectsData.count);
-        setSubscription(subscriptionData);
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (status === 'authenticated') {
-      fetchProjects();
-    }
-  }, [router, status]);
+  const isLoading = !projectsData && !projectsError || !subscriptionData && !subscriptionError;
 
   const handleCreateProject = async () => {
-    if (projectCount >= 100 && !subscription?.isPro) {
+    if (projectsData?.count >= 100 && !subscriptionData?.isPro) {
       router.push('/pricing');
       return;
     }
 
     setIsCreating(true);
     try {
-      // Optimistically add a new project
       const optimisticProject = {
         id: 'temp-' + Date.now(),
         name: 'New Project',
@@ -70,37 +53,26 @@ export default function ProjectsPage() {
         createdAt: new Date().toISOString(),
         isOptimistic: true,
       };
-      setProjects(prev => [optimisticProject, ...prev]);
+      mutateProjects(prevData => ({
+        ...prevData,
+        projects: [optimisticProject, ...prevData.projects],
+        count: prevData.count + 1
+      }), false);
 
       const response = await fetch('/api/projects', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: 'New Project',
-          description: '',
-        }),
-
-
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'New Project', description: '' }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create project');
-      }
+      if (!response.ok) throw new Error('Failed to create project');
 
       const newProject = await response.json();
-      
-      // Replace optimistic project with real one
-      setProjects(prev => 
-        prev.map(p => p.id === optimisticProject.id ? newProject : p)
-      );
-
+      mutateProjects();
       router.push(`/project/${newProject.id}`);
     } catch (error) {
       console.error('Error:', error);
-      // Remove optimistic project on error
-      setProjects(prev => prev.filter(p => !p.isOptimistic));
+      mutateProjects();
     } finally {
       setIsCreating(false);
     }
@@ -108,38 +80,40 @@ export default function ProjectsPage() {
 
   const handleDeleteProject = async (projectId) => {
     try {
-      // Optimistically remove the project
-      const deletedProject = projects.find(p => p.id === projectId);
-      setProjects(prev => prev.filter(p => p.id !== projectId));
+      mutateProjects(prevData => ({
+        ...prevData,
+        projects: prevData.projects.filter(p => p.id !== projectId),
+        count: prevData.count - 1
+      }), false);
 
-      const response = await fetch(`/api/projects/${projectId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete project');
-      }
+      const response = await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete project');
+      mutateProjects();
     } catch (error) {
       console.error('Error:', error);
-      // Restore the project on error
-      setProjects(prev => [...prev, deletedProject]);
+      mutateProjects();
     }
   };
+
+  if (status === 'unauthenticated') {
+    router.push('/login');
+    return null;
+  }
 
   if (status === 'loading' || isLoading) {
     return (
       <div className="container mx-auto p-8">
         <title>Projects</title>
-        <div className="flex justify-between items-center mb-8">
+        <nav className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Your Projects</h1>
-          <p className="text-gray-600">
-            {projectCount} / {subscription?.isPro ? '∞' : '100'} projects used
-          </p>
-          <Button disabled>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Loading...
-          </Button>
-        </div>
+          <div className="flex items-center space-x-4">
+            <p className="text-gray-600">Loading...</p>
+            <Button disabled className="flex items-center">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Loading...
+            </Button>
+          </div>
+        </nav>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <Card key={i} className="animate-pulse">
@@ -157,27 +131,43 @@ export default function ProjectsPage() {
     );
   }
 
+  const projects = projectsData?.projects || [];
+  const projectCount = projectsData?.count || 0;
+
   return (
     <div className="container mx-auto p-8">
-      <div className="flex justify-between items-center mb-8">
+      <nav className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Your Projects</h1>
-        <p className="text-gray-600">
-          {projectCount} / {subscription?.isPro ? "∞" : "100"} projects used
-        </p>
-        <Button onClick={handleCreateProject} disabled={isCreating}>
-          {isCreating ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Plus className="mr-2 h-4 w-4" />
-          )}
-          {isCreating ? "Creating..." : "New Project"}
-        </Button>
-
-        <Avatar>
-          <AvatarImage src={session?.user?.image} alt={session?.user?.name} />
-          <AvatarFallback>{session?.user?.name?.charAt(0)}</AvatarFallback>
-        </Avatar>
-      </div>
+        <div className="flex items-center space-x-4">
+          <p className="text-gray-600">
+            {projectCount} / {subscriptionData?.isPro ? "∞" : "100"} projects
+          </p>
+          <Button onClick={handleCreateProject} disabled={isCreating}>
+            {isCreating ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="mr-2 h-4 w-4" />
+            )}
+            {isCreating ? "Creating..." : "New Project"}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Avatar className="cursor-pointer">
+                <AvatarImage src={session?.user?.image} alt={session?.user?.name} />
+                <AvatarFallback>{session?.user?.name?.charAt(0)}</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>{session?.user?.name}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => signOut()}>Log out</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </nav>
 
       {projects.length === 0 ? (
         <Card className="text-center p-12">
