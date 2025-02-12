@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check } from 'lucide-react';
+import { UpgradeButton } from '@/components/UpgradeButton';
 
 export default function PricingPage() {
   const { data: session } = useSession();
@@ -88,6 +89,8 @@ export default function PricingPage() {
               <Button className="w-full" onClick={handleUpgrade}>
                 Upgrade to Pro
               </Button>
+              fr
+              <UpgradeButton/>
             </CardFooter>
           </Card>
         </div>

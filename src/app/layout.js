@@ -111,7 +111,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className=" ">
       <body className={`antialiased`}>
         <Providers>{children}</Providers>
-        <Script src="https://checkout.razorpay.com/v1/checkout.js"></Script>
+        <Script src="https://sdk.cashfree.com/js/v3/cashfree.js" strategy="beforeInteractive" />
       </body>
     </html>
   );

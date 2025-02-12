@@ -30,11 +30,35 @@ SketchFlow is a powerful and intuitive collaborative whiteboard platform designe
    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
    ```
 
+### Cashfree Payment Integration
+1. Create a Cashfree account at [cashfree.com](https://www.cashfree.com)
+2. Get your App ID and Secret Key from the Cashfree Dashboard
+3. Add the following environment variables to your `.env` file:
+   ```env
+   CASHFREE_APP_ID=your_app_id
+   CASHFREE_SECRET_KEY=your_secret_key
+   CASHFREE_API_VERSION=2022-09-01
+   CASHFREE_BASE_URL=https://sandbox.cashfree.com/pg  # Use https://api.cashfree.com/pg for production
+
+   # Subscription Plans
+   PRO_MONTHLY_PLAN_AMOUNT=999
+   PRO_YEARLY_PLAN_AMOUNT=9999
+   ```
+4. Add the Cashfree script to your HTML:
+   ```html
+   <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+   ```
+
 ### Testing Payments
 - Use Razorpay's test card numbers for development:
   - Card Number: 4111 1111 1111 1111
   - Expiry: Any future date
-  - CVV: Any 3 digitsync your changes when online.
+  - CVV: Any 3 digits
+- Use Cashfree's test card numbers for development:
+  - Card Number: 4111 1111 1111 1111
+  - Expiry: Any future date
+  - CVV: Any 3 digits
+  - OTP: 123456
 - **Version Control:** Keep track of changes and revert to previous versions as needed.
 
 ## Tech Stack
