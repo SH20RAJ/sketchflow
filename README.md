@@ -12,7 +12,29 @@ SketchFlow is a powerful and intuitive collaborative whiteboard platform designe
 
 ### Advanced Features
 - **Slack, Notion, and Trello Integrations:** Connect your whiteboard with productivity tools.
-- **Offline Mode:** Work offline and sync your changes when online.
+- **Offline Mode:** Work offline and sync when back online.
+- **Subscription Plans:** Premium features with flexible subscription options.
+
+## Payment Integration
+
+### Razorpay Setup
+1. Create a Razorpay account at [razorpay.com](https://razorpay.com)
+2. Get your API keys from the Razorpay Dashboard
+3. Add the following environment variables to your `.env` file:
+   ```env
+   RAZORPAY_KEY_ID=your_key_id
+   RAZORPAY_KEY_SECRET=your_key_secret
+   ```
+4. Add the Razorpay script to your HTML:
+   ```html
+   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+   ```
+
+### Testing Payments
+- Use Razorpay's test card numbers for development:
+  - Card Number: 4111 1111 1111 1111
+  - Expiry: Any future date
+  - CVV: Any 3 digitsync your changes when online.
 - **Version Control:** Keep track of changes and revert to previous versions as needed.
 
 ## Tech Stack

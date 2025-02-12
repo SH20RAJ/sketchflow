@@ -1,3 +1,4 @@
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -108,10 +109,9 @@ export const themeColor = [
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className=" ">
-      <body
-        className={`antialiased`}
-      >
+      <body className={`antialiased`}>
         <Providers>{children}</Providers>
+        <Script src="https://checkout.razorpay.com/v1/checkout.js"></Script>
       </body>
     </html>
   );
