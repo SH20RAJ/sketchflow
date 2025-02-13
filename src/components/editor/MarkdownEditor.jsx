@@ -1,32 +1,35 @@
 'use client';
 
 import { Editor } from "novel-lightweight";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
-export function MarkdownEditor({ content, onChange }) {
-  const [data, setData] = useState(content || "");
-  
+export function MarkdownEditor({ content, onChange, readOnly = false }) {
+  const [editorContent, setEditorContent] = useState(content || "");
 
-  // Update data when content prop changes
+  // Update local state when content prop changes
   useEffect(() => {
-    if (content !== undefined) {
-      setData(content);
+    if (content !== undefined && content !== editorContent) {
+      setEditorContent(content);
     }
   }, [content]);
+
+  // Handle editor updates
+  const handleUpdate = useCallback((editor) => {
+    if (editor) {
+      const markdown = editor.storage.markdown.getMarkdown();
+      setEditorContent(markdown);
+      onChange?.(markdown);
+    }
+  }, [onChange]);
 
   return (
     <div className="w-full h-full min-h-[500px]">
       <Editor
-        defaultValue={data}
-        disableLocalStorage={true}
-        value={data}
-        onUpdate={(editor) => {          
-          if (editor) {
-            const markdown = editor.storage.markdown.getMarkdown();
-            setData(markdown);
-            onChange(markdown);
-          }
-        }}
+        defaultValue={editorContent}
+        disableLocalStorage={false}
+        value={editorContent}
+        onUpdate={handleUpdate}
+        editable={!readOnly}
         className="h-full min-h-[500px] border rounded-lg"
       />
     </div>

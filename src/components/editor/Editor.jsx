@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import useSWR from 'swr';
 import { Excalidraw } from "@excalidraw/excalidraw";
 import { LoadingButton } from "@/components/ui/loading";
@@ -50,16 +50,28 @@ export default function Editor({ projectId, initialData = {}, isOwner = false })
   const [layout, setLayout] = useState("split");
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [excalidrawData, setExcalidrawData] = useState(initialData?.diagram?.content || DEFAULT_DATA.excalidraw);
+  const [markdown, setMarkdown] = useState(initialData?.markdown?.content || DEFAULT_DATA.markdown);
+  const [projectName, setProjectName] = useState(initialData?.name || DEFAULT_DATA.name);
+  const [isShared, setIsShared] = useState(initialData?.shared || false);
+  const [previousLayout, setPreviousLayout] = useState(layout);
+
+  useEffect(() => {
+    if (layout !== previousLayout) {
+      setPreviousLayout(layout);
+      if (layout === 'split' || layout === 'markdown') {
+        setMarkdown(prev => prev);
+      }
+      if (layout === 'split' || layout === 'sketch') {
+        setExcalidrawData(prev => ({ ...prev }));
+      }
+    }
+  }, [layout]);
 
   const { data, error, mutate } = useSWR(`/api/projects/${projectId}`, fetcher, {
     fallbackData: initialData,
     revalidateOnFocus: false,
   });
-
-  const [excalidrawData, setExcalidrawData] = useState(data?.diagram?.content || DEFAULT_DATA.excalidraw);
-  const [markdown, setMarkdown] = useState(data?.markdown?.content || DEFAULT_DATA.markdown);
-  const [projectName, setProjectName] = useState(data?.name || DEFAULT_DATA.name);
-  const [isShared, setIsShared] = useState(data?.shared || false);
 
   const handleExcalidrawChange = useCallback((elements, appState) => {
     setExcalidrawData({ elements, appState });
