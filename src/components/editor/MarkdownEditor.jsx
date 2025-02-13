@@ -26,7 +26,7 @@ export function MarkdownEditor({ content, onChange, readOnly = false }) {
     <div className="w-full h-full min-h-[500px]">
       <Editor
         defaultValue={editorContent}
-        disableLocalStorage={false}
+        disableLocalStorage={true}
         value={editorContent}
         onUpdate={handleUpdate}
         editable={!readOnly}
