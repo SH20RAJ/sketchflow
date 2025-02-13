@@ -64,12 +64,19 @@ export async function createOrder({
       }
     );
 
-    if (!response.data.order_token) {
+    if (!response.data.payment_session_id) {
       console.error('Invalid Cashfree response:', response.data);
       throw new Error('Invalid response from Cashfree');
     }
 
-    return response.data;
+    return {
+      order_token: response.data.payment_session_id,
+      order_id: response.data.order_id,
+      order_status: response.data.order_status,
+      order_currency: response.data.order_currency,
+      order_amount: response.data.order_amount,
+      cf_order_id: response.data.cf_order_id
+    };
   } catch (error) {
     console.error('Cashfree order creation failed:', {
       message: error.message,

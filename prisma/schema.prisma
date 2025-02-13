@@ -126,7 +126,7 @@ model Plan {
   name            String
   description     String
   price           Int
-  duration        Int            // duration in days
+  duration        Int            @default(30)    // duration in days, default 30 days
   features        String         @db.Text    // Stored as JSON string
   subscriptions   Subscription[]
   createdAt       DateTime       @default(now())
@@ -134,8 +134,9 @@ model Plan {
 }
 
 model Payment {
-  id              String    @id @default(cuid())
-  razorpayId      String    @unique
+  id              String    @id
+  razorpayId      String?   // Made optional since we're using Cashfree
+  cfOrderId       String?   @unique  // Added for Cashfree order ID
   amount          Int
   currency        String    @default("INR")
   status          String

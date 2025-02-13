@@ -89,33 +89,29 @@ export default function SubscriptionPage() {
       if (!response.ok) throw new Error(data.error || "Payment initialization failed");
 
       // Initialize Cashfree SDK
-      const cashfree = new window.Cashfree({
-        mode: "sandbox" // or "production"
-      });
+      const cashfree = new window.Cashfree();
 
-      await cashfree.init({
-        orderToken: data.order_token,
-        orderId: data.order_id,
-        onSuccess: async (data) => {
-          console.log("Payment success", data);
-          await mutate(); // Refresh subscription data
-          router.push("/projects");
-        },
-        onFailure: (data) => {
-          console.error("Payment failed", data);
+      const checkoutOptions = {
+        paymentSessionId: data.order_token,
+        returnUrl: `${window.location.origin}/payment/status?order_id={order_id}`,
+      };
+
+      cashfree.checkout(checkoutOptions).then(function(result) {
+        if (result.error) {
+          console.error("Payment failed:", result.error);
           alert("Payment failed. Please try again.");
-        },
-        onClose: () => {
-          setLoading(false);
-          setSelectedPlan(null);
-        },
+        }
+        if (result.status === "OK") {
+          console.log("Payment success:", result);
+          mutate(); // Refresh subscription data
+          router.push("/projects");
+        }
       });
-
-      cashfree.redirect();
 
     } catch (error) {
       console.error("Subscription error:", error);
       alert(error.message || "Failed to process subscription");
+    } finally {
       setLoading(false);
       setSelectedPlan(null);
     }
