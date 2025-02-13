@@ -50,6 +50,16 @@ export async function GET(request) {
           data: { status: 'PAID' }
         });
 
+        // Get the Pro plan from database
+        const proPlan = await prisma.plan.findFirst({
+          where: { name: 'Pro' }
+        });
+
+        if (!proPlan) {
+          console.error('Pro plan not found in database');
+          return NextResponse.json({ error: 'Plan not found' }, { status: 500 });
+        }
+
         // Create or update subscription
         const planDuration = payment.amount === Number(process.env.PRO_YEARLY_PLAN_AMOUNT) ? 365 : 30;
         
@@ -63,7 +73,7 @@ export async function GET(request) {
           create: {
             userId: payment.userId,
             status: 'active',
-            planId: 'pro', // Assuming you have a plan with ID 'pro'
+            planId: proPlan.id,
             startDate: new Date(),
             endDate: new Date(Date.now() + planDuration * 24 * 60 * 60 * 1000)
           }

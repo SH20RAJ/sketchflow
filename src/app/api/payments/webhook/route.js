@@ -125,6 +125,19 @@ export async function POST(request) {
           }
         });
 
+        // Get the Pro plan from database
+        const proPlan = await prisma.plan.findFirst({
+          where: { name: 'Pro' }
+        });
+
+        if (!proPlan) {
+          console.error('Pro plan not found in database');
+          return NextResponse.json({ error: 'Plan not found' }, { 
+            status: 500,
+            headers: corsHeaders
+          });
+        }
+
         // Create or update subscription
         const planDuration = dbPayment.amount === Number(process.env.PRO_YEARLY_PLAN_AMOUNT) ? 365 : 30;
         
@@ -138,7 +151,7 @@ export async function POST(request) {
           create: {
             userId: dbPayment.userId,
             status: 'active',
-            planId: 'pro',
+            planId: proPlan.id,
             startDate: new Date(),
             endDate: new Date(Date.now() + planDuration * 24 * 60 * 60 * 1000)
           }

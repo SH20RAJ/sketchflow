@@ -8,10 +8,10 @@ generator client {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  username      String?   @unique
-  email         String?   @unique
+  username      String?       @unique
+  email         String?       @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
@@ -19,25 +19,25 @@ model User {
   projects      Project[]
   subscription  Subscription?
   payments      Payment[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 model Account {
-  id                       String  @id @default(cuid())
-  userId                   String  @unique
+  id                       String   @id @default(cuid())
+  userId                   String   @unique
   type                     String
   provider                 String
   providerAccountId        String
-  refresh_token            String? @db.Text
-  access_token             String? @db.Text
+  refresh_token            String?  @db.Text
+  access_token             String?  @db.Text
   expires_at               Int?
   token_type               String?
   scope                    String?
-  id_token                 String? @db.Text
+  id_token                 String?  @db.Text
   session_state            String?
   refresh_token_expires_in Int?
-  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 
@@ -66,16 +66,16 @@ model VerificationToken {
 }
 
 model Project {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   name        String
   description String?
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   diagrams    Diagram[]
   markdowns   Markdown[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  shared      Boolean @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  shared      Boolean    @default(false)
 
   @@index([userId])
 }
@@ -105,46 +105,46 @@ model Markdown {
 }
 
 model Subscription {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status          String    @default("inactive") // active, inactive, cancelled
-  planId          String
-  plan            Plan      @relation(fields: [planId], references: [id])
-  startDate       DateTime  @default(now())
-  endDate         DateTime?
-  razorpayId      String?   @unique
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id         String    @id @default(cuid())
+  userId     String    @unique
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status     String    @default("inactive") // active, inactive, cancelled
+  planId     String
+  plan       Plan      @relation(fields: [planId], references: [id])
+  startDate  DateTime  @default(now())
+  endDate    DateTime?
+  razorpayId String?   @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@index([userId])
   @@index([planId])
 }
 
 model Plan {
-  id              String         @id @default(cuid())
-  name            String
-  description     String
-  price           Int
-  duration        Int            @default(30)    // duration in days, default 30 days
-  features        String         @db.Text    // Stored as JSON string
-  subscriptions   Subscription[]
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id            String         @id @default(cuid())
+  name          String         @unique
+  description   String
+  price         Int
+  duration      Int            @default(30) // duration in days, default 30 days
+  features      String         @db.Text // Stored as JSON string
+  subscriptions Subscription[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Payment {
-  id              String    @id
-  razorpayId      String?   // Made optional since we're using Cashfree
-  cfOrderId       String?   @unique  // Added for Cashfree order ID
-  amount          Int
-  currency        String    @default("INR")
-  status          String
-  orderId         String?   @unique
-  userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id         String   @id
+  razorpayId String? // Made optional since we're using Cashfree
+  cfOrderId  String?  @unique // Added for Cashfree order ID
+  amount     Int
+  currency   String   @default("INR")
+  status     String
+  orderId    String?  @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([userId])
 }
