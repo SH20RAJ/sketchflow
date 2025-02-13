@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from '@/auth';
-import prisma from '@/prisma';
+import { auth } from '@/auth';
+import { prisma } from '@/prisma';
 import { createOrder } from '@/lib/cashfree';
 import { nanoid } from 'nanoid';
 
 export async function POST(req) {
   try {
-    const session = await getServerSession();
+    const session = await auth();
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

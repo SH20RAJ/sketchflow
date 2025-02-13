@@ -24,8 +24,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { signOut } from "next-auth/react";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
+
 
 export default function ProjectsPage() {
   const router = useRouter();

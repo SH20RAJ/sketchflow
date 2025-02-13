@@ -1,227 +1,370 @@
-import React from 'react';
+"use client";
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from 'next/link';
+import { useSession } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { motion } from "framer-motion";
+import { ArrowRight, CheckCircle2, Play, Users, Star, Shield, Zap } from "lucide-react";
 
 export default function LandingPage() {
+    const { data: session, status } = useSession();
+    const isAuthenticated = status === "authenticated";
+    const [activeTestimonial, setActiveTestimonial] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveTestimonial((prev) => (prev + 1) % 3);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
-        <div className="bg-white min-h-screen">
-            <header className="fixed w-full bg-white shadow-sm z-50">
+        <div className="bg-gradient-to-b from-white to-blue-50 min-h-screen">
+            <header className="fixed w-full bg-white/80 backdrop-blur-md shadow-sm z-50">
                 <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
-                    <div className="text-2xl font-bold text-blue-600">SketchFlow</div>
-                    <div className="hidden md:flex space-x-6">
-                        <a href="#home" className="text-gray-600 hover:text-blue-500">Home</a>
-                        <a href="#features" className="text-gray-600 hover:text-blue-500">Features</a>
-                        <a href="#pricing" className="text-gray-600 hover:text-blue-500">Pricing</a>
-                        <a href="#testimonials" className="text-gray-600 hover:text-blue-500">Testimonials</a>
-                        <a href="#faq" className="text-gray-600 hover:text-blue-500">FAQ</a>
-                        <a href="#contact" className="text-gray-600 hover:text-blue-500">Contact</a>
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center gap-2"
+                    >
+                        <img src="/logo.svg" alt="SketchFlow" className="h-8 w-auto" />
+                        <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">SketchFlow</span>
+                    </motion.div>
+                    <div className="hidden md:flex space-x-8">
+                        <a href="#home" className="text-gray-600 hover:text-blue-500 transition-colors">Home</a>
+                        <a href="#features" className="text-gray-600 hover:text-blue-500 transition-colors">Features</a>
+                        <a href="#pricing" className="text-gray-600 hover:text-blue-500 transition-colors">Pricing</a>
+                        <a href="#testimonials" className="text-gray-600 hover:text-blue-500 transition-colors">Testimonials</a>
                     </div>
-                    <Link href="/projects"><Button variant="outline" className="hidden md:inline-flex">Get Started</Button></Link>
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center gap-4"
+                    >
+                        {isAuthenticated ? (
+                            <>
+                                <Link href="/projects">
+                                    <Button variant="outline" className="group">
+                                        Dashboard
+                                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                    </Button>
+                                </Link>
+                                <Avatar className="ring-2 ring-blue-500 ring-offset-2">
+                                    <AvatarImage src={session.user.image} alt={session.user.name} />
+                                    <AvatarFallback>{session.user.name?.[0]}</AvatarFallback>
+                                </Avatar>
+                            </>
+                        ) : (
+                            <Link href="/login">
+                                <Button className="bg-blue-600 hover:bg-blue-700 text-white group">
+                                    Join Now
+                                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                </Button>
+                            </Link>
+                        )}
+                    </motion.div>
                 </nav>
             </header>
 
             <main>
-                <section id="home" className="pt-24 h-[80vh] flex justify-center items-center pb-16">
-                    <div className="container mx-auto px-4 text-center">
-                        <h1 className="text-5xl md:text-7xl font-bold text-gray-800 mb-6">
-                            Professional <span className="text-blue-500">Whiteboarding</span> Made <span className="text-blue-500">Simple</span>
-                        </h1>
-                        <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                            SketchFlow empowers developers, teachers, and creative teams to collaborate through intuitive whiteboarding and diagramming. Unleash your creativity and boost productivity today!
-                        </p>
-                        <div className="flex justify-center gap-4">
-                            <Link href="/projects"><Button size="lg" className="bg-blue-500 hover:bg-blue-600 text-white">Start Creating</Button></Link>
-                            <Button size="lg" variant="outline" className="text-blue-500 hover:bg-blue-50">Watch Demo</Button>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="features" className="py-20 bg-gray-50">
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-4xl font-bold text-center text-gray-800 mb-16">Powerful Features</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-                                <CardHeader>
-                                    <CardTitle className="text-2xl font-bold text-blue-500">🔄 Real-time Collaboration</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-gray-600">Work together seamlessly with your team in real-time, no matter where they are located. Share ideas instantly and boost productivity.</p>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-                                <CardHeader>
-                                    <CardTitle className="text-2xl font-bold text-blue-500">📊 Smart Diagrams</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-gray-600">Create professional diagrams with intelligent tools and templates. Our AI-powered suggestions help you design faster and smarter.</p>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-                                <CardHeader>
-                                    <CardTitle className="text-2xl font-bold text-blue-500">💾 Version Control</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-gray-600">Track changes and maintain a complete history of your work. Easily revert to previous versions or compare different iterations side by side.</p>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="pricing" className="py-20">
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-4xl font-bold text-center text-gray-800 mb-16">Simple, Transparent Pricing</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
-                            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-                                <CardHeader>
-                                    <CardTitle className="text-3xl font-bold text-blue-500">Free</CardTitle>
-                                    <CardDescription className="text-lg">For individual users</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-4xl font-bold text-gray-800 mb-6">$0<span className="text-xl text-gray-600">/month</span></p>
-                                    <ul className="text-gray-600 space-y-3 text-lg">
-                                        <li>✅ Up to 100 Projects</li>
-                                        <li>✅ Basic Templates</li>
-                                        <li>✅ Core Features</li>
-                                        <li>✅ Community Support</li>
-                                        <li>✅ 1GB Storage</li>
-                                    </ul>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white text-lg py-6">Get Started</Button>
-                                </CardFooter>
-                            </Card>
-                            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-blue-500">
-                                <CardHeader>
-                                    <CardTitle className="text-3xl font-bold text-blue-500">Pro</CardTitle>
-                                    <CardDescription className="text-lg">For power users</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-4xl font-bold text-gray-800 mb-6">$19<span className="text-xl text-gray-600">/month</span></p>
-                                    <ul className="text-gray-600 space-y-3 text-lg">
-                                        <li>✅ Unlimited Projects</li>
-                                        <li>✅ Premium Templates</li>
-                                        <li>✅ Advanced Features</li>
-                                        <li>✅ Priority Support</li>
-                                        <li>✅ 100GB Storage</li>
-                                        <li>✅ Team Collaboration Tools</li>
-                                    </ul>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white text-lg py-6">Choose Pro</Button>
-                                </CardFooter>
-                            </Card>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="testimonials" className="py-20 bg-gray-50">
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-4xl font-bold text-center text-gray-800 mb-16">What Our Users Say</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                            {[
-                                {
-                                    quote: "SketchFlow has revolutionized our team's brainstorming sessions. It's intuitive, powerful, and a joy to use!",
-                                    author: "John Doe",
-                                    title: "Software Engineer"
-                                },
-                                {
-                                    quote: "As a designer, I've tried many tools, but SketchFlow stands out. It's become an essential part of my creative process.",
-                                    author: "Emma Wilson",
-                                    title: "UX Designer"
-                                },
-                                {
-                                    quote: "The collaboration features in SketchFlow have significantly improved our remote team's productivity. Highly recommended!",
-                                    author: "Michael Chen",
-                                    title: "Project Manager"
-                                }
-                            ].map((testimonial, i) => (
-                                <Card key={i} className="bg-white shadow-lg">
-                                    <CardContent className="pt-6">
-                                        <p className="text-gray-600 mb-4">"{testimonial.quote}"</p>
-                                        <p className="font-semibold text-fuchsia-400">{testimonial.author}, {testimonial.title}</p>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                <section id="faq" className="py-20">
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-4xl font-bold text-center text-gray-800 mb-16">Frequently Asked Questions</h2>
-                        <div className="max-w-3xl mx-auto">
-                            {[
-                                {
-                                    question: "How does SketchFlow ensure data security?",
-                                    answer: "We use industry-standard encryption and follow best practices to keep your data safe and secure."
-                                },
-                                {
-                                    question: "Can I collaborate with my team in real-time?",
-                                    answer: "Yes, SketchFlow supports real-time collaboration, allowing multiple team members to work on the same project simultaneously."
-                                },
-                                {
-                                    question: "Is there a limit to the number of projects I can create?",
-                                    answer: "Free users can create up to 100 projects, while Pro users have unlimited project creation."
-                                },
-                                {
-                                    question: "Do you offer a free trial for the Pro plan?",
-                                    answer: "Yes, we offer a 14-day free trial of our Pro plan, giving you full access to all premium features."
-                                }
-                            ].map((faq, index) => (
-                                <div key={index} className="mb-8">
-                                    <h3 className="text-xl font-semibold text-gray-800 mb-2">{faq.question}</h3>
-                                    <p className="text-gray-600">{faq.answer}</p>
+                <section id="home" className="pt-32 min-h-screen flex items-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-white/30 pointer-events-none" />
+                    <div className="container mx-auto px-4 relative">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="text-center max-w-4xl mx-auto"
+                        >
+                            <div className="mb-6 inline-flex items-center px-4 py-2 bg-blue-50 rounded-full">
+                                <Star className="h-4 w-4 text-blue-500 mr-2" />
+                                <span className="text-blue-700 font-medium">Trusted by 10,000+ teams worldwide</span>
+                            </div>
+                            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+                                Professional <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">Whiteboarding</span> Made <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">Simple</span>
+                            </h1>
+                            <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+                                Transform your ideas into reality with our powerful collaborative whiteboarding platform. Perfect for teams who want to innovate faster.
+                            </p>
+                            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
+                                {isAuthenticated ? (
+                                    <Link href="/projects">
+                                        <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-6 rounded-xl group">
+                                            Go to Dashboard
+                                            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                        </Button>
+                                    </Link>
+                                ) : (
+                                    <Link href="/login">
+                                        <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-6 rounded-xl group">
+                                            Start Free Trial
+                                            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                        </Button>
+                                    </Link>
+                                )}
+                                <Button size="lg" variant="outline" className="w-full sm:w-auto text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl group">
+                                    <Play className="mr-2 h-5 w-5" />
+                                    Watch Demo
+                                </Button>
+                            </div>
+                            <div className="flex items-center justify-center gap-8 text-gray-500">
+                                <div className="flex items-center gap-2">
+                                    <Shield className="h-5 w-5 text-green-500" />
+                                    <span>Enterprise-grade security</span>
                                 </div>
-                            ))}
+                                <div className="flex items-center gap-2">
+                                    <Users className="h-5 w-5 text-blue-500" />
+                                    <span>Collaborative workspace</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Zap className="h-5 w-5 text-yellow-500" />
+                                    <span>Real-time sync</span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </section>
+
+                <section id="features" className="py-32 bg-white relative">
+                    <div className="container mx-auto px-4">
+                        <div className="text-center max-w-3xl mx-auto mb-20">
+                            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                                Everything you need to <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">create amazing diagrams</span>
+                            </h2>
+                            <p className="text-xl text-gray-600">Powerful features that help you bring your ideas to life, collaborate with your team, and deliver results faster.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <motion.div
+                                whileHover={{ y: -5 }}
+                                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100"
+                            >
+                                <div className="h-12 w-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                                    <Users className="h-6 w-6 text-blue-600" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-4">Real-time Collaboration</h3>
+                                <p className="text-gray-600">Work together seamlessly with your team in real-time. Share ideas instantly and boost productivity.</p>
+                            </motion.div>
+                            <motion.div
+                                whileHover={{ y: -5 }}
+                                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100"
+                            >
+                                <div className="h-12 w-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+                                    <CheckCircle2 className="h-6 w-6 text-green-600" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-4">Smart Diagrams</h3>
+                                <p className="text-gray-600">Create professional diagrams with intelligent tools and templates. AI-powered suggestions help you design faster.</p>
+                            </motion.div>
+                            <motion.div
+                                whileHover={{ y: -5 }}
+                                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100"
+                            >
+                                <div className="h-12 w-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                                    <Shield className="h-6 w-6 text-purple-600" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-4">Version Control</h3>
+                                <p className="text-gray-600">Track changes and maintain history of your work. Easily revert to previous versions or compare iterations.</p>
+                            </motion.div>
                         </div>
                     </div>
                 </section>
 
-                <section id="contact" className="py-20 bg-gray-50">
+                <section id="pricing" className="py-32 bg-gray-50">
                     <div className="container mx-auto px-4">
-                        <h2 className="text-4xl font-bold text-center text-gray-800 mb-16">Get in Touch</h2>
-                        <div className="max-w-xl mx-auto">
-                            <p className="text-center text-gray-600 mb-8">Have questions or need support? Our team is here to help!</p>
-                            <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white text-lg py-6">Contact Us</Button>
+                        <div className="text-center max-w-3xl mx-auto mb-20">
+                            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                                Simple, <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">transparent pricing</span>
+                            </h2>
+                            <p className="text-xl text-gray-600">Choose the perfect plan for your needs. No hidden fees.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                            <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                className="bg-white rounded-2xl shadow-lg p-8"
+                            >
+                                <div className="mb-8">
+                                    <h3 className="text-2xl font-bold text-gray-900">Free</h3>
+                                    <p className="text-gray-600 mt-2">Perfect for getting started</p>
+                                </div>
+                                <div className="mb-8">
+                                    <span className="text-5xl font-bold">$0</span>
+                                    <span className="text-gray-600">/month</span>
+                                </div>
+                                <ul className="space-y-4 mb-8">
+                                    <li className="flex items-center text-gray-600">
+                                        <CheckCircle2 className="h-5 w-5 text-green-500 mr-3" />
+                                        Up to 100 Projects
+                                    </li>
+                                    <li className="flex items-center text-gray-600">
+                                        <CheckCircle2 className="h-5 w-5 text-green-500 mr-3" />
+                                        Basic Templates
+                                    </li>
+                                    <li className="flex items-center text-gray-600">
+                                        <CheckCircle2 className="h-5 w-5 text-green-500 mr-3" />
+                                        Core Features
+                                    </li>
+                                    <li className="flex items-center text-gray-600">
+                                        <CheckCircle2 className="h-5 w-5 text-green-500 mr-3" />
+                                        Community Support
+                                    </li>
+                                </ul>
+                                <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white py-6 rounded-xl">
+                                    Get Started Free
+                                </Button>
+                            </motion.div>
+                            <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                className="bg-blue-600 rounded-2xl shadow-lg p-8 text-white relative overflow-hidden"
+                            >
+                                <div className="absolute top-4 right-4 bg-blue-500 px-3 py-1 rounded-full text-sm font-medium">
+                                    Popular
+                                </div>
+                                <div className="mb-8">
+                                    <h3 className="text-2xl font-bold">Pro</h3>
+                                    <p className="text-blue-200 mt-2">For power users & teams</p>
+                                </div>
+                                <div className="mb-8">
+                                    <span className="text-5xl font-bold">$19</span>
+                                    <span className="text-blue-200">/month</span>
+                                </div>
+                                <ul className="space-y-4 mb-8">
+                                    <li className="flex items-center text-blue-100">
+                                        <CheckCircle2 className="h-5 w-5 text-blue-300 mr-3" />
+                                        Unlimited Projects
+                                    </li>
+                                    <li className="flex items-center text-blue-100">
+                                        <CheckCircle2 className="h-5 w-5 text-blue-300 mr-3" />
+                                        Premium Templates
+                                    </li>
+                                    <li className="flex items-center text-blue-100">
+                                        <CheckCircle2 className="h-5 w-5 text-blue-300 mr-3" />
+                                        Advanced Features
+                                    </li>
+                                    <li className="flex items-center text-blue-100">
+                                        <CheckCircle2 className="h-5 w-5 text-blue-300 mr-3" />
+                                        Priority Support
+                                    </li>
+                                    <li className="flex items-center text-blue-100">
+                                        <CheckCircle2 className="h-5 w-5 text-blue-300 mr-3" />
+                                        Team Collaboration
+                                    </li>
+                                </ul>
+                                <Button className="w-full bg-white text-blue-600 hover:bg-blue-50 py-6 rounded-xl">
+                                    Upgrade to Pro
+                                </Button>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="testimonials" className="py-32 bg-white">
+                    <div className="container mx-auto px-4">
+                        <div className="text-center max-w-3xl mx-auto mb-20">
+                            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                                Loved by <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">thousands</span> of teams
+                            </h2>
+                            <p className="text-xl text-gray-600">Don't just take our word for it. Here's what our users have to say.</p>
+                        </div>
+                        <div className="max-w-4xl mx-auto">
+                            <motion.div
+                                key={activeTestimonial}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="bg-white rounded-2xl shadow-lg p-8 text-center"
+                            >
+                                <div className="mb-8">
+                                    <img src={`/logo.svg`} alt="User" className="w-20 h-20 rounded-full mx-auto mb-4" />
+                                    <div className="flex justify-center gap-1 mb-4">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                                        ))}
+                                    </div>
+                                </div>
+                                <p className="text-xl text-gray-600 mb-6">"{[
+                                    "SketchFlow has revolutionized our team's brainstorming sessions. The real-time collaboration features are game-changing!",
+                                    "As a designer, I've tried many tools, but SketchFlow stands out. The AI-powered suggestions save me hours of work.",
+                                    "The collaboration features have significantly improved our remote team's productivity. Best investment we've made!"
+                                ][activeTestimonial]}"</p>
+                                <div>
+                                    <p className="font-semibold text-gray-900">{[
+                                        "John Doe",
+                                        "Emma Wilson",
+                                        "Michael Chen"
+                                    ][activeTestimonial]}</p>
+                                    <p className="text-gray-500">{[
+                                        "Software Engineer at Google",
+                                        "Lead Designer at Apple",
+                                        "Product Manager at Microsoft"
+                                    ][activeTestimonial]}</p>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="py-20 bg-blue-600">
+                    <div className="container mx-auto px-4">
+                        <div className="max-w-4xl mx-auto text-center">
+                            <h2 className="text-4xl font-bold text-white mb-6">Ready to transform your workflow?</h2>
+                            <p className="text-xl text-blue-100 mb-8">Join thousands of teams who are already using SketchFlow to bring their ideas to life.</p>
+                            {isAuthenticated ? (
+                                <Link href="/projects">
+                                    <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl">
+                                        Go to Dashboard
+                                        <ArrowRight className="ml-2 h-5 w-5" />
+                                    </Button>
+                                </Link>
+                            ) : (
+                                <Link href="/login">
+                                    <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl">
+                                        Start Free Trial
+                                        <ArrowRight className="ml-2 h-5 w-5" />
+                                    </Button>
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </section>
             </main>
 
-            <footer className="bg-gray-800 text-white py-12">
+            <footer className="bg-gray-900 text-white py-20">
                 <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                         <div>
-                            <h3 className="text-xl font-semibold mb-4">SketchFlow</h3>
-                            <p className="text-gray-400">Empowering creativity through collaborative whiteboarding.</p>
+                            <div className="flex items-center gap-2 mb-6">
+                                <img src="/logo.svg" alt="SketchFlow" className="h-8 w-auto" />
+                                <span className="text-2xl font-bold">SketchFlow</span>
+                            </div>
+                            <p className="text-gray-400">Empowering teams to create, collaborate, and innovate together.</p>
                         </div>
                         <div>
-                            <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
-                            <ul className="space-y-2">
-                                <li><a href="#home" className="text-gray-400 hover:text-white">Home</a></li>
-                                <li><a href="#features" className="text-gray-400 hover:text-white">Features</a></li>
-                                <li><a href="#pricing" className="text-gray-400 hover:text-white">Pricing</a></li>
+                            <h3 className="text-lg font-semibold mb-4">Product</h3>
+                            <ul className="space-y-3">
+                                <li><a href="#features" className="text-gray-400 hover:text-white transition-colors">Features</a></li>
+                                <li><a href="#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</a></li>
+                                <li><a href="#testimonials" className="text-gray-400 hover:text-white transition-colors">Testimonials</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h3 className="text-xl font-semibold mb-4">Legal</h3>
-                            <ul className="space-y-2">
-                                <li><a href="#" className="text-gray-400 hover:text-white">Privacy Policy</a></li>
-                                <li><a href="#" className="text-gray-400 hover:text-white">Terms of Service</a></li>
+                            <h3 className="text-lg font-semibold mb-4">Company</h3>
+                            <ul className="space-y-3">
+                                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About</a></li>
+                                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+                                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h3 className="text-xl font-semibold mb-4">Connect</h3>
-                            <ul className="space-y-2">
-                                <li><a href="#" className="text-gray-400 hover:text-white">Twitter</a></li>
-                                <li><a href="#" className="text-gray-400 hover:text-white">LinkedIn</a></li>
-                                <li><a href="#" className="text-gray-400 hover:text-white">GitHub</a></li>
+                            <h3 className="text-lg font-semibold mb-4">Legal</h3>
+                            <ul className="space-y-3">
+                                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy</a></li>
+                                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms</a></li>
+                                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Security</a></li>
                             </ul>
                         </div>
                     </div>
-                    <div className="mt-12 pt-8 border-t border-gray-700 text-center text-gray-400">
+                    <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
                         <p>&copy; {new Date().getFullYear()} SketchFlow. All rights reserved.</p>
                     </div>
                 </div>
