@@ -16,24 +16,30 @@ export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
-function verifyWebhookSignature(payload, signature, timestamp) {
+function verifyWebhookSignature(rawBody, signature, timestamp) {
   try {
-    // Get the raw request body as a string
-    const data = JSON.stringify(payload);
+    // According to Cashfree's documentation, we need to:
+    // 1. Use timestamp first, then body
+    const signatureData = timestamp + rawBody;
     
-    // Concatenate timestamp and data
-    const signatureData = timestamp + data;
+    // Get the webhook secret key
+    const webhookSecret = process.env.CASHFREE_WEBHOOK_SECRET || process.env.CASHFREE_SECRET_KEY;
     
-    // Create HMAC using your secret key
-    const expectedSignature = crypto
-      .createHmac('sha256', process.env.CASHFREE_SECRET_KEY)
+    // Compute HMAC with SHA256
+    const computedSignature = crypto
+      .createHmac('sha256', webhookSecret)
       .update(signatureData)
       .digest('base64');
     
-    console.log('Expected signature:', expectedSignature);
-    console.log('Received signature:', signature);
+    console.log('Signature debug:', {
+      timestamp,
+      signatureData: signatureData.slice(0, 50) + '...',
+      webhookSecretLength: webhookSecret.length,
+      computed: computedSignature,
+      received: signature
+    });
     
-    return expectedSignature === signature;
+    return computedSignature === signature;
   } catch (error) {
     console.error('Signature verification failed:', error);
     return false;
@@ -42,13 +48,19 @@ function verifyWebhookSignature(payload, signature, timestamp) {
 
 export async function POST(request) {
   try {
-    console.log('Webhook called - headers:', Object.fromEntries(request.headers.entries()));
+    const headers = Object.fromEntries(request.headers.entries());
+    console.log('Webhook called - headers:', headers);
     
-    const payload = await request.json();
-    console.log('Webhook payload:', payload);
+    // Get the raw request body as text first
+    const rawBody = await request.text();
+    console.log('Raw webhook body:', rawBody);
+
+    // Parse the payload after getting raw body
+    const payload = JSON.parse(rawBody);
+    console.log('Parsed webhook payload:', payload);
     
-    const signature = request.headers.get('x-webhook-signature');
-    const timestamp = request.headers.get('x-webhook-timestamp');
+    const signature = headers['x-webhook-signature'];
+    const timestamp = headers['x-webhook-timestamp'];
 
     if (!signature || !timestamp) {
       console.error('Missing signature or timestamp in webhook request');
@@ -58,8 +70,11 @@ export async function POST(request) {
       });
     }
 
-    // Verify webhook signature
-    if (!verifyWebhookSignature(payload, signature, timestamp)) {
+    // Verify webhook signature using raw body
+    const isValid = verifyWebhookSignature(rawBody, signature, timestamp);
+    console.log('Signature verification result:', isValid);
+
+    if (!isValid) {
       console.error('Invalid signature in webhook request');
       return NextResponse.json({ error: 'Invalid signature' }, { 
         status: 401,

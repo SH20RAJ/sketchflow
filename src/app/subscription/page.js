@@ -16,6 +16,7 @@ export default function SubscriptionPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const { data: subscriptionData, mutate } = useSWR(
     "/api/subscription",
@@ -125,6 +126,11 @@ export default function SubscriptionPage() {
     }
   };
 
+  const handleNavigation = () => {
+    setIsNavigating(true);
+    router.push('/projects');
+  };
+
   return (
     <div className="container mx-auto px-4  py-8">
 
@@ -139,12 +145,17 @@ export default function SubscriptionPage() {
          </div>
          <div className="flex flex-col md:flex-row items-stretch md:items-center space-y-2 md:space-y-0 md:space-x-4">
            <Button
-             onClick={() => router.push('/projects')}
+             onClick={handleNavigation}
              variant="outline"
              className="flex items-center"
+             disabled={isNavigating}
            >
-             <ArrowLeft className="mr-2 h-4 w-4" />
-             Back to Projects
+             {isNavigating ? (
+               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+             ) : (
+               <ArrowLeft className="mr-2 h-4 w-4" />
+             )}
+             {isNavigating ? "Navigating..." : "Back to Projects"}
            </Button>
          </div>
        </nav>
