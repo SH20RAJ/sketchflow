@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import useSWR, { mutate } from 'swr';
 
 export default function PaymentStatus() {
   const router = useRouter();
@@ -30,6 +31,8 @@ export default function PaymentStatus() {
           if (data.status === 'PAID' || data.status === 'SUCCESS') {
             setStatus('success');
             setMessage('Payment successful! Your subscription has been activated.');
+            // Refresh subscription data
+            await mutate('/api/subscription');
           } else {
             setStatus('error');
             setMessage(data.message || 'Payment verification failed');

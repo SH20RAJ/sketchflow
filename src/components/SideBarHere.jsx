@@ -2,23 +2,50 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, FolderOpen, Share2, Settings, LogOut, CreditCard, ChevronRight } from "lucide-react";
+import { PlusCircle, FolderOpen, Share2, Settings, LogOut, CreditCard, ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import useSWR from "swr";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { MotionContainer, MotionProgress } from "@/components/ui/motion-container";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
-const MenuItem = ({ href, icon: Icon, children, className }) => (
-  <Button asChild variant="ghost" className={cn("w-full justify-start group hover:bg-blue-50/50", className)}>
-    <Link href={href} className="flex items-center">
-      <Icon className="mr-2 h-4 w-4 text-gray-500 group-hover:text-blue-500 transition-colors" />
-      <span className="flex-1 group-hover:text-blue-600 transition-colors">{children}</span>
-      <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
-    </Link>
-  </Button>
-);
+const MenuItem = ({ href, icon: Icon, children, className, badge }) => {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
+  return (
+    <Button
+      asChild
+      variant="ghost"
+      className={cn(
+        "w-full justify-start group relative",
+        "hover:bg-blue-50/50 hover:text-blue-600 transition-all duration-200",
+        "border border-transparent",
+        isActive && "bg-blue-50 text-blue-600 border-blue-100/50 shadow-sm",
+        className
+      )}
+    >
+      <Link href={href} className="flex items-center">
+        <Icon className={cn(
+          "mr-2 h-4 w-4",
+          isActive ? "text-blue-500" : "text-gray-500 group-hover:text-blue-500",
+          "transition-colors duration-200"
+        )} />
+        <span className="flex-1 font-medium">{children}</span>
+        {badge}
+        <ChevronRight className={cn(
+          "h-4 w-4 text-gray-400",
+          "transition-all duration-300",
+          "opacity-0 -translate-x-2",
+          "group-hover:opacity-100 group-hover:translate-x-0",
+          "group-hover:text-blue-500"
+        )} />
+      </Link>
+    </Button>
+  );
+};
 
 export const SideBarHere = () => {
   const { data: projectsData } = useSWR("/api/projects", fetcher);
@@ -29,52 +56,63 @@ export const SideBarHere = () => {
   const percentageUsed = subscriptionData?.isPro ? 0 : (projectCount / 100) * 100;
   const isPro = subscriptionData?.isPro;
 
+  const ProBadge = () => (
+    <span className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded-full bg-gradient-to-r from-blue-600/10 to-blue-400/10 text-blue-600 border border-blue-200 text-xs font-medium flex items-center gap-1">
+      <span className="size-1.5 rounded-full bg-blue-500 animate-pulse" />
+      Pro
+    </span>
+  );
+
+  const TemplatesBadge = () => (
+    <span className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded-full bg-gradient-to-r from-gray-600/10 to-gray-400/10 text-gray-600 border border-gray-200 text-xs font-medium">
+      {isPro ? "Pro" : "Preview"}
+    </span>
+  );
+
   return (
     <ScrollArea className="h-full py-6">
-      <div className="px-3 py-2">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-6 px-4"
-        >
-          <img src="/logo.svg" alt="SketchFlow" className="h-8 w-auto" />
+      <div className="px-3 py-2 space-y-8">
+        <MotionContainer>
+          <div className="relative">
+            <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-lg" />
+            <img src="/logo.svg" alt="SketchFlow" className="relative h-8 w-auto" />
+          </div>
           <Link href="/" className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text hover:opacity-80 transition-opacity">
             SketchFlow
           </Link>
-        </motion.div>
+        </MotionContainer>
+        <Separator className="my-4" />
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div>
-            <h2 className="mb-2 px-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Projects</h2>
-            <div className="space-y-1">
+            <h2 className="mb-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Projects</h2>
+            <div className="space-y-1.5">
               <MenuItem href="/projects" icon={FolderOpen}>All Projects</MenuItem>
               <MenuItem href="/projects/new" icon={PlusCircle}>New Project</MenuItem>
               <MenuItem href="/projects/shared" icon={Share2}>Shared Projects</MenuItem>
+              <MenuItem
+                href="/projects/templates"
+                icon={Sparkles}
+                className="relative"
+                badge={<TemplatesBadge />}
+              >
+                Templates
+              </MenuItem>
             </div>
           </div>
 
           <div className="px-4">
-            <div className="p-4 rounded-xl bg-gray-50/50 border border-gray-100 space-y-3">
+            <div className="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200/50 space-y-3 shadow-sm hover:shadow-md transition-shadow duration-200">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 font-medium">Project Usage</span>
                 <span className="text-gray-900 font-semibold">{projectCount}/{maxProjects}</span>
               </div>
               <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${percentageUsed}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                  className={cn(
-                    "h-full rounded-full transition-colors",
-                    percentageUsed > 90 ? "bg-red-500" :
-                      percentageUsed > 70 ? "bg-yellow-500" :
-                        "bg-blue-500"
-                  )}
-                />
+                <MotionProgress percentageUsed={percentageUsed} />
               </div>
               {percentageUsed > 90 && !isPro && (
-                <p className="text-xs text-red-600 flex items-center gap-1">
-                  <span className="inline-block w-1 h-1 rounded-full bg-red-600"></span>
+                <p className="text-xs text-red-600 flex items-center gap-1.5">
+                  <span className="inline-block w-1 h-1 rounded-full bg-red-600 animate-pulse"></span>
                   Running out of space! Consider upgrading.
                 </p>
               )}
@@ -82,28 +120,41 @@ export const SideBarHere = () => {
           </div>
 
           <div>
-            <h2 className="mb-2 px-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Account</h2>
-            <div className="space-y-1">
+            <h2 className="mb-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Account</h2>
+            <div className="space-y-4">
               <div className="px-4 py-3">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-600">Plan</span>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600 font-medium">Plan</span>
                   <span className={cn(
-                    "text-sm font-semibold px-2 py-1 rounded-full",
-                    isPro ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"
+                    "text-sm font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5",
+                    isPro
+                      ? "bg-gradient-to-r from-blue-600/10 to-blue-400/10 text-blue-600 border border-blue-200"
+                      : "bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 border border-gray-200"
                   )}>
-                    {isPro ? "Pro" : "Free"}
+                    {isPro ? (
+                      <>
+                        <span className="size-2 rounded-full bg-blue-500 animate-pulse" />
+                        Pro
+                      </>
+                    ) : "Free"}
                   </span>
                 </div>
-                {subscriptionData?.expiresAt && (
+                {isPro && subscriptionData?.subscription?.endDate && (
                   <p className="text-xs text-gray-500">
-                    Expires: {new Date(subscriptionData.expiresAt).toLocaleDateString()}
+                    Renews: {new Date(subscriptionData.subscription.endDate).toLocaleDateString()}
                   </p>
                 )}
               </div>
 
-              <MenuItem href="/subscription" icon={CreditCard} className="text-sm">
-                {isPro ? "Manage Subscription" : "Upgrade to Pro"}
-              </MenuItem>
+              {!isPro ? (
+                <MenuItem href="/subscription" icon={CreditCard} className="text-sm bg-gradient-to-r from-blue-50/50 to-transparent">
+                  Upgrade to Pro
+                </MenuItem>
+              ) : (
+                <MenuItem href="/settings" icon={CreditCard} className="text-sm">
+                  Manage Subscription
+                </MenuItem>
+              )}
               <MenuItem href="/settings" icon={Settings} className="text-sm">Settings</MenuItem>
               <MenuItem href="/logout" icon={LogOut} className="text-sm text-red-600 hover:text-red-700 hover:bg-red-50/50">
                 Logout
