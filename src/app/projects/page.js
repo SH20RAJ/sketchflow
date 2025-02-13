@@ -178,7 +178,7 @@ export default function ProjectsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-8">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-8 pt-16 md:pt-8">
       <nav className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text mb-2">

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -126,8 +126,30 @@ export default function SubscriptionPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16">
-       <div className="text-center mb-16">
+    <div className="container mx-auto px-4  py-8">
+
+       <nav className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center mb-8">
+         <div>
+           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text mb-2">
+             Subscription
+           </h1>
+           <p className="text-gray-600">
+             Manage your subscription plan
+           </p>
+         </div>
+         <div className="flex flex-col md:flex-row items-stretch md:items-center space-y-2 md:space-y-0 md:space-x-4">
+           <Button
+             onClick={() => router.push('/projects')}
+             variant="outline"
+             className="flex items-center"
+           >
+             <ArrowLeft className="mr-2 h-4 w-4" />
+             Back to Projects
+           </Button>
+         </div>
+       </nav>
+       <hr />
+       <div className="text-center mt-10 mb-16">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
           Choose Your <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">Plan</span>
         </h1>
