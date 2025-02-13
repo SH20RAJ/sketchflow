@@ -4,7 +4,21 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Editor from '@/components/editor/Editor';
-import { LoadingPage } from '@/components/ui/loading';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Share2, Copy, Lock, Globe, Loader2, AlertCircle } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProjectPage({ params }) {
   const router = useRouter();
@@ -12,6 +26,10 @@ export default function ProjectPage({ params }) {
   const [projectData, setProjectData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isShared, setIsShared] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [cloning, setCloning] = useState(false);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -21,47 +39,168 @@ export default function ProjectPage({ params }) {
       }
       const data = await response.json();
       setProjectData(data);
+      setIsShared(data.shared);
+      setIsOwner(session?.user?.id === data.userId);
       setError(null);
     } catch (error) {
       console.error('Error:', error);
       setError(error.message);
-      router.push('/projects');
+      if (!error.message.includes('not found')) {
+        router.push('/projects');
+      }
     } finally {
       setLoading(false);
     }
-  }, [params.projectId, router]);
+  }, [params.projectId, router, session?.user?.id]);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
+  const toggleShare = async () => {
+    try {
+      const response = await fetch(`/api/projects/${params.projectId}/share`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shared: !isShared })
+      });
+
+      if (!response.ok) throw new Error('Failed to update sharing settings');
+      
+      setIsShared(!isShared);
+      toast.success(isShared ? 'Project is now private' : 'Project is now shared');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to update sharing settings');
+    }
+  };
+
+  const cloneProject = async () => {
+    if (!session) {
       router.push('/login');
       return;
     }
 
-    if (status === 'authenticated' && params.projectId) {
-      fetchProject();
+    setCloning(true);
+    try {
+      const response = await fetch(`/api/projects/${params.projectId}/clone`, {
+        method: 'POST'
+      });
+
+      if (!response.ok) throw new Error('Failed to clone project');
+      
+      const newProject = await response.json();
+      toast.success('Project cloned successfully');
+      router.push(`/project/${newProject.id}`);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to clone project');
+    } finally {
+      setCloning(false);
     }
-  }, [status, params.projectId, fetchProject, router]);
+  };
 
-  if (status === 'loading' || loading) {
-    return <LoadingPage />;
-  }
+  const copyShareLink = () => {
+    const shareUrl = `${window.location.origin}/project/${params.projectId}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast.success('Share link copied to clipboard');
+  };
 
-  if (error) {
+  useEffect(() => {
+    if (status === 'loading') return;
+
+    const checkAccess = async () => {
+      try {
+        // First check access
+        const accessResponse = await fetch(`/api/projects/${params.projectId}/access`);
+        const accessData = await accessResponse.json();
+        
+        console.log('Access check response:', accessData);
+
+        if (!accessData.hasAccess && !accessData.isShared) {
+          if (status === 'unauthenticated') {
+            toast.error('Please log in to view this project');
+            router.push('/login');
+          } else {
+            toast.error('You do not have access to this project');
+            router.push('/projects');
+          }
+          return;
+        }
+
+        // Then fetch project data
+        const response = await fetch(`/api/projects/${params.projectId}`);
+        if (!response.ok) {
+          throw new Error(await response.text() || 'Failed to fetch project');
+        }
+        const data = await response.json();
+        setProjectData(data);
+        setIsShared(data.shared);
+        setIsOwner(session?.user?.id === data.userId);
+        setError(null);
+      } catch (error) {
+        console.error('Error:', error);
+        setError(error.message);
+        toast.error(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAccess();
+  }, [status, params.projectId, router, session?.user?.id]);
+
+  if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-red-500">Error: {error}</div>
+      <div className="h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
+          <p className="text-gray-600">Loading project...</p>
+        </motion.div>
       </div>
     );
   }
 
-  if (!projectData) {
-    return null;
+  if (error) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <Card className="w-full max-w-md">
+            <CardContent className="pt-6">
+              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Project Not Found</h2>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <Button
+                className="w-full"
+                onClick={() => router.push('/projects')}
+              >
+                Back to Projects
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
   }
 
+  if (!projectData) return null;
+
   return (
-    <Editor
-      projectId={params.projectId}
-      initialData={projectData}
-    />
+    <div className="relative">
+      
+
+      {/* Editor */}
+      <div  >
+        <Editor
+          projectId={params.projectId}
+          initialData={projectData}
+          isOwner={isOwner}
+        />
+      </div>
+    </div>
   );
 }

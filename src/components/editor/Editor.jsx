@@ -6,39 +6,28 @@ import { Excalidraw } from "@excalidraw/excalidraw";
 import { LoadingButton } from "@/components/ui/loading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pencil, Save, X, Layout, Share } from "lucide-react";
+import { Pencil, Save, X, Layout, Share2, Copy, Globe, Loader2 } from "lucide-react";
 import { MarkdownEditor } from "./MarkdownEditor";
 import { useRouter } from "next/navigation";
 import { ResizablePanel, ResizablePanelGroup } from "../ui/resizable";
 import Image from "next/image";
 import Link from "next/link";
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { motion } from 'framer-motion';
 
 const DEFAULT_DATA = {
   excalidraw: {
-    elements: [
-      {
-        type: "rectangle",
-        version: 141,
-        versionNonce: 361174001,
-        isDeleted: false,
-        id: "oDVXy8D6rom3H1-LLH2-f",
-        fillStyle: "hachure",
-        strokeWidth: 1,
-        strokeStyle: "solid",
-        roughness: 1,
-        opacity: 100,
-        angle: 0,
-        x: 100.50390625,
-        y: 93.67578125,
-        strokeColor: "#000000",
-        backgroundColor: "transparent",
-        width: 186.47265625,
-        height: 141.9765625,
-        seed: 1968410350,
-        groupIds: [],
-      },
-    ],
-    appState: { zenModeEnabled: false, viewBackgroundColor: "#a5d8ff" },
+    elements: [],
+    appState: { viewBackgroundColor: "#ffffff" },
     scrollToContent: true,
   },
   markdown: `
@@ -54,11 +43,13 @@ A collaborative diagramming and markdown editor.
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function Editor({ projectId, initialData = {} }) {
+export default function Editor({ projectId, initialData = {}, isOwner = false }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [layout, setLayout] = useState("sketch");
+  const [layout, setLayout] = useState("split");
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   const { data, error, mutate } = useSWR(`/api/projects/${projectId}`, fetcher, {
     fallbackData: initialData,
@@ -68,6 +59,7 @@ export default function Editor({ projectId, initialData = {} }) {
   const [excalidrawData, setExcalidrawData] = useState(data?.diagram?.content || DEFAULT_DATA.excalidraw);
   const [markdown, setMarkdown] = useState(data?.markdown?.content || DEFAULT_DATA.markdown);
   const [projectName, setProjectName] = useState(data?.name || DEFAULT_DATA.name);
+  const [isShared, setIsShared] = useState(data?.shared || false);
 
   const handleExcalidrawChange = useCallback((elements, appState) => {
     setExcalidrawData({ elements, appState });
@@ -89,17 +81,42 @@ export default function Editor({ projectId, initialData = {} }) {
       if (!response.ok) throw new Error(result.message || "Failed to save project");
       mutate(result);
       setIsEditingName(false);
+      toast.success("Project saved successfully");
     } catch (err) {
       console.error("Save error:", err);
+      toast.error("Failed to save project");
     } finally {
       setIsSaving(false);
     }
   }, [projectId, excalidrawData, markdown, projectName, mutate]);
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(JSON.stringify({ excalidraw: excalidrawData, markdown, name: projectName }));
-    alert("Project shared successfully!");
-  }
+  const toggleShare = async () => {
+    setIsSharing(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/share`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shared: !isShared })
+      });
+
+      if (!response.ok) throw new Error('Failed to update sharing settings');
+
+      setIsShared(!isShared);
+      toast.success(isShared ? 'Project is now private' : 'Project is now shared');
+      mutate();
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to update sharing settings');
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const copyShareLink = () => {
+    const shareUrl = `${window.location.origin}/project/${projectId}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast.success('Share link copied to clipboard');
+  };
 
   const handleNameChange = useCallback((e) => {
     setProjectName(e.target.value);
@@ -109,43 +126,51 @@ export default function Editor({ projectId, initialData = {} }) {
   if (!data) return <div>Loading...</div>;
 
   return (
-    <div className="h-screen flex flex-col">
-      <title>{projectName}</title>
-      <div className="border-b h-12 p-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Link href="/projects">
-            <Image src="/logo.svg" alt="Logo" width={40} height={40} />
+    <div className="h-screen flex flex-col bg-white">
+      <div className="border-b px-4 h-16 flex items-center justify-between bg-white/80 backdrop-blur-md">
+        <div className="flex items-center gap-4">
+          <Link href="/projects" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Image src="/logo.svg" alt="Logo" width={32} height={32} className="rounded-lg" />
+            {isEditingName ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={projectName}
+                  onChange={handleNameChange}
+                  className="w-[200px]"
+                  autoFocus
+                />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setIsEditingName(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-semibold text-gray-900">{projectName}</h1>
+                {isOwner && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setIsEditingName(true)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            )}
+            {isShared && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <Globe className="w-3 h-3 mr-1" />
+                Shared
+              </span>
+            )}
           </Link>
-          {isEditingName ? (
-            <div className="flex items-center gap-2">
-              <Input
-                value={projectName}
-                onChange={handleNameChange}
-                className="w-[200px]"
-                autoFocus
-              />
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => setIsEditingName(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold">{projectName}</h1>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => setIsEditingName(true)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
         </div>
-        <div>
+
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 border rounded-lg p-1">
             {["split", "sketch", "markdown"].map((l) => (
               <Button
@@ -153,34 +178,85 @@ export default function Editor({ projectId, initialData = {} }) {
                 size="sm"
                 variant={layout === l ? "default" : "ghost"}
                 onClick={() => setLayout(l)}
+                className="capitalize"
               >
-                {l.charAt(0).toUpperCase() + l.slice(1)}
+                {l}
               </Button>
             ))}
           </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? (
-              <LoadingButton>Saving...</LoadingButton>
-            ) : (
+
+          <div className="flex items-center gap-2">
+            {isOwner && (
               <>
-                <Save className="h-4 w-4 mr-2" />
-                Save
+                <Button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="gap-2"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Save
+                    </>
+                  )}
+                </Button>
+
+                <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <Share2 className="h-4 w-4" />
+                      Share
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Share Project</DialogTitle>
+                      <DialogDescription>
+                        Anyone with the link can view this project when sharing is enabled.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <h4 className="text-sm font-medium">Share with anyone</h4>
+                          <p className="text-sm text-gray-500">
+                            {isShared ? 'Project is publicly accessible' : 'Project is private'}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={isShared}
+                          onCheckedChange={toggleShare}
+                          disabled={isSharing}
+                        />
+                      </div>
+                      {isShared && (
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Share link</label>
+                          <div className="flex gap-2">
+                            <Input
+                              readOnly
+                              value={`${window.location.origin}/project/${projectId}`}
+                            />
+                            <Button onClick={copyShareLink}>
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </>
             )}
-          </Button>
-          <Button onClick={handleShare} variant="outline">
-            <Share className="h-4 w-4 mr-2" />
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => router.push("/projects")}
-          >
-            Back to Projects
-          </Button>
+          </div>
         </div>
       </div>
+
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup
           direction={layout === "split" ? "horizontal" : "vertical"}
@@ -190,6 +266,7 @@ export default function Editor({ projectId, initialData = {} }) {
               <MarkdownEditor
                 content={markdown}
                 onChange={handleMarkdownChange}
+                readOnly={!isOwner}
               />
             </ResizablePanel>
           )}
@@ -198,7 +275,7 @@ export default function Editor({ projectId, initialData = {} }) {
               <Excalidraw
                 onChange={handleExcalidrawChange}
                 initialData={excalidrawData}
-                viewModeEnabled={false}
+                viewModeEnabled={!isOwner}
               />
             </ResizablePanel>
           )}

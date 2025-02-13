@@ -8,7 +8,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
- 
+
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 export default function SubscriptionPage() {
@@ -88,30 +88,38 @@ export default function SubscriptionPage() {
 
       if (!response.ok) throw new Error(data.error || "Payment initialization failed");
 
-      // Initialize Cashfree SDK
-      const cashfree = new window.Cashfree();
+      // Initialize Cashfree Payment
+      if (typeof window.Cashfree === 'undefined') {
+        throw new Error('Cashfree SDK not loaded');
+      }
 
-      const checkoutOptions = {
+      const cashfree = new window.Cashfree({
+        mode: "sandbox" // or "production" based on environment
+      });
+
+      await cashfree.checkout({
         paymentSessionId: data.order_token,
         returnUrl: `${window.location.origin}/payment/status?order_id={order_id}`,
-      };
-
-      cashfree.checkout(checkoutOptions).then(function(result) {
-        if (result.error) {
-          console.error("Payment failed:", result.error);
-          alert("Payment failed. Please try again.");
-        }
-        if (result.status === "OK") {
-          console.log("Payment success:", result);
+        onSuccess: (data) => {
+          console.log("Payment success:", data);
           mutate(); // Refresh subscription data
           router.push("/projects");
-        }
+        },
+        onFailure: (data) => {
+          console.error("Payment failed:", data);
+          alert("Payment failed. Please try again.");
+          setLoading(false);
+          setSelectedPlan(null);
+        },
+        onClose: () => {
+          setLoading(false);
+          setSelectedPlan(null);
+        },
       });
 
     } catch (error) {
       console.error("Subscription error:", error);
       alert(error.message || "Failed to process subscription");
-    } finally {
       setLoading(false);
       setSelectedPlan(null);
     }

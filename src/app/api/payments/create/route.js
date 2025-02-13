@@ -69,7 +69,7 @@ export async function POST(request) {
         const payment = await prisma.payment.create({
           data: {
             id: orderId,
-            cfOrderId: order.cf_order_id,
+            cfOrderId: order.cf_order_id.toString(),
             amount: Number(amount),
             currency: 'INR',
             status: 'PENDING',

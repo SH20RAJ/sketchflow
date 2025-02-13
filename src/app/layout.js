@@ -109,9 +109,14 @@ export const themeColor = [
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className=" ">
+      <head>
+        <Script 
+          src="https://sdk.cashfree.com/js/v3/cashfree.js"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body className={`antialiased`}>
         <Providers>{children}</Providers>
-        <Script src="https://sdk.cashfree.com/js/ui/2.0.0/cashfree.prod.js" strategy="beforeInteractive" />
       </body>
     </html>
   );

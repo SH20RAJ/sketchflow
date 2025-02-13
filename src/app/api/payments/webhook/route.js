@@ -1,96 +1,134 @@
 import { NextResponse } from 'next/server';
-import { verifyPaymentSignature } from '@/lib/cashfree';
-import prisma from '@/prisma';
+import { PrismaClient } from '@prisma/client';
+import crypto from 'crypto';
 
-export async function POST(req) {
+const prisma = new PrismaClient();
+
+// Configure CORS
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, x-webhook-signature',
+};
+
+// Handle OPTIONS request for CORS
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
+function verifyWebhookSignature(payload, signature) {
   try {
-    const data = await req.json();
-    const signature = req.headers.get('x-webhook-signature');
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.CASHFREE_SECRET_KEY)
+      .update(JSON.stringify(payload))
+      .digest('base64');
+    
+    return expectedSignature === signature;
+  } catch (error) {
+    console.error('Signature verification failed:', error);
+    return false;
+  }
+}
 
-    // Verify webhook signature
-    const isValid = await verifyPaymentSignature(
-      data.order_id,
-      data.order_amount,
-      data.reference_id,
-      signature
-    );
-
-    if (!isValid) {
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+export async function POST(request) {
+  try {
+    console.log('Webhook called - headers:', Object.fromEntries(request.headers.entries()));
+    
+    const payload = await request.json();
+    console.log('Webhook payload:', payload);
+    
+    const signature = request.headers.get('x-webhook-signature');
+    if (!signature) {
+      console.error('No signature found in webhook request');
+      return NextResponse.json({ error: 'No signature provided' }, { 
+        status: 401,
+        headers: corsHeaders
+      });
     }
 
-    // Update payment status
+    // Verify webhook signature
+    if (!verifyWebhookSignature(payload, signature)) {
+      console.error('Invalid signature in webhook request');
+      return NextResponse.json({ error: 'Invalid signature' }, { 
+        status: 401,
+        headers: corsHeaders
+      });
+    }
+
+    const { order } = payload;
+    if (!order?.order_id) {
+      console.error('Invalid payload structure:', payload);
+      return NextResponse.json({ error: 'Invalid payload' }, { 
+        status: 400,
+        headers: corsHeaders
+      });
+    }
+
+    console.log('Webhook received:', {
+      orderId: order.order_id,
+      status: order.order_status,
+      payment: order.payment
+    });
+
+    // Find payment in database
     const payment = await prisma.payment.findUnique({
-      where: { id: data.order_id }
+      where: { id: order.order_id },
+      include: { user: true }
     });
 
     if (!payment) {
-      return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
+      console.error('Payment not found:', order.order_id);
+      return NextResponse.json({ error: 'Payment not found' }, { 
+        status: 404,
+        headers: corsHeaders
+      });
     }
 
     // Update payment status
-    await prisma.payment.update({
-      where: { id: data.order_id },
-      data: { status: data.order_status }
-    });
-
-    // If payment is successful, update subscription
-    if (data.order_status === 'PAID') {
-      const amount = Number(data.order_amount);
-      const planType = amount === Number(process.env.PRO_YEARLY_PLAN_AMOUNT) ? 'yearly' : 'monthly';
-      const durationDays = planType === 'yearly' ? 365 : 30;
-
-      // Find or create plan
-      let plan = await prisma.plan.findFirst({
-        where: {
-          price: amount,
-          duration: durationDays
-        }
+    if (order.order_status === 'PAID') {
+      await prisma.payment.update({
+        where: { id: order.order_id },
+        data: { status: 'PAID' }
       });
 
-      if (!plan) {
-        // Create plan if it doesn't exist
-        plan = await prisma.plan.create({
-          data: {
-            name: `Pro ${planType.charAt(0).toUpperCase() + planType.slice(1)}`,
-            description: `Pro plan with ${planType} billing`,
-            price: amount,
-            duration: durationDays,
-            features: JSON.stringify([
-              'Unlimited projects',
-              'Advanced collaboration',
-              'Priority support',
-              'Custom templates'
-            ])
-          }
-        });
-      }
-
-      // Update or create subscription
+      // Create or update subscription
+      const planDuration = payment.amount === Number(process.env.PRO_YEARLY_PLAN_AMOUNT) ? 365 : 30;
+      
       await prisma.subscription.upsert({
         where: { userId: payment.userId },
         update: {
           status: 'active',
-          planId: plan.id,
           startDate: new Date(),
-          endDate: new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000)
+          endDate: new Date(Date.now() + planDuration * 24 * 60 * 60 * 1000)
         },
         create: {
           userId: payment.userId,
           status: 'active',
-          planId: plan.id,
+          planId: 'pro',
           startDate: new Date(),
-          endDate: new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000)
+          endDate: new Date(Date.now() + planDuration * 24 * 60 * 60 * 1000)
         }
       });
+
+      console.log('Payment marked as successful:', order.order_id);
+    } else if (['EXPIRED', 'FAILED', 'CANCELLED'].includes(order.order_status)) {
+      await prisma.payment.update({
+        where: { id: order.order_id },
+        data: { status: order.order_status }
+      });
+      console.log('Payment marked as failed:', order.order_id);
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ status: 'ok' }, { 
+      headers: corsHeaders 
+    });
   } catch (error) {
-    console.error('Webhook processing failed:', error);
-    return NextResponse.json(
-      { error: error.message || 'Webhook processing failed' },
-      { status: 500 }
-    );
+    console.error('Webhook processing error:', error);
+    return NextResponse.json({ error: 'Webhook processing failed' }, { 
+      status: 500,
+      headers: corsHeaders
+    });
+  } finally {
+    await prisma.$disconnect();
   }
 }

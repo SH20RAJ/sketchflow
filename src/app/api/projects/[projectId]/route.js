@@ -5,14 +5,16 @@ import { auth } from "@/auth";
 export async function GET(request, { params }) {
   try {
     const session = await auth();
-    if (!session?.user?.email) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    console.log('Project fetch - Session:', { 
+      userId: session?.user?.id,
+      email: session?.user?.email 
+    });
+    console.log('Project fetch - Project ID:', params.projectId);
 
+    // First find the project
     const project = await prisma.project.findUnique({
       where: {
         id: params.projectId,
-        userId: session.user.id,
       },
       include: {
         diagrams: true,
@@ -20,31 +22,60 @@ export async function GET(request, { params }) {
       },
     });
 
+    console.log('Project fetch - Project found:', { 
+      id: project?.id, 
+      userId: project?.userId,
+      shared: project?.shared 
+    });
+
     if (!project) {
+      console.log('Project fetch - Project not found');
       return new NextResponse("Project not found", { status: 404 });
+    }
+
+    // Check access
+    const isOwner = session?.user?.id === project.userId;
+    const hasAccess = isOwner || project.shared;
+
+    console.log('Project fetch - Access check:', { isOwner, hasAccess });
+
+    if (!hasAccess) {
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
     // Get the main diagram and markdown
     let mainDiagram = project.diagrams[0];
     let mainMarkdown = project.markdowns[0];
 
-    mainDiagram.content.appState.collaborators = [];
+    if (mainDiagram?.content?.appState) {
+      mainDiagram.content.appState.collaborators = [];
+    }
 
-    return NextResponse.json({
+    const response = {
+      ...project,
       markdown: mainMarkdown,
       diagram: mainDiagram,
-      ...project,
-    });
+      isOwner,
+    };
+
+    console.log('Project fetch - Success');
+    return NextResponse.json(response);
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Project fetch error:", {
+      error: error.message,
+      stack: error.stack,
+      projectId: params.projectId
+    });
     return new NextResponse("Internal Server Error", { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
     const session = await auth();
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -63,15 +94,17 @@ export async function DELETE(request, { params }) {
 
     return new NextResponse("Project deleted", { status: 200 });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Project delete error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function PATCH(request, { params }) {
   try {
     const session = await auth();
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -99,15 +132,17 @@ export async function PATCH(request, { params }) {
 
     return NextResponse.json(project);
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Project update error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function POST(request, { params }) {
   try {
     const session = await auth();
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -140,7 +175,9 @@ export async function POST(request, { params }) {
 
     return new NextResponse("OK");
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Project save error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
