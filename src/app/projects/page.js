@@ -13,7 +13,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Plus, Loader2, Pencil, Trash } from "lucide-react";
+import { Plus, Loader2, Pencil, Trash, FolderOpen, Search, Settings, LogOut } from "lucide-react";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -25,14 +25,32 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "next-auth/react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Input } from "@/components/ui/input";
+
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { y: 20, opacity: 0 },
+  show: { y: 0, opacity: 1 }
+};
 
 export default function ProjectsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [isPending, startTransition] = useTransition();
   const [isCreating, setIsCreating] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const {
     data: projectsData,
@@ -123,10 +141,10 @@ export default function ProjectsPage() {
 
   if (status === "loading" || isLoading) {
     return (
-      <div className="container mx-auto p-8">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-8">
         <title>Projects</title>
         <nav className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Your Projects</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">Your Projects</h1>
           <div className="flex items-center space-x-4">
             <p className="text-gray-600">Loading...</p>
             <Button disabled className="flex items-center">
@@ -154,16 +172,38 @@ export default function ProjectsPage() {
 
   const projects = projectsData?.projects || [];
   const projectCount = projectsData?.count || 0;
+  const filteredProjects = projects.filter(project => 
+    project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    project.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="container mx-auto p-8">
-      <nav className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Your Projects</h1>
-        <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-8">
+      <nav className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center mb-8">
+        <div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text mb-2">
+            Your Projects
+          </h1>
           <p className="text-gray-600">
-            {projectCount} / {subscriptionData?.isPro ? "∞" : "100"} projects
+            {projectCount} / {subscriptionData?.isPro ? "∞" : "100"} projects available
           </p>
-          <Button onClick={handleCreateProject} disabled={isCreating}>
+        </div>
+        <div className="flex flex-col md:flex-row items-stretch md:items-center space-y-2 md:space-y-0 md:space-x-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search projects..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 w-full md:w-64"
+            />
+          </div>
+          <Button 
+            onClick={handleCreateProject} 
+            disabled={isCreating}
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+          >
             {isCreating ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -173,96 +213,144 @@ export default function ProjectsPage() {
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Avatar className="cursor-pointer">
-                <AvatarImage
-                  src={session?.user?.image}
-                  alt={session?.user?.name}
-                />
-                <AvatarFallback>
-                  {session?.user?.name?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+              <Button variant="ghost" className="rounded-full w-10 h-10 p-0">
+                <Avatar>
+                  <AvatarImage src={session?.user?.image} alt={session?.user?.name} />
+                  <AvatarFallback>{session?.user?.name?.[0]}</AvatarFallback>
+                </Avatar>
+              </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{session?.user?.name}</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="font-medium leading-none">{session?.user?.name}</p>
+                  <p className="text-sm leading-none text-gray-500">{session?.user?.email}</p>
+                </div>
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" /> Settings
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()}>
-                Log out
+              <DropdownMenuItem onClick={() => signOut()} className="text-red-600">
+                <LogOut className="mr-2 h-4 w-4" /> Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </nav>
 
-      {projects.length === 0 ? (
-        <Card className="text-center p-12">
-          <CardContent>
-            <p className="text-gray-600 mb-4">
-              You haven't created any projects yet.
-            </p>
-            <Button onClick={handleCreateProject}>
-              Create your first project
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <Card
-              key={project.id}
-              className={`transition-opacity ${
-                project.isOptimistic ? "opacity-50" : "opacity-100"
-              }`}
-            >
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-xl">{project.name}</CardTitle>
-                  <div className="flex gap-2">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() =>
-                        startTransition(() =>
-                          router.push(`/project/${project.id}`)
-                        )
-                      }
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handleDeleteProject(project.id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <CardDescription>{project.description}</CardDescription>
-              </CardHeader>
+      <AnimatePresence>
+        {filteredProjects.length === 0 && !searchQuery && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <Card className="text-center p-12 border-2 border-dashed">
+              <CardContent className="space-y-4">
+                <FolderOpen className="h-12 w-12 mx-auto text-gray-400" />
+                <p className="text-xl font-medium text-gray-600">
+                  Start Your Journey
+                </p>
+                <p className="text-gray-500 max-w-md mx-auto">
+                  Create your first project and begin bringing your ideas to life.
+                </p>
+                <Button 
+                  onClick={handleCreateProject}
+                  className="bg-blue-600 hover:bg-blue-700 text-white mt-4"
+                >
+                  Create your first project
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {filteredProjects.length === 0 && searchQuery && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <Card className="text-center p-12">
               <CardContent>
-                <p className="text-sm text-gray-500">
-                  Created {format(new Date(project.createdAt), "PP")}
+                <Search className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-xl font-medium text-gray-600 mb-2">
+                  No projects found
+                </p>
+                <p className="text-gray-500">
+                  No projects match your search "{searchQuery}"
                 </p>
               </CardContent>
-              <CardFooter>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() =>
-                    startTransition(() => router.push(`/project/${project.id}`))
-                  }
-                >
-                  Open Project
-                </Button>
-              </CardFooter>
             </Card>
-          ))}
-        </div>
-      )}
+          </motion.div>
+        )}
+
+        {filteredProjects.length > 0 && (
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {filteredProjects.map((project) => (
+              <motion.div key={project.id} variants={item}>
+                <Card
+                  className={`group hover:shadow-lg transition-all duration-200 ${
+                    project.isOptimistic ? "opacity-50" : "opacity-100"
+                  }`}
+                >
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-xl group-hover:text-blue-600 transition-colors">
+                          {project.name}
+                        </CardTitle>
+                        <CardDescription className="mt-2">
+                          {project.description || "No description"}
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => startTransition(() => router.push(`/project/${project.id}`))}
+                          className="h-8 w-8 hover:bg-blue-50"
+                        >
+                          <Pencil className="h-4 w-4 text-blue-600" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleDeleteProject(project.id)}
+                          className="h-8 w-8 hover:bg-red-50"
+                        >
+                          <Trash className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-500 flex items-center">
+                      Created {format(new Date(project.createdAt), "PPP")}
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button
+                      variant="outline"
+                      className="w-full hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                      onClick={() => startTransition(() => router.push(`/project/${project.id}`))}
+                    >
+                      Open Project
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
