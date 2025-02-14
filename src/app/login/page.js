@@ -48,10 +48,10 @@ export default function LoginPage() {
           <Card className="backdrop-blur-sm bg-white/90 shadow-xl border-0">
             <CardHeader className="text-center space-y-2">
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
-                Welcome Back
+                Welcome to SketchFlow
               </CardTitle>
               <CardDescription className="text-gray-600 text-lg">
-                Sign in to start creating amazing diagrams and documents
+                Sign in / Join to start creating amazing diagrams and documents
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">

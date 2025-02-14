@@ -95,7 +95,7 @@ export default function SubscriptionPage() {
       }
 
       const cashfree = new window.Cashfree({
-        mode: "sandbox" // or "production" based on environment
+        mode: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox'
       });
 
       await cashfree.checkout({
