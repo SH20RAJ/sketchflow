@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, Play, Users, Star, Shield, Zap } from "lucide-react";
+import { ArrowRight,X, CheckCircle2, Play, Users, Star, Shield, Zap, BarChart, Laptop, Sparkles, Globe, Clock, Lock, MessageSquare, Award, Rocket, Heart, Lightbulb, Cpu, Cloud, Repeat, Settings, PieChart, TrendingUp, Smartphone, Code } from "lucide-react";
 
 export default function LandingPage() {
     const { data: session, status } = useSession();
@@ -19,6 +19,54 @@ export default function LandingPage() {
         }, 5000);
         return () => clearInterval(interval);
     }, []);
+
+    // Add new stats data
+    const stats = [
+        { number: "10,000+", label: "Active Users" },
+        { number: "1M+", label: "Diagrams Created" },
+        { number: "150+", label: "Countries" },
+        { number: "99.9%", label: "Uptime" }
+    ];
+
+    // Add integration logos
+    const integrations = [
+        "github.svg", "slack.svg", "notion.svg", "figma.svg",
+        "jira.svg", "asana.svg", "trello.svg", "azure.svg"
+    ];
+
+    // Add comparison data
+    const comparisonFeatures = [
+        { name: "Real-time Collaboration", sketchflow: true, others: false },
+        { name: "AI-Powered Suggestions", sketchflow: true, others: false },
+        { name: "Version Control", sketchflow: true, others: true },
+        { name: "Smart Templates", sketchflow: true, others: false },
+        { name: "Export Options", sketchflow: true, others: true },
+        { name: "Team Management", sketchflow: true, others: false }
+    ];
+
+    // Add use cases
+    const useCases = [
+        {
+            icon: Lightbulb,
+            title: "Brainstorming",
+            description: "Capture and organize ideas in real-time with your team."
+        },
+        {
+            icon: Cpu,
+            title: "System Design",
+            description: "Create detailed system architecture diagrams with ease."
+        },
+        {
+            icon: Users,
+            title: "Team Planning",
+            description: "Plan projects and workflows collaboratively."
+        },
+        {
+            icon: PieChart,
+            title: "Data Visualization",
+            description: "Transform complex data into clear visual representations."
+        }
+    ];
 
     return (
         <div className="bg-gradient-to-b from-white to-blue-50 min-h-screen">
@@ -324,6 +372,209 @@ export default function LandingPage() {
                                     </Button>
                                 </Link>
                             )}
+                        </div>
+                    </div>
+                </section>
+
+                {/* New Stats Section */}
+                <section className="py-20 bg-white">
+                    <div className="container mx-auto px-4">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+                        >
+                            {stats.map((stat, index) => (
+                                <div key={index} className="text-center">
+                                    <h3 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text mb-2">
+                                        {stat.number}
+                                    </h3>
+                                    <p className="text-gray-600">{stat.label}</p>
+                                </div>
+                            ))}
+                        </motion.div>
+                    </div>
+                </section>
+
+                {/* New How It Works Section */}
+                <section className="py-32 bg-gray-50">
+                    <div className="container mx-auto px-4">
+                        <div className="text-center max-w-3xl mx-auto mb-20">
+                            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                                How <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">SketchFlow</span> Works
+                            </h2>
+                            <p className="text-xl text-gray-600">
+                                Get started in minutes with our intuitive workflow
+                            </p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                            <div className="absolute top-1/2 left-0 w-full h-0.5 bg-blue-100 -translate-y-1/2 hidden md:block" />
+                            {[
+                                { icon: Rocket, title: "Create Project", description: "Start with a blank canvas or choose from templates" },
+                                { icon: Users, title: "Collaborate", description: "Invite team members and work together in real-time" },
+                                { icon: TrendingUp, title: "Ship Faster", description: "Export, share, and implement your designs" }
+                            ].map((step, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.2 }}
+                                    className="bg-white rounded-2xl p-8 relative z-10"
+                                >
+                                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                                        {index + 1}
+                                    </div>
+                                    <div className="text-center">
+                                        <step.icon className="h-12 w-12 mx-auto text-blue-600 mb-6" />
+                                        <h3 className="text-xl font-semibold mb-4">{step.title}</h3>
+                                        <p className="text-gray-600">{step.description}</p>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* New Use Cases Section */}
+                <section className="py-32 bg-white">
+                    <div className="container mx-auto px-4">
+                        <div className="text-center max-w-3xl mx-auto mb-20">
+                            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                                Perfect for Every <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">Use Case</span>
+                            </h2>
+                            <p className="text-xl text-gray-600">
+                                Discover how teams use SketchFlow to solve different challenges
+                            </p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {useCases.map((useCase, index) => (
+                                <motion.div
+                                    key={index}
+                                    whileHover={{ y: -5 }}
+                                    className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100"
+                                >
+                                    <useCase.icon className="h-12 w-12 text-blue-600 mb-6" />
+                                    <h3 className="text-xl font-semibold mb-4">{useCase.title}</h3>
+                                    <p className="text-gray-600">{useCase.description}</p>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* New Social Proof Section */}
+                <section className="py-20 bg-gray-50">
+                    <div className="container mx-auto px-4">
+                        <div className="text-center mb-12">
+                            <p className="text-lg text-gray-600">Trusted by teams at</p>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8 items-center opacity-50">
+                            {integrations.map((logo, index) => (
+                                <motion.img
+                                    key={index}
+                                    src={`/logos/${logo}`}
+                                    alt="Company Logo"
+                                    className="h-8 w-auto mx-auto"
+                                    initial={{ opacity: 0 }}
+                                    whileInView={{ opacity: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.1 }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* New Comparison Section */}
+                <section className="py-32 bg-white">
+                    <div className="container mx-auto px-4">
+                        <div className="text-center max-w-3xl mx-auto mb-20">
+                            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                                Why Choose <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">SketchFlow</span>
+                            </h2>
+                            <p className="text-xl text-gray-600">
+                                See how we compare to traditional diagramming tools
+                            </p>
+                        </div>
+                        <div className="max-w-4xl mx-auto">
+                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                                <div className="grid grid-cols-3 p-6 bg-gray-50 border-b">
+                                    <div className="text-gray-600 font-medium">Feature</div>
+                                    <div className="text-center text-blue-600 font-semibold">SketchFlow</div>
+                                    <div className="text-center text-gray-600 font-medium">Others</div>
+                                </div>
+                                {comparisonFeatures.map((feature, index) => (
+                                    <div key={index} className="grid grid-cols-3 p-6 border-b last:border-0">
+                                        <div className="text-gray-900">{feature.name}</div>
+                                        <div className="text-center">
+                                            {feature.sketchflow ? (
+                                                <CheckCircle2 className="h-6 w-6 text-green-500 mx-auto" />
+                                            ) : (
+                                                <X className="h-6 w-6 text-red-500 mx-auto" />
+                                            )}
+                                        </div>
+                                        <div className="text-center">
+                                            {feature.others ? (
+                                                <CheckCircle2 className="h-6 w-6 text-green-500 mx-auto" />
+                                            ) : (
+                                                <X className="h-6 w-6 text-red-500 mx-auto" />
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* New FAQ Section */}
+                <section className="py-32 bg-gray-50">
+                    <div className="container mx-auto px-4">
+                        <div className="text-center max-w-3xl mx-auto mb-20">
+                            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                                Frequently Asked <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">Questions</span>
+                            </h2>
+                            <p className="text-xl text-gray-600">
+                                Everything you need to know about SketchFlow
+                            </p>
+                        </div>
+                        <div className="max-w-3xl mx-auto">
+                            {[
+                                {
+                                    q: "How does the free trial work?",
+                                    a: "Start with our 14-day free trial with full access to all Pro features. No credit card required."
+                                },
+                                {
+                                    q: "Can I collaborate with my team?",
+                                    a: "Yes! Invite unlimited team members and collaborate in real-time on all your projects."
+                                },
+                                {
+                                    q: "What happens to my data?",
+                                    a: "Your data is securely stored and backed up. We use enterprise-grade encryption to protect your information."
+                                },
+                                {
+                                    q: "Can I export my diagrams?",
+                                    a: "Export your diagrams in multiple formats including PNG, SVG, and PDF. Pro users get access to additional export options."
+                                },
+                                {
+                                    q: "Do you offer enterprise plans?",
+                                    a: "Yes, we offer custom enterprise plans with additional features, dedicated support, and custom integrations."
+                                }
+                            ].map((faq, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.1 }}
+                                    className="bg-white rounded-xl p-6 mb-4 shadow-sm"
+                                >
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{faq.q}</h3>
+                                    <p className="text-gray-600">{faq.a}</p>
+                                </motion.div>
+                            ))}
                         </div>
                     </div>
                 </section>
