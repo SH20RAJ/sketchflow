@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,31 +28,40 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <nav className="flex justify-between items-center p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50 relative overflow-hidden">
+      {/* Decorative elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute top-40 right-20 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-20 left-40 w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <nav className="flex justify-between items-center p-8 relative z-10">
+      <Link href="/"> 
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text"
+          className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-transparent bg-clip-text"
         >
           SketchFlow
-        </motion.h1>
+          </motion.h1>
+          </Link>
       </nav>
 
-      <div className="flex flex-col items-center justify-center px-4 mt-12">
+      <div className="flex flex-col items-center justify-center px-4 mt-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="w-full max-w-md"
         >
-          <Card className="backdrop-blur-sm bg-white/90 shadow-xl border-0">
-            <CardHeader className="text-center space-y-2">
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
+          <Card className="backdrop-blur-xl bg-white/80 shadow-lg transition-transform duration-300 hover:scale-105 rounded-xl">
+            <CardHeader className="text-center space-y-2 pb-4">
+              <CardTitle className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-transparent bg-clip-text">
                 Welcome to SketchFlow
               </CardTitle>
-              <CardDescription className="text-gray-600 text-lg">
-                Sign in / Join to start creating amazing diagrams and documents
+              <CardDescription className="text-gray-600 text-xl font-light">
+                Create, collaborate, and bring your ideas to life
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
@@ -62,10 +72,11 @@ export default function LoginPage() {
               >
                 <Button
                   variant="outline"
-                  className="w-full flex items-center justify-center py-6 text-lg hover:bg-blue-50 hover:text-blue-600 transition-colors border-2"
+                  className="w-full flex items-center justify-center py-5 text-lg rounded-md relative overflow-hidden group border-2 border-gray-200 hover:border-blue-500"
                   onClick={() => signIn('google', { callbackUrl: '/projects' })}
                 >
-                  <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                  <svg className="mr-3 h-6 w-6 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -83,7 +94,7 @@ export default function LoginPage() {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                     />
                   </svg>
-                  Continue with Google
+                  <span className="font-medium">Continue with Google</span>
                 </Button>
               </motion.div>
             </CardContent>

@@ -8,6 +8,7 @@ import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { toast } from "react-hot-toast";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
@@ -89,26 +90,28 @@ export default function SubscriptionPage() {
 
       if (!response.ok) throw new Error(data.error || "Payment initialization failed");
 
+      if (!data.payment_session_id) {
+        throw new Error('Invalid payment session');
+      }
+
       // Initialize Cashfree Payment
       if (typeof window.Cashfree === 'undefined') {
         throw new Error('Cashfree SDK not loaded');
       }
 
-      const cashfree = new window.Cashfree({
-        mode: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox'
-      });
+      const cashfree = new window.Cashfree(process.env.NODE_ENV === 'production' ? 'production' : 'sandbox');
 
       await cashfree.checkout({
-        paymentSessionId: data.order_token,
-        returnUrl: `${window.location.origin}/payment/status?order_id={order_id}`,
+        paymentSessionId: data.payment_session_id,
+        returnUrl: `${window.location.origin}/payment/status?order_id=${data.order_id}`,
         onSuccess: (data) => {
           console.log("Payment success:", data);
           mutate(); // Refresh subscription data
-          router.push("/projects");
+          router.push(`/payment/status?order_id=${data.order_id}`);
         },
         onFailure: (data) => {
           console.error("Payment failed:", data);
-          alert("Payment failed. Please try again.");
+          toast.error("Payment failed. Please try again.");
           setLoading(false);
           setSelectedPlan(null);
         },
@@ -120,7 +123,7 @@ export default function SubscriptionPage() {
 
     } catch (error) {
       console.error("Subscription error:", error);
-      alert(error.message || "Failed to process subscription");
+      toast.error(error.message || "Failed to process subscription");
       setLoading(false);
       setSelectedPlan(null);
     }
