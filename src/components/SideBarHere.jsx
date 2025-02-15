@@ -151,11 +151,11 @@ export const SideBarHere = () => {
                   Upgrade to Pro
                 </MenuItem>
               ) : (
-                <MenuItem href="/settings" icon={CreditCard} className="text-sm">
+                <MenuItem href="/projects/settings" icon={CreditCard} className="text-sm">
                   Manage Subscription
                 </MenuItem>
               )}
-              <MenuItem href="/settings" icon={Settings} className="text-sm">Settings</MenuItem>
+              <MenuItem href="/projects/settings" icon={Settings} className="text-sm">Settings</MenuItem>
               <MenuItem href="/logout" icon={LogOut} className="text-sm text-red-600 hover:text-red-700 hover:bg-red-50/50">
                 Logout
               </MenuItem>
