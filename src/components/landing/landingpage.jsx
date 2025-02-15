@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
-import { ArrowRight,X, CheckCircle2, Play, Users, Star, Shield, Zap, BarChart, Laptop, Sparkles, Globe, Clock, Lock, MessageSquare, Award, Rocket, Heart, Lightbulb, Cpu, Cloud, Repeat, Settings, PieChart, TrendingUp, Smartphone, Code } from "lucide-react";
+import { ArrowRight, X, CheckCircle2, Play, Users, Star, Shield, Zap, BarChart, Laptop, Sparkles, Globe, Clock, Lock, MessageSquare, Award, Rocket, Heart, Lightbulb, Cpu, Cloud, Repeat, Settings, PieChart, TrendingUp, Smartphone, Code } from "lucide-react";
 
 export default function LandingPage() {
     const { data: session, status } = useSession();
@@ -30,8 +30,9 @@ export default function LandingPage() {
 
     // Add integration logos
     const integrations = [
-        "github.svg", "slack.svg", "notion.svg", "figma.svg",
-        "jira.svg", "asana.svg", "trello.svg", "azure.svg"
+        "https://www.svgrepo.com/show/512317/github-142.svg", "https://www.svgrepo.com/show/448248/slack.svg",
+         "https://www.svgrepo.com/show/452076/notion.svg", "https://www.svgrepo.com/show/452202/figma.svg",
+        "https://www.svgrepo.com/show/452241/jira.svg", "https://www.svgrepo.com/show/526412/video-library.svg", "https://www.svgrepo.com/show/475688/trello-color.svg","https://www.svgrepo.com/show/125087/yoga.svg"
     ];
 
     // Add comparison data
@@ -152,7 +153,9 @@ export default function LandingPage() {
                                         </Button>
                                     </Link>
                                 )}
-                                <Button size="lg" variant="outline" className="w-full sm:w-auto text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl group">
+                                <Button onClick={() => {
+                                    window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "_blank");
+                                }} size="lg" variant="outline" className="w-full sm:w-auto text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl group">
                                     <Play className="mr-2 h-5 w-5" />
                                     Watch Demo
                                 </Button>
@@ -474,7 +477,7 @@ export default function LandingPage() {
                             {integrations.map((logo, index) => (
                                 <motion.img
                                     key={index}
-                                    src={`/logos/${logo}`}
+                                    src={`${logo}`}
                                     alt="Company Logo"
                                     className="h-8 w-auto mx-auto"
                                     initial={{ opacity: 0 }}
