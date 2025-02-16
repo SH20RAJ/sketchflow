@@ -78,14 +78,8 @@ export default function Editor({
   useEffect(() => {
     if (layout !== previousLayout) {
       setPreviousLayout(layout);
-      if (layout === "split" || layout === "markdown") {
-        setMarkdown((prev) => prev);
-      }
-      if (layout === "split" || layout === "sketch") {
-        setExcalidrawData((prev) => ({ ...prev }));
-      }
     }
-  }, [layout]);
+  }, [layout, previousLayout]);
 
   const { data, error, mutate } = useSWR(
     `/api/projects/${projectId}`,
@@ -164,6 +158,10 @@ export default function Editor({
     setProjectName(e.target.value);
   }, []);
 
+  const handleLayoutChange = useCallback((newLayout) => {
+    setLayout(newLayout);
+  }, []);
+
   if (error) return <div>Error: {error.message}</div>;
   if (!data) return <div>Loading...</div>;
 
@@ -230,7 +228,7 @@ export default function Editor({
                 key={l}
                 size="sm"
                 variant={layout === l ? "default" : "ghost"}
-                onClick={() => setLayout(l)}
+                onClick={() => handleLayoutChange(l)}
                 className="capitalize"
               >
                 {l}

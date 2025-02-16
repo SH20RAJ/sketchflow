@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import { UpgradeButton } from '@/components/UpgradeButton';
+import SubscriptionPage from '@/app/subscription/page';
 
-export default function PricingPage() {
+export   function PricingPage() {
   const { data: session } = useSession();
 
   const handleUpgrade = async () => {
@@ -98,3 +99,6 @@ export default function PricingPage() {
     </div>
   );
 }
+
+
+export default SubscriptionPage;

@@ -7,16 +7,6 @@ import Editor from '@/components/editor/Editor';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Share2, Copy, Lock, Globe, Loader2, AlertCircle } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
