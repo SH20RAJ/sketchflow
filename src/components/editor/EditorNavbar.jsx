@@ -1,129 +1,213 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import {
-    Layout,
-    SplitSquareHorizontal,
-    FileText,
+    Pencil,
+    Save,
+    X,
     Share2,
     Copy,
     Globe,
-    Lock,
-    Menu
+    Loader2,
+    Layout,
+    SplitSquareHorizontal,
+    FileText,
 } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 
 const layouts = [
-    {
-        id: 'canvas',
-        name: 'Canvas View',
-        icon: Layout,
-        description: 'Full canvas for diagramming'
-    },
     {
         id: 'split',
         name: 'Split View',
         icon: SplitSquareHorizontal,
-        description: 'Canvas with documentation'
     },
     {
-        id: 'document',
+        id: 'sketch',
+        name: 'Canvas View',
+        icon: Layout,
+    },
+    {
+        id: 'markdown',
         name: 'Document View',
         icon: FileText,
-        description: 'Full documentation view'
     }
 ];
 
 export function EditorNavbar({
-    currentLayout,
-    onLayoutChange,
-    isShared,
-    onShareToggle,
-    onCopyLink,
     projectName,
-    isOwner
+    isEditingName,
+    setIsEditingName,
+    handleNameChange,
+    isOwner,
+    isShared,
+    layout,
+    setLayout,
+    handleSave,
+    isSaving,
+    showShareDialog,
+    setShowShareDialog,
+    toggleShare,
+    isSharing,
+    projectId,
+    copyShareLink
 }) {
     return (
-        <div className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-            <div className="flex h-14 items-center px-4 gap-4">
-                <div className="flex items-center gap-2 md:hidden">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                                <Menu className="h-5 w-5" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-48">
-                            {layouts.map((layout) => (
-                                <DropdownMenuItem
-                                    key={layout.id}
-                                    onClick={() => onLayoutChange(layout.id)}
-                                    className="flex items-center gap-2"
-                                >
-                                    <layout.icon className="h-4 w-4" />
-                                    <span>{layout.name}</span>
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <span className="font-medium text-sm">{projectName}</span>
-                </div>
-
-                <div className="hidden md:flex items-center gap-1">
-                    {layouts.map((layout) => (
+        <div className="border-b px-3 h-12 flex items-center justify-between bg-white/80 backdrop-blur-md">
+            <div className="flex items-center gap-2">
+                <Link
+                    href="/projects"
+                    className="flex items-center hover:opacity-80 transition-opacity"
+                >
+                    <Image
+                        src="/logo.svg"
+                        alt="Logo"
+                        width={24}
+                        height={24}
+                        className="rounded-md"
+                    />
+                </Link>
+                {isEditingName ? (
+                    <div className="flex items-center gap-1">
+                        <Input
+                            value={projectName}
+                            onChange={handleNameChange}
+                            className="w-[180px] h-8 text-sm"
+                            autoFocus
+                        />
                         <Button
-                            key={layout.id}
-                            variant={currentLayout === layout.id ? "secondary" : "ghost"}
-                            size="sm"
-                            onClick={() => onLayoutChange(layout.id)}
-                            className={cn(
-                                "gap-2",
-                                currentLayout === layout.id && "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700"
-                            )}
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8"
+                            onClick={() => setIsEditingName(false)}
                         >
-                            <layout.icon className="h-4 w-4" />
-                            <span>{layout.name}</span>
+                            <X className="h-3 w-3" />
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-1">
+                        <h1 className="text-sm font-medium text-gray-700">
+                            {projectName}
+                        </h1>
+                        {isOwner && (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8"
+                                onClick={() => setIsEditingName(true)}
+                            >
+                                <Pencil className="h-3 w-3" />
+                            </Button>
+                        )}
+                    </div>
+                )}
+                {isShared && (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <Globe className="w-3 h-3 mr-0.5" />
+                        Shared
+                    </span>
+                )}
+            </div>
+
+            <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 border rounded-md p-0.5">
+                    {layouts.map((l) => (
+                        <Button
+                            key={l.id}
+                            size="sm"
+                            variant={layout === l.id ? "default" : "ghost"}
+                            onClick={() => setLayout(l.id)}
+                            className="h-7 px-2"
+                        >
+                            <l.icon className="h-3 w-3" />
                         </Button>
                     ))}
                 </div>
 
-                <div className="ml-auto flex items-center gap-2">
+                <div className="flex items-center gap-1">
                     {isOwner && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={onShareToggle}
-                            className="gap-2"
-                        >
-                            <Share2 className="h-4 w-4" />
-                            <span className="hidden sm:inline">Share</span>
-                            {isShared ? (
-                                <Globe className="h-4 w-4 text-green-500" />
-                            ) : (
-                                <Lock className="h-4 w-4 text-gray-500" />
-                            )}
-                        </Button>
-                    )}
-                    {isShared && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={onCopyLink}
-                            className="gap-2"
-                        >
-                            <Copy className="h-4 w-4" />
-                            <span className="hidden sm:inline">Copy Link</span>
-                        </Button>
+                        <>
+                            <Button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="h-7 px-2 text-xs"
+                                size="sm"
+                            >
+                                {isSaving ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                    <Save className="h-3 w-3" />
+                                )}
+                            </Button>
+
+                            <Dialog
+                                open={showShareDialog}
+                                onOpenChange={setShowShareDialog}
+                            >
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" className="h-7 px-2" size="sm">
+                                        <Share2 className="h-3 w-3" />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Share Project</DialogTitle>
+                                        <DialogDescription>
+                                            Anyone with the link can view this project when sharing
+                                            is enabled.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-4 py-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-1">
+                                                <h4 className="text-sm font-medium">
+                                                    Share with anyone
+                                                </h4>
+                                                <p className="text-sm text-gray-500">
+                                                    {isShared
+                                                        ? "Project is publicly accessible"
+                                                        : "Project is private"}
+                                                </p>
+                                            </div>
+                                            <Switch
+                                                checked={isShared}
+                                                onCheckedChange={toggleShare}
+                                                disabled={isSharing}
+                                            />
+                                        </div>
+                                        {isShared && (
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium">
+                                                    Share link
+                                                </label>
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        readOnly
+                                                        value={`${window.location.origin}/project/${projectId}`}
+                                                    />
+                                                    <Button onClick={copyShareLink}>
+                                                        <Copy className="h-3 w-3" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </>
                     )}
                 </div>
             </div>
         </div>
     );
-} 
+}

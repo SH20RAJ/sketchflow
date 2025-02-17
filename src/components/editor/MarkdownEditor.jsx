@@ -23,14 +23,14 @@ export function MarkdownEditor({ content, onChange, readOnly = false }) {
   }, [onChange]);
 
   return (
-    <div className="w-full h-full min-h-[500px]">
+    <div className="w-full h-full overflow-auto min-h-[500px]">
       <Editor
         defaultValue={editorContent}
         disableLocalStorage={true}
         value={editorContent}
         onUpdate={handleUpdate}
         editable={!readOnly}
-        className="h-full min-h-[500px] border rounded-lg"
+        className="h-full min-h-[500px]   rounded-lg border-0"
       />
     </div>
   );
