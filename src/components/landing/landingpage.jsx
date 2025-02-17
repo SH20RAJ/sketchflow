@@ -89,12 +89,20 @@ export default function LandingPage() {
 
   return (
     <>
-      <main>
+      <main className="overflow-hidden">
+        {/* Hero Section */}
         <section
           id="home"
           className="pt-32 min-h-screen flex items-center relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-white/30 pointer-events-none" />
+          {/* Background Elements */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-purple-50 pointer-events-none" />
+          <div className="absolute inset-0">
+            <div className="absolute top-1/4 -left-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob" />
+            <div className="absolute top-1/3 -right-4 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-2000" />
+            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-4000" />
+          </div>
+
           <div className="container mx-auto px-4 relative">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -102,33 +110,61 @@ export default function LandingPage() {
               transition={{ delay: 0.2 }}
               className="text-center max-w-4xl mx-auto"
             >
-              <div className="mb-6 inline-flex items-center px-4 py-2 bg-blue-50 rounded-full">
+              {/* Modern Badge */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+                className="mb-6 inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full border border-blue-500/20 backdrop-blur-sm"
+              >
                 <Star className="h-4 w-4 text-blue-500 mr-2" />
                 <span className="text-blue-700 font-medium">
                   Trusted by 10,000+ teams worldwide
                 </span>
-              </div>
+              </motion.div>
+
+              {/* Hero Title */}
               <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
                 Professional{" "}
-                <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
-                  Whiteboarding
+                <span className="relative">
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+                    Whiteboarding
+                  </span>
+                  <motion.span
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ delay: 0.5, duration: 0.8 }}
+                    className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-blue-600/40 to-purple-600/40 rounded-full"
+                  />
                 </span>{" "}
                 Made{" "}
-                <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
-                  Simple
+                <span className="relative">
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+                    Simple
+                  </span>
+                  <motion.span
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ delay: 0.7, duration: 0.8 }}
+                    className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-blue-600/40 to-purple-600/40 rounded-full"
+                  />
                 </span>
               </h1>
+
+              {/* Hero Description */}
               <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
                 Transform your ideas into reality with our powerful
                 collaborative whiteboarding platform. Perfect for teams who want
                 to innovate faster.
               </p>
+
+              {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
                 {isAuthenticated ? (
                   <Link href="/projects">
                     <Button
                       size="lg"
-                      className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-6 rounded-xl group"
+                      className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg px-8 py-6 rounded-xl group shadow-lg hover:shadow-xl transition-all duration-200"
                     >
                       Go to Dashboard
                       <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -138,7 +174,7 @@ export default function LandingPage() {
                   <Link href="/login">
                     <Button
                       size="lg"
-                      className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-6 rounded-xl group"
+                      className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg px-8 py-6 rounded-xl group shadow-lg hover:shadow-xl transition-all duration-200"
                     >
                       Start Free Trial
                       <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -154,51 +190,98 @@ export default function LandingPage() {
                   }}
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl group"
+                  className="w-full sm:w-auto text-gray-700 hover:text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl group border-2 hover:border-blue-200 transition-colors"
                 >
                   <Play className="mr-2 h-5 w-5" />
                   Watch Demo
                 </Button>
               </div>
-              <div className="flex items-center justify-center gap-8 text-gray-500">
-                <div className="flex items-center gap-2">
+
+              {/* Feature Pills */}
+              <div className="flex flex-wrap justify-center gap-4 text-gray-600">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200 shadow-sm"
+                >
                   <Shield className="h-5 w-5 text-green-500" />
                   <span>Enterprise-grade security</span>
-                </div>
-                <div className="flex items-center gap-2">
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200 shadow-sm"
+                >
                   <Users className="h-5 w-5 text-blue-500" />
                   <span>Collaborative workspace</span>
-                </div>
-                <div className="flex items-center gap-2">
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200 shadow-sm"
+                >
                   <Zap className="h-5 w-5 text-yellow-500" />
                   <span>Real-time sync</span>
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           </div>
         </section>
 
-        <section id="features" className="py-32 bg-white relative">
-          <div className="container mx-auto px-4">
+        {/* Features Section */}
+        <section id="features" className="py-32 relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-white via-blue-50/50 to-white pointer-events-none" />
+          <div className="container mx-auto px-4 relative">
             <div className="text-center max-w-3xl mx-auto mb-20">
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="inline-block px-4 py-2 bg-blue-50 rounded-full text-blue-600 font-medium text-sm mb-4"
+              >
+                Features
+              </motion.span>
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="text-4xl font-bold text-gray-900 mb-6"
+              >
                 Everything you need to{" "}
-                <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
                   create amazing diagrams
                 </span>
-              </h2>
-              <p className="text-xl text-gray-600">
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="text-xl text-gray-600"
+              >
                 Powerful features that help you bring your ideas to life,
                 collaborate with your team, and deliver results faster.
-              </p>
+              </motion.p>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <motion.div
                 whileHover={{ y: -5 }}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+                className="bg-white/50 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100"
               >
-                <div className="h-12 w-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                  <Users className="h-6 w-6 text-blue-600" />
+                <div className="relative">
+                  <div className="absolute inset-0 bg-blue-100 rounded-xl blur-lg opacity-50" />
+                  <div className="relative h-12 w-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   Real-time Collaboration
@@ -210,10 +293,17 @@ export default function LandingPage() {
               </motion.div>
               <motion.div
                 whileHover={{ y: -5 }}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+                className="bg-white/50 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100"
               >
-                <div className="h-12 w-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
-                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                <div className="relative">
+                  <div className="absolute inset-0 bg-green-100 rounded-xl blur-lg opacity-50" />
+                  <div className="relative h-12 w-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6">
+                    <CheckCircle2 className="h-6 w-6 text-white" />
+                  </div>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   Smart Diagrams
@@ -225,17 +315,24 @@ export default function LandingPage() {
               </motion.div>
               <motion.div
                 whileHover={{ y: -5 }}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5 }}
+                className="bg-white/50 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100"
               >
-                <div className="h-12 w-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-                  <Shield className="h-6 w-6 text-purple-600" />
+                <div className="relative">
+                  <div className="absolute inset-0 bg-purple-100 rounded-xl blur-lg opacity-50" />
+                  <div className="relative h-12 w-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Version Control
+                  Share & Clone
                 </h3>
                 <p className="text-gray-600">
-                  Track changes and maintain history of your work. Easily revert
-                  to previous versions or compare iterations.
+                  Share your diagrams with anyone and let them clone and build upon
+                  your work. Perfect for templates and team collaboration.
                 </p>
               </motion.div>
             </div>
@@ -750,7 +847,6 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-
     </>
   );
 }
