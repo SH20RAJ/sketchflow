@@ -79,6 +79,10 @@ export default function Editor({
     if (layout !== previousLayout) {
       setPreviousLayout(layout);
     }
+    let m = markdown;
+    console.log("m", m);
+    
+    setMarkdown(m);
   }, [layout, previousLayout]);
 
   const { data, error, mutate } = useSWR(
