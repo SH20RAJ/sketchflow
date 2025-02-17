@@ -1,14 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,27 +14,12 @@ import {
   Star,
   Shield,
   Zap,
-  BarChart,
-  Laptop,
-  Sparkles,
-  Globe,
-  Clock,
-  Lock,
-  MessageSquare,
-  Award,
   Rocket,
-  Heart,
   Lightbulb,
   Cpu,
-  Cloud,
-  Repeat,
-  Settings,
   PieChart,
   TrendingUp,
-  Smartphone,
-  Code,
 } from "lucide-react";
-import LandingFooter from "./LandingFooter";
 
 export default function LandingPage() {
   const { data: session, status } = useSession();
@@ -278,7 +255,7 @@ export default function LandingPage() {
                 Choose the perfect plan for your needs. No hidden fees.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 className="bg-white rounded-2xl shadow-lg p-8"
@@ -311,9 +288,11 @@ export default function LandingPage() {
                     Community Support
                   </li>
                 </ul>
-                <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white py-6 rounded-xl">
-                  Get Started Free
-                </Button>
+                <Link href="/subscription" className="block">
+                  <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white py-6 rounded-xl">
+                    Get Started Free
+                  </Button>
+                </Link>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.02 }}
@@ -327,8 +306,14 @@ export default function LandingPage() {
                   <p className="text-blue-200 mt-2">For power users & teams</p>
                 </div>
                 <div className="mb-8">
-                  <span className="text-5xl font-bold">$19</span>
-                  <span className="text-blue-200">/month</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-5xl font-bold">$2</span>
+                    <span className="text-blue-200">/month</span>
+                  </div>
+                  <div className="text-blue-200 mt-1">
+                    <span className="line-through">$19</span>
+                    <span className="ml-2 text-sm">Limited time offer</span>
+                  </div>
                 </div>
                 <ul className="space-y-4 mb-8">
                   <li className="flex items-center text-blue-100">
@@ -351,10 +336,67 @@ export default function LandingPage() {
                     <CheckCircle2 className="h-5 w-5 text-blue-300 mr-3" />
                     Team Collaboration
                   </li>
+                  <li className="flex items-center text-blue-100">
+                    <CheckCircle2 className="h-5 w-5 text-blue-300 mr-3" />
+                    Save more with yearly plan ($10/year)
+                  </li>
                 </ul>
-                <Button className="w-full bg-white text-blue-600 hover:bg-blue-50 py-6 rounded-xl">
-                  Upgrade to Pro
-                </Button>
+                <Link href="/subscription" className="block">
+                  <Button className="w-full bg-white text-blue-600 hover:bg-blue-50 py-6 rounded-xl">
+                    Upgrade to Pro
+                  </Button>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="bg-gray-900 rounded-2xl shadow-lg p-8 text-white relative overflow-hidden"
+              >
+                <div className="absolute top-4 right-4 bg-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+                  Enterprise
+                </div>
+                <div className="mb-8">
+                  <h3 className="text-2xl font-bold">Enterprise</h3>
+                  <p className="text-gray-400 mt-2">For large organizations</p>
+                </div>
+                <div className="mb-8">
+                  <div className="flex items-center gap-2">
+                    <span className="text-5xl font-bold">Custom</span>
+                  </div>
+                  <div className="text-gray-400 mt-1">
+                    <span className="text-sm">Contact us for pricing</span>
+                  </div>
+                </div>
+                <ul className="space-y-4 mb-8">
+                  <li className="flex items-center text-gray-300">
+                    <CheckCircle2 className="h-5 w-5 text-gray-500 mr-3" />
+                    Everything in Pro
+                  </li>
+                  <li className="flex items-center text-gray-300">
+                    <CheckCircle2 className="h-5 w-5 text-gray-500 mr-3" />
+                    Dedicated Support
+                  </li>
+                  <li className="flex items-center text-gray-300">
+                    <CheckCircle2 className="h-5 w-5 text-gray-500 mr-3" />
+                    Custom Integrations
+                  </li>
+                  <li className="flex items-center text-gray-300">
+                    <CheckCircle2 className="h-5 w-5 text-gray-500 mr-3" />
+                    SLA Guarantees
+                  </li>
+                  <li className="flex items-center text-gray-300">
+                    <CheckCircle2 className="h-5 w-5 text-gray-500 mr-3" />
+                    Advanced Security
+                  </li>
+                  <li className="flex items-center text-gray-300">
+                    <CheckCircle2 className="h-5 w-5 text-gray-500 mr-3" />
+                    Custom Contract Terms
+                  </li>
+                </ul>
+                <Link href="/subscriptions" className="block">
+                  <Button className="w-full bg-white text-gray-900 hover:bg-gray-100 py-6 rounded-xl">
+                    Contact Sales
+                  </Button>
+                </Link>
               </motion.div>
             </div>
           </div>
@@ -413,7 +455,7 @@ export default function LandingPage() {
                   <p className="font-semibold text-gray-900">
                     {
                       ["John Doe", "Emma Wilson", "Michael Chen"][
-                        activeTestimonial
+                      activeTestimonial
                       ]
                     }
                   </p>
@@ -709,6 +751,6 @@ export default function LandingPage() {
         </section>
       </main>
 
-     </>
+    </>
   );
 }

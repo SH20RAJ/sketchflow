@@ -1,13 +1,12 @@
-'use client';
+"use client";
 
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import { UpgradeButton } from '@/components/UpgradeButton';
-import SubscriptionPage from '@/app/subscription/page';
 
-export   function PricingPage() {
+export default function PricingPage() {
   const { data: session } = useSession();
 
   const handleUpgrade = async () => {
@@ -60,13 +59,25 @@ export   function PricingPage() {
           </Card>
 
           {/* Pro Plan */}
-          <Card className="border-2 border-blue-500">
+          <Card className="border-2 border-blue-500 relative overflow-hidden">
+            <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+              Limited Time Offer
+            </div>
             <CardHeader>
               <CardTitle className="text-2xl">Pro</CardTitle>
               <CardDescription>For power users</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold mb-6">$19/month</div>
+              <div className="mb-6">
+                <div className="text-4xl font-bold">$2/month</div>
+                <div className="text-gray-500 mt-1">
+                  <span className="line-through">$19/month</span>
+                  <span className="ml-2 text-sm text-blue-600">Save 89%</span>
+                </div>
+                <div className="text-sm text-blue-600 mt-1">
+                  Or $10/year (save even more)
+                </div>
+              </div>
               <ul className="space-y-3">
                 <li className="flex items-center">
                   <Check className="h-5 w-5 text-green-500 mr-2" />
@@ -84,21 +95,27 @@ export   function PricingPage() {
                   <Check className="h-5 w-5 text-green-500 mr-2" />
                   Priority support
                 </li>
+                <li className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-2" />
+                  Team collaboration
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-2" />
+                  API access
+                </li>
               </ul>
             </CardContent>
             <CardFooter>
-              <Button className="w-full" onClick={handleUpgrade}>
-                Upgrade to Pro
-              </Button>
-              fr
-              <UpgradeButton/>
+              <UpgradeButton className="w-full" />
             </CardFooter>
           </Card>
+        </div>
+
+        <div className="mt-12 text-center text-gray-600">
+          <p>All prices are in USD. Billed monthly unless otherwise noted.</p>
+          <p className="mt-2">Need custom enterprise pricing? <a href="mailto:sales@sketchflow.com" className="text-blue-600 hover:underline">Contact us</a></p>
         </div>
       </div>
     </div>
   );
-}
-
-
-export default SubscriptionPage;
+}   

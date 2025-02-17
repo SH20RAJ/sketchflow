@@ -31,7 +31,7 @@ export default function SubscriptionPage() {
     {
       id: "free",
       name: "Free",
-      price: "₹0",
+      price: "$0",
       period: "/month",
       description: "Perfect for getting started",
       features: [
@@ -45,7 +45,8 @@ export default function SubscriptionPage() {
     {
       id: "pro-monthly",
       name: "Pro Monthly",
-      price: "₹1,999",
+      price: "$2",
+      oldPrice: "$19",
       period: "/month",
       description: "Best for professionals",
       features: [
@@ -62,12 +63,13 @@ export default function SubscriptionPage() {
     {
       id: "pro-yearly",
       name: "Pro Yearly",
-      price: "₹19,999",
+      price: "$10",
+      oldPrice: "$190",
       period: "/year",
-      description: "Save 17% with annual billing",
+      description: "Save 50% with annual billing",
       features: [
         "Everything in Pro Monthly",
-        "2 Months Free",
+        "6 Months Free",
         "Early Access to New Features",
         "Dedicated Account Manager",
         "Custom Integration Support"
@@ -190,6 +192,9 @@ export default function SubscriptionPage() {
               )}
               <CardHeader>
                 <CardTitle className="text-2xl font-bold flex items-baseline gap-2">
+                  {plan.oldPrice && (
+                    <span className="text-gray-400 line-through text-lg">{plan.oldPrice}</span>
+                  )}
                   {plan.price}
                   <span className="text-gray-500 text-base font-normal">{plan.period}</span>
                 </CardTitle>

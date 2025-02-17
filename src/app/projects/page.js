@@ -99,7 +99,7 @@ export default function ProjectsPage() {
       mutateProjects(
         (prevData) => ({
           ...prevData,
-          projects: [optimisticProject, ...prevData.projects],
+          projects: [optimisticProject, ...prevData?.projects],
           count: prevData.count + 1,
         }),
         false
