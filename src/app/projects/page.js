@@ -108,7 +108,7 @@ export default function ProjectsPage() {
       const response = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "New Project", description: "" }),
+        body: JSON.stringify({ name: "New Space", description: "" }),
       });
 
       if (!response.ok) throw new Error("Failed to create project");
@@ -264,7 +264,7 @@ export default function ProjectsPage() {
             ) : (
               <Plus className="mr-2 h-4 w-4" />
             )}
-            {isCreating ? "Creating..." : "New Project"}
+            {isCreating ? "Creating..." : "New Space"}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

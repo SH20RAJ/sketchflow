@@ -83,8 +83,8 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-semibold text-gray-800">Contact Us</h2>
             <p className="text-gray-600 leading-relaxed">
               If you have any questions about this Privacy Policy, please contact us at:
-              <a href="mailto:privacy@sketchflow.com" className="text-blue-600 hover:text-blue-700 ml-1">
-                privacy@sketchflow.com
+              <a href="mailto:privacy@sketchflow.space" className="text-blue-600 hover:text-blue-700 ml-1">
+                privacy@sketchflow.space
               </a>
             </p>
           </section>

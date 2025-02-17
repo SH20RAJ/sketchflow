@@ -9,13 +9,13 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://sketchflow.app',
+    url: 'https://sketchflow.space',
     siteName: 'SketchFlow',
     title: 'SketchFlow - Collaborative Whiteboard for Creative Teams',
     description: 'Unleash creativity with our real-time collaborative digital whiteboard for teams.',
     images: [
       {
-        url: 'https://sketchflow.app/og-image.jpg',
+        url: 'https://sketchflow.space/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'SketchFlow Collaborative Whiteboard',
@@ -28,7 +28,7 @@ export const metadata = {
     title: 'SketchFlow - Collaborative Whiteboard for Creative Teams',
     description: 'Unleash creativity with our real-time collaborative digital whiteboard for teams.',
     creator: '@sketchflow',
-    images: ['https://sketchflow.app/twitter-image.jpg'],
+    images: ['https://sketchflow.space/twitter-image.jpg'],
   },
   
   robots: {
@@ -57,10 +57,10 @@ export const metadata = {
   },
   
   alternates: {
-    canonical: 'https://sketchflow.app',
+    canonical: 'https://sketchflow.space',
     languages: {
-      'en-US': 'https://sketchflow.app',
-      'es-ES': 'https://sketchflow.app/es',
+      'en-US': 'https://sketchflow.space',
+      'es-ES': 'https://sketchflow.space/es',
     },
   },
   

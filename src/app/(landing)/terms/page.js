@@ -80,8 +80,8 @@ export default function TermsPage() {
             <h2 className="text-2xl font-semibold text-gray-800">Contact</h2>
             <p className="text-gray-600 leading-relaxed">
               If you have any questions about these Terms, please contact us at:
-              <a href="mailto:legal@sketchflow.com" className="text-blue-600 hover:text-blue-700 ml-1">
-                legal@sketchflow.com
+              <a href="mailto:legal@sketchflow.space" className="text-blue-600 hover:text-blue-700 ml-1">
+                legal@sketchflow.space
               </a>
             </p>
           </section>

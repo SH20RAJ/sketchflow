@@ -76,10 +76,10 @@ export default function SecurityPage() {
               security team at:
               <br />
               <a
-                href="mailto:security@sketchflow.com"
+                href="mailto:security@sketchflow.space"
                 className="text-blue-600 hover:text-blue-800"
               >
-                security@sketchflow.com
+                security@sketchflow.space
               </a>
             </p>
           </section>

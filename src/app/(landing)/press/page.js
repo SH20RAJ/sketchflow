@@ -246,7 +246,7 @@ export default function PressPage() {
               className="bg-white text-blue-600 hover:bg-blue-50"
               asChild
             >
-              <Link href="mailto:press@sketchflow.com">
+              <Link href="mailto:press@sketchflow.space">
                 <Mail className="mr-2 h-4 w-4" />
                 Contact Press Team
               </Link>

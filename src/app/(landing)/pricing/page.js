@@ -113,7 +113,7 @@ export default function PricingPage() {
 
         <div className="mt-12 text-center text-gray-600">
           <p>All prices are in USD. Billed monthly unless otherwise noted.</p>
-          <p className="mt-2">Need custom enterprise pricing? <a href="mailto:sales@sketchflow.com" className="text-blue-600 hover:underline">Contact us</a></p>
+          <p className="mt-2">Need custom enterprise pricing? <a href="mailto:sales@sketchflow.space" className="text-blue-600 hover:underline">Contact us</a></p>
         </div>
       </div>
     </div>

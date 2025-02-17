@@ -190,8 +190,8 @@ export default function ContactPage() {
                 <Mail className="h-6 w-6 text-blue-600 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">Email Us</h3>
                 <p className="text-gray-600">
-                  <a href="mailto:hello@sketchflow.com" className="hover:text-blue-600 transition-colors">
-                    hello@sketchflow.com
+                  <a href="mailto:hello@sketchflow.space" className="hover:text-blue-600 transition-colors">
+                    hello@sketchflow.space
                   </a>
                 </p>
               </div>
