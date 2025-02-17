@@ -13,6 +13,16 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Plus, Loader2, Pencil, Trash, FolderOpen, Search, Settings, LogOut, PlusCircle, Clock, Users } from "lucide-react";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,6 +38,7 @@ import { signOut } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { MotionGrid, MotionGridItem, MotionFadeIn, AnimatePresence } from "@/components/ui/motion-project";
+import { toast } from "react-hot-toast";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
@@ -52,6 +63,8 @@ export default function ProjectsPage() {
   const [isPending, startTransition] = useTransition();
   const [isCreating, setIsCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [projectToDelete, setProjectToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     data: projectsData,
@@ -130,6 +143,38 @@ export default function ProjectsPage() {
     } catch (error) {
       console.error("Error:", error);
       mutateProjects();
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!projectToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      mutateProjects(
+        (prevData) => ({
+          ...prevData,
+          projects: prevData.projects.filter((p) => p.id !== projectToDelete.id),
+          count: prevData.count - 1,
+        }),
+        false
+      );
+
+      const response = await fetch(`/api/projects/${projectToDelete.id}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) throw new Error("Failed to delete project");
+      
+      toast.success("Project deleted successfully");
+      await mutateProjects();
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to delete project");
+      await mutateProjects();
+    } finally {
+      setIsDeleting(false);
+      setProjectToDelete(null);
     }
   };
 
@@ -345,7 +390,7 @@ export default function ProjectsPage() {
                       variant="outline"
                       size="sm"
                       className="text-gray-600 hover:text-red-600 hover:border-red-200 transition-colors"
-                      onClick={() => handleDeleteProject(project.id)}
+                      onClick={() => setProjectToDelete(project)}
                     >
                       <Trash className="h-4 w-4 mr-1" />
                       Delete
@@ -357,6 +402,38 @@ export default function ProjectsPage() {
           </MotionGrid>
         )}
       </AnimatePresence>
+
+      <AlertDialog open={!!projectToDelete} onOpenChange={(open) => !open && setProjectToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this project?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the project
+              "{projectToDelete?.name}" and all of its contents.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash className="mr-2 h-4 w-4" />
+                  Delete Project
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

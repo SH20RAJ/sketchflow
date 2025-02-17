@@ -36,30 +36,30 @@ export default function LandingNavBar() {
           </motion.div>
           </Link>
           <div className="hidden md:flex space-x-8">
-            <a
+            <Link
               href="/#"
               className="text-gray-600 hover:text-blue-500 transition-colors"
             >
               Home
-            </a>
-            <a
-              href="#features"
+            </Link>
+            <Link
+              href="#features" 
               className="text-gray-600 hover:text-blue-500 transition-colors"
             >
               Features
-            </a>
-            <a
+            </Link>
+            <Link
               href="/pricing"
               className="text-gray-600 hover:text-blue-500 transition-colors"
             >
               Pricing
-            </a>
-            <a
+            </Link>
+            <Link
               href="#testimonials"
               className="text-gray-600 hover:text-blue-500 transition-colors"
             >
               Testimonials
-            </a>
+            </Link>
           </div>
           <motion.div
             initial={{ opacity: 0, x: 20 }}

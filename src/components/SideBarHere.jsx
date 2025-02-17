@@ -4,10 +4,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { PlusCircle, FolderOpen, Share2, Settings, LogOut, CreditCard, ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { MotionContainer, MotionProgress } from "@/components/ui/motion-container";
+import { useState } from "react";
+import { toast } from 'sonner';
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
@@ -47,14 +49,45 @@ const MenuItem = ({ href, icon: Icon, children, className, badge }) => {
   );
 };
 
-export const SideBarHere = () => {
-  const { data: projectsData } = useSWR("/api/projects", fetcher);
-  const { data: subscriptionData } = useSWR("/api/subscription", fetcher);
+export   function SideBarHere() {
+  const router = useRouter();
+  const [isCreating, setIsCreating] = useState(false);
+
+  const { data: subscriptionData } = useSWR('/api/subscription', fetcher);
+  const { data: projectsData, mutate: mutateProjects } = useSWR('/api/projects', fetcher);
 
   const projectCount = projectsData?.count || 0;
   const maxProjects = subscriptionData?.isPro ? "∞" : "100";
   const percentageUsed = subscriptionData?.isPro ? 0 : (projectCount / 100) * 100;
   const isPro = subscriptionData?.isPro;
+
+  const handleNewProject = async (e) => {
+    e.preventDefault();
+    if (projectsData?.count >= 100 && !subscriptionData?.isPro) {
+      window.location.href = "/pricing";
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "New Project", description: "" }),
+      });
+
+      if (!response.ok) throw new Error("Failed to create project");
+
+      const newProject = await response.json();
+      await mutateProjects();
+      window.location.href = `/project/${newProject.id}`;
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to create project");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const ProBadge = () => (
     <span className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded-full bg-gradient-to-r from-blue-600/10 to-blue-400/10 text-blue-600 border border-blue-200 text-xs font-medium flex items-center gap-1">
@@ -88,7 +121,9 @@ export const SideBarHere = () => {
             <h2 className="mb-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Projects</h2>
             <div className="space-y-1.5">
               <MenuItem href="/projects" icon={FolderOpen}>All Projects</MenuItem>
-              <MenuItem href="/projects/new" icon={PlusCircle}>New Project</MenuItem>
+              <MenuItem href="#" onClick={handleNewProject} icon={PlusCircle} disabled={isCreating}>
+                {isCreating ? "Creating..." : "New Project"}
+              </MenuItem>
               <MenuItem href="/projects/shared" icon={Share2}>Shared Projects</MenuItem>
               <MenuItem
                 href="/projects/templates"
@@ -165,4 +200,4 @@ export const SideBarHere = () => {
       </div>
     </ScrollArea>
   );
-};
+}

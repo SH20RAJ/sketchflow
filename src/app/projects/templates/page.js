@@ -25,42 +25,42 @@ const templates = [
     name: 'Flowchart',
     description: 'Create professional flowcharts and process diagrams',
     category: 'Diagram',
-    thumbnail: '/templates/flowchart.png',
+    thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Flowchart_symbols.png',
   },
   {
     id: 'mindmap',
     name: 'Mind Map',
     description: 'Organize ideas and concepts visually',
     category: 'Diagram',
-    thumbnail: '/templates/mindmap.png',
+    thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Flowchart_symbols.png',
   },
   {
     id: 'wireframe',
     name: 'Wireframe',
     description: 'Design user interfaces and website layouts',
     category: 'Design',
-    thumbnail: '/templates/wireframe.png',
+    thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Flowchart_symbols.png',
   },
   {
     id: 'architecture',
     name: 'System Architecture',
     description: 'Document system architecture and components',
     category: 'Technical',
-    thumbnail: '/templates/architecture.png',
+    thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Flowchart_symbols.png',
   },
   {
     id: 'gantt',
     name: 'Gantt Chart',
     description: 'Plan and track project timelines',
     category: 'Project Management',
-    thumbnail: '/templates/gantt.png',
+    thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Flowchart_symbols.png',
   },
   {
     id: 'erd',
     name: 'Entity Relationship',
     description: 'Design and document database schemas',
     category: 'Technical',
-    thumbnail: '/templates/erd.png',
+    thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Flowchart_symbols.png',
   }
 ];
 
