@@ -15,6 +15,7 @@ import {
     FileText,
     ChevronDown,
     Menu,
+    GitFork,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -34,6 +35,9 @@ import {
     DropdownMenuTrigger,
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
+import { toast } from "react-hot-toast";
+import { signIn } from "next-auth/react";
 
 const layouts = [
     {
@@ -76,6 +80,43 @@ export function EditorNavbar({
     projectDescription,
     handleDescriptionChange
 }) {
+    const [isCloning, setIsCloning] = useState(false);
+
+    const handleCloneProject = async () => {
+        setIsCloning(true);
+        try {
+            const response = await fetch(`/api/projects/${projectId}/clone`, {
+                method: 'POST',
+            });
+
+            const data = await response.json();
+
+            if (response.status === 401) {
+                setIsCloning(false);
+                signIn(undefined, { callbackUrl: window.location.href });
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to clone project');
+            }
+
+            toast.success(data.message || 'Project cloned successfully');
+
+            // Redirect to the new project
+            if (data.id) {
+                window.location.replace(`/project/${data.id}`);
+            } else {
+                throw new Error('No project ID received');
+            }
+        } catch (error) {
+            console.error('Clone error:', error);
+            toast.error(error.message || 'Failed to clone project. Please try again.');
+        } finally {
+            setIsCloning(false);
+        }
+    };
+
     return (
         <div className="border-b h-12 flex items-center justify-between bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
             {/* Left Section */}
@@ -172,7 +213,7 @@ export function EditorNavbar({
 
             {/* Right Section */}
             <div className="flex items-center gap-2 px-2">
-                {isOwner && (
+                {isOwner ? (
                     <>
                         <Button
                             onClick={handleSave}
@@ -254,6 +295,26 @@ export function EditorNavbar({
                             </DialogContent>
                         </Dialog>
                     </>
+                ) : isShared && (
+                    <Button
+                        onClick={handleCloneProject}
+                        disabled={isCloning}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 gap-2"
+                    >
+                        {isCloning ? (
+                            <>
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                <span className="text-xs">Cloning...</span>
+                            </>
+                        ) : (
+                            <>
+                                <GitFork className="h-3.5 w-3.5" />
+                                <span className="text-xs">Clone Project</span>
+                            </>
+                        )}
+                    </Button>
                 )}
             </div>
         </div>
