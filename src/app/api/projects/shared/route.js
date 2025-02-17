@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from '@prisma/client';
 import { auth } from "@/auth";
 
+// Initialize Prisma Client
+const prisma = new PrismaClient();
+
+// Mark route as dynamic
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(request) {
+  let session = null;
+  
   try {
-    const session = await auth();
+    session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -50,7 +59,7 @@ export async function GET(request) {
     console.error("Error fetching shared projects:", {
       error: error.message,
       stack: error.stack,
-      userId: session?.user?.id
+      userId: session?.user?.id || 'not authenticated'
     });
     return NextResponse.json(
       { error: "Failed to fetch shared projects", details: error.message },

@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -19,6 +18,7 @@ import {
   Cpu,
   PieChart,
   TrendingUp,
+  Check,
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -57,7 +57,6 @@ export default function LandingPage() {
   const comparisonFeatures = [
     { name: "Real-time Collaboration", sketchflow: true, others: false },
     { name: "AI-Powered Suggestions", sketchflow: true, others: false },
-    { name: "Version Control", sketchflow: true, others: true },
     { name: "Smart Templates", sketchflow: true, others: false },
     { name: "Export Options", sketchflow: true, others: true },
     { name: "Team Management", sketchflow: true, others: false },
@@ -89,7 +88,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <main className="overflow-hidden">
+      <main className="overflow-hidden  ">
         {/* Hero Section */}
         <section
           id="home"
@@ -499,109 +498,142 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="testimonials" className="py-32 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-20">
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Loved by{" "}
-                <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
-                  thousands
-                </span>{" "}
-                of teams
+        <section id="testimonials" className="py-32 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-blue-50 opacity-70"></div>
+          <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-5"></div>
+
+          <div className="container mx-auto px-4 relative">
+            <div className="text-center max-w-3xl mx-auto mb-24">
+              <span className="text-blue-600 font-semibold tracking-wider uppercase text-sm mb-4 block">TESTIMONIALS</span>
+              <h2 className="text-5xl font-bold text-gray-900 mb-8 leading-tight">
+                Trusted by{" "}
+                <span className="relative">
+                  <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 text-transparent bg-clip-text">
+                    industry leaders
+                  </span>
+                  <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 100 8" preserveAspectRatio="none">
+                    <path d="M0 7c20-3 40-3 60 0s40 3 60 0" stroke="url(#gradient)" strokeWidth="2" fill="none" />
+                  </svg>
+                </span>
               </h2>
-              <p className="text-xl text-gray-600">
-                Don't just take our word for it. Here's what our users have to
-                say.
+              <p className="text-xl text-gray-600 leading-relaxed">
+                Join the community of visionaries who have transformed their workflow with our platform
               </p>
             </div>
-            <div className="max-w-4xl mx-auto">
+
+            <div className="max-w-5xl mx-auto">
               <motion.div
                 key={activeTestimonial}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="bg-white rounded-2xl shadow-lg p-8 text-center"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="bg-white backdrop-blur-lg rounded-3xl shadow-2xl p-12 relative"
               >
-                <div className="mb-8">
-                  <img
-                    src={`/logo.svg`}
-                    alt="User"
-                    className="w-20 h-20 rounded-full mx-auto mb-4"
-                  />
-                  <div className="flex justify-center gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-5 w-5 text-yellow-400 fill-yellow-400"
-                      />
-                    ))}
+                <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-600 rounded-full opacity-10"></div>
+                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-600 rounded-full opacity-10"></div>
+
+                <div className="flex items-center gap-8 mb-10">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full blur-lg opacity-30"></div>
+                    <img
+                      src={`/logo.svg`}
+                      alt="User"
+                      className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg relative z-10"
+                    />
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <div className="flex gap-1 mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="h-6 w-6 text-yellow-400 fill-yellow-400 drop-shadow-sm"
+                        />
+                      ))}
+                    </div>
+                    <p className="font-bold text-2xl text-gray-900">
+                      {["John Cater", "Emma Wilson", "Michael Chen"][activeTestimonial]}
+                    </p>
+                    <p className="text-gray-600 text-lg">
+                      {["Software Engineer at Google", "Lead Designer at Apple", "Product Manager at Microsoft"][activeTestimonial]}
+                    </p>
                   </div>
                 </div>
-                <p className="text-xl text-gray-600 mb-6">
-                  "
-                  {
-                    [
-                      "SketchFlow has revolutionized our team's brainstorming sessions. The real-time collaboration features are game-changing!",
-                      "As a designer, I've tried many tools, but SketchFlow stands out. The AI-powered suggestions save me hours of work.",
-                      "The collaboration features have significantly improved our remote team's productivity. Best investment we've made!",
-                    ][activeTestimonial]
-                  }
-                  "
+
+                <p className="text-2xl text-gray-700 leading-relaxed italic mb-8">
+                  "{[
+                    "SketchFlow has revolutionized our team's brainstorming sessions. The real-time collaboration features are game-changing!",
+                    "As a designer, I've tried many tools, but SketchFlow stands out. The AI-powered suggestions save me hours of work.",
+                    "The collaboration features have significantly improved our remote team's productivity. Best investment we've made!"
+                  ][activeTestimonial]}"
                 </p>
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {
-                      ["John Doe", "Emma Wilson", "Michael Chen"][
-                      activeTestimonial
-                      ]
-                    }
-                  </p>
-                  <p className="text-gray-500">
-                    {
-                      [
-                        "Software Engineer at Google",
-                        "Lead Designer at Apple",
-                        "Product Manager at Microsoft",
-                      ][activeTestimonial]
-                    }
-                  </p>
+
+                <div className="flex justify-center gap-4 mt-8">
+                  {[0, 1, 2].map((index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveTestimonial(index)}
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${activeTestimonial === index
+                        ? "bg-blue-600 w-8"
+                        : "bg-gray-300 hover:bg-gray-400"
+                        }`}
+                    />
+                  ))}
                 </div>
               </motion.div>
             </div>
           </div>
         </section>
 
-        <section className="py-20 bg-blue-600">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-4xl font-bold text-white mb-6">
-                Ready to transform your workflow?
-              </h2>
-              <p className="text-xl text-blue-100 mb-8">
-                Join thousands of teams who are already using SketchFlow to
-                bring their ideas to life.
-              </p>
-              {isAuthenticated ? (
-                <Link href="/projects">
-                  <Button
-                    size="lg"
-                    className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl"
-                  >
-                    Go to Dashboard
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              ) : (
-                <Link href="/login">
-                  <Button
-                    size="lg"
-                    className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl"
-                  >
-                    Start Free Trial
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              )}
+        {/* Hero CTA Section with Glassmorphism */}
+        <section className="py-32 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 relative overflow-hidden">
+          {/* Animated Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+            <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+          </div>
+
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="backdrop-blur-lg bg-white/10 rounded-3xl p-12 border border-white/20 shadow-2xl"
+              >
+                <h2 className="text-5xl font-bold text-white mb-6 text-center leading-tight">
+                  Transform Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-400">Workflow</span> with
+                  <br />Next-Gen Design Tools
+                </h2>
+                <p className="text-xl text-blue-50 mb-12 text-center max-w-2xl mx-auto leading-relaxed">
+                  Join the design revolution with thousands of forward-thinking teams already using SketchFlow to create, collaborate, and innovate.
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                  {isAuthenticated ? (
+                    <Link href="/projects">
+                      <Button
+                        size="lg"
+                        className="group bg-white hover:bg-blue-50 text-blue-600 text-lg px-10 py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+                      >
+                        Open Dashboard
+                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href="/login">
+                      <Button
+                        size="lg"
+                        className="group bg-white hover:bg-blue-50 text-blue-600 text-lg px-10 py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+                      >
+                        Start Free Trial
+                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              </motion.div>
             </div>
           </div>
         </section>
@@ -740,55 +772,182 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* New Comparison Section */}
-        <section className="py-32 bg-white">
+        {/* Comparison Section */}
+        <section className="py-24 bg-gradient-to-b from-white to-blue-50">
           <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-20">
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Why Choose{" "}
-                <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
-                  SketchFlow
-                </span>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text mb-6">
+                Why Choose SketchFlow?
               </h2>
-              <p className="text-xl text-gray-600">
-                See how we compare to traditional diagramming tools
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Experience the next evolution in collaborative diagramming and whiteboarding
               </p>
-            </div>
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                <div className="grid grid-cols-3 p-6 bg-gray-50 border-b">
-                  <div className="text-gray-600 font-medium">Feature</div>
-                  <div className="text-center text-blue-600 font-semibold">
-                    SketchFlow
+            </motion.div>
+
+            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {/* SketchFlow Features */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="bg-white rounded-2xl p-8 shadow-lg border border-blue-100"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-lg"></div>
+                    <img src="/logo.svg" alt="SketchFlow" className="w-12 h-12 relative" />
                   </div>
-                  <div className="text-center text-gray-600 font-medium">
-                    Others
+                  <h3 className="text-2xl font-bold text-blue-600">SketchFlow</h3>
+                </div>
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-1">
+                      <Check className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-900">Advanced AI Integration</span>
+                      <p className="text-gray-600 mt-1">Smart diagram suggestions and automated layouts powered by cutting-edge AI</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-1">
+                      <Check className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-900">Real-time Collaboration</span>
+                      <p className="text-gray-600 mt-1">True real-time collaboration with cursor presence and instant updates</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-1">
+                      <Check className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-900">Unlimited Projects</span>
+                      <p className="text-gray-600 mt-1">No restrictions on the number of projects with Pro plan</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-1">
+                      <Check className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-900">Advanced Export Options</span>
+                      <p className="text-gray-600 mt-1">Export to multiple formats including SVG, PNG, and PDF with vector quality</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-1">
+                      <Check className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-900">Smart Templates</span>
+                      <p className="text-gray-600 mt-1">Extensive library of smart templates with AI-powered customization</p>
+                    </div>
+                  </li>
+                </ul>
+                <div className="mt-6 pt-6 border-t border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-gray-900">$2</span>
+                      <span className="text-gray-500">/month</span>
+                    </div>
+                    <span className="text-sm text-blue-600 font-medium">Limited Time Offer</span>
                   </div>
                 </div>
-                {comparisonFeatures.map((feature, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-3 p-6 border-b last:border-0"
-                  >
-                    <div className="text-gray-900">{feature.name}</div>
-                    <div className="text-center">
-                      {feature.sketchflow ? (
-                        <CheckCircle2 className="h-6 w-6 text-green-500 mx-auto" />
-                      ) : (
-                        <X className="h-6 w-6 text-red-500 mx-auto" />
-                      )}
+              </motion.div>
+
+              {/* Competitor Features */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="bg-gray-50 rounded-2xl p-8 shadow-lg border border-gray-200"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                  <h3 className="text-2xl font-bold text-gray-400">Other Tools</h3>
+                </div>
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center mt-1">
+                      <X className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-center">
-                      {feature.others ? (
-                        <CheckCircle2 className="h-6 w-6 text-green-500 mx-auto" />
-                      ) : (
-                        <X className="h-6 w-6 text-red-500 mx-auto" />
-                      )}
+                    <div>
+                      <span className="font-semibold text-gray-700">Basic Features</span>
+                      <p className="text-gray-500 mt-1">Limited to basic diagramming without AI assistance</p>
                     </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center mt-1">
+                      <X className="w-4 h-4 text-gray-400" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-700">Basic Collaboration</span>
+                      <p className="text-gray-500 mt-1">Limited collaboration features with delayed updates</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center mt-1">
+                      <X className="w-4 h-4 text-gray-400" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-700">Limited Projects</span>
+                      <p className="text-gray-500 mt-1">Strict limitations on project numbers and storage</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center mt-1">
+                      <X className="w-4 h-4 text-gray-400" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-700">Basic Export</span>
+                      <p className="text-gray-500 mt-1">Limited export options with quality constraints</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center mt-1">
+                      <X className="w-4 h-4 text-gray-400" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-700">Basic Templates</span>
+                      <p className="text-gray-500 mt-1">Limited template library without smart features</p>
+                    </div>
+                  </li>
+                </ul>
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-gray-400">$15-20</span>
+                      <span className="text-gray-400">/month</span>
+                    </div>
+                    <span className="text-sm text-gray-400 font-medium">Standard Pricing</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              </motion.div>
             </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mt-12"
+            >
+              <Link href="/login">
+                <Button
+                   size="lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  Try SketchFlow Free
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </motion.div>
           </div>
         </section>
 
