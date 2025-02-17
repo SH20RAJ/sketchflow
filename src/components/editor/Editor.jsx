@@ -75,14 +75,31 @@ export default function Editor({
   );
   const [isShared, setIsShared] = useState(initialData?.shared || false);
   const [previousLayout, setPreviousLayout] = useState(layout);
+  const [projectDescription, setProjectDescription] = useState(
+    initialData?.description || ''
+  );
 
   const handleLayoutChange = useCallback((newLayout) => {
     setPreviousLayout(layout);
     setLayout(newLayout);
+
     let m = markdown;
-    console.log("m", m);
-    setMarkdown(m);
+    
+    setMarkdown(m)
   }, [layout]);
+
+  useEffect(() => {
+    if (markdown) {
+      localStorage.setItem('markdown-content', markdown);
+    }
+  }, [markdown]);
+
+  useEffect(() => {
+    const savedMarkdown = localStorage.getItem('markdown-content');
+    if (savedMarkdown && !markdown) {
+      setMarkdown(savedMarkdown);
+    }
+  }, []);
 
   const { data, error, mutate } = useSWR(
     `/api/projects/${projectId}`,
@@ -111,6 +128,7 @@ export default function Editor({
           excalidraw: excalidrawData,
           markdown,
           name: projectName,
+          description: projectDescription,
         }),
       });
       const result = await response.json();
@@ -125,7 +143,7 @@ export default function Editor({
     } finally {
       setIsSaving(false);
     }
-  }, [projectId, excalidrawData, markdown, projectName, mutate]);
+  }, [projectId, excalidrawData, markdown, projectName, projectDescription, mutate]);
 
   const toggleShare = async () => {
     setIsSharing(true);
@@ -161,6 +179,10 @@ export default function Editor({
     setProjectName(e.target.value);
   }, []);
 
+  const handleDescriptionChange = useCallback((e) => {
+    setProjectDescription(e.target.value);
+  }, []);
+
   if (error) return <div>Error: {error.message}</div>;
   if (!data) return <div>Loading...</div>;
 
@@ -183,33 +205,47 @@ export default function Editor({
         isSharing={isSharing}
         projectId={projectId}
         copyShareLink={copyShareLink}
+        projectDescription={projectDescription}
+        handleDescriptionChange={handleDescriptionChange}
       />
 
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 relative">
         <ResizablePanelGroup
           direction={layout === 'split' ? 'horizontal' : 'vertical'}
+          className="rounded-lg"
         >
           {layout !== 'sketch' && (
-            <ResizablePanel defaultSize={layout === 'split' ? 30 : 100}>
-              <MarkdownEditor
-                content={markdown}
-                onChange={handleMarkdownChange}
-                readOnly={!isOwner}
-              />
+            <ResizablePanel
+              defaultSize={layout === 'split' ? 30 : 100}
+              className="min-h-0"
+            >
+              <div className="h-full overflow-auto">
+                <MarkdownEditor
+                  content={markdown}
+                  onChange={handleMarkdownChange}
+                  readOnly={!isOwner}
+                />
+              </div>
             </ResizablePanel>
           )}
           {layout !== 'markdown' && (
-            <ResizablePanel defaultSize={layout === 'split' ? 70 : 100}>
+            <ResizablePanel
+              defaultSize={layout === 'split' ? 70 : 100}
+              className="min-h-0"
+            >
               <Excalidraw
                 onChange={handleExcalidrawChange}
                 initialData={excalidrawData}
                 viewModeEnabled={!isOwner}
                 UIOptions={{
+                  dockedToolbar: true, // Ensures toolbar is docked and not floating
+                  toolbarPosition: "left", // Moves toolbar to the left
                   canvasActions: {
-                    position: "left"
+                    saveToActiveFile: false, // Example action control
                   }
                 }}
               />
+
             </ResizablePanel>
           )}
         </ResizablePanelGroup>
