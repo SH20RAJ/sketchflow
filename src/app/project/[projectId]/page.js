@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Share2, Copy, Lock, Globe, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import Loading from '@/app/loading';
 
 export default function ProjectPage({ params }) {
   const router = useRouter();
@@ -138,16 +139,7 @@ export default function ProjectPage({ params }) {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center"
-        >
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
-          <p className="text-gray-600">Loading project...</p>
-        </motion.div>
-      </div>
+      <Loading />
     );
   }
 

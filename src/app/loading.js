@@ -43,9 +43,9 @@ export default function Loading() {
             className="relative mb-8"
           >
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-600/20 to-purple-600/20 blur-xl animate-pulse" />
-            <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl">
-              <img src="/logo.svg" alt="Logo" className="h-12 w-12 mx-auto mb-4" />
-              <LoadingSpinner className="h-8 w-8 text-blue-600" />
+            <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl flex flex-col items-center justify-center">
+              <img src="/logo.svg" alt="Logo" className="h-12 w-12 mb-4" />
+              {/* <LoadingSpinner className="h-8 w-8 text-blue-600" /> */}
             </div>
           </motion.div>
 
@@ -68,7 +68,7 @@ export default function Loading() {
           {/* Loading progress bar */}
           <motion.div 
             variants={itemVariants}
-            className="w-64 h-1 bg-gray-200 rounded-full overflow-hidden"
+            className="w-64 h-1 bg-gray-200 rounded-full overflow-hidden mx-auto"
           >
             <motion.div
               className="h-full bg-gradient-to-r from-blue-600 to-purple-600"
