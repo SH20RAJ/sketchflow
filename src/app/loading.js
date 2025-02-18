@@ -46,6 +46,7 @@ export default function Loading() {
             <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl flex flex-col items-center justify-center">
               <img src="/logo.svg" alt="Logo" className="h-12 w-12 mb-4" />
               {/* <LoadingSpinner className="h-8 w-8 text-blue-600" /> */}
+              <h2 className="text-2xl font-bold">SketchFlow</h2>
             </div>
           </motion.div>
 
