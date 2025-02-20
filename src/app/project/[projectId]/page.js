@@ -1,5 +1,5 @@
 'use client';
-
+// add changes will be lost working
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -21,8 +21,16 @@ export default function ProjectPage({ params }) {
   const [isOwner, setIsOwner] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [cloning, setCloning] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const fetchProject = useCallback(async () => {
+    if (hasUnsavedChanges) {
+      const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave?');
+      if (!confirmed) {
+        return;
+      }
+    }
+
     try {
       const response = await fetch(`/api/projects/${params.projectId}`);
       if (!response.ok) {
@@ -33,6 +41,7 @@ export default function ProjectPage({ params }) {
       setIsShared(data.shared);
       setIsOwner(session?.user?.id === data.userId);
       setError(null);
+      setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error:', error);
       setError(error.message);
@@ -42,7 +51,7 @@ export default function ProjectPage({ params }) {
     } finally {
       setLoading(false);
     }
-  }, [params.projectId, router, session?.user?.id]);
+  }, [params.projectId, router, session?.user?.id, hasUnsavedChanges]);
 
   const toggleShare = async () => {
     try {
@@ -66,6 +75,13 @@ export default function ProjectPage({ params }) {
     if (!session) {
       router.push('/login');
       return;
+    }
+
+    if (hasUnsavedChanges) {
+      const confirmed = window.confirm('You have unsaved changes. Are you sure you want to clone?');
+      if (!confirmed) {
+        return;
+      }
     }
 
     setCloning(true);
@@ -97,8 +113,14 @@ export default function ProjectPage({ params }) {
     if (status === 'loading') return;
 
     const checkAccess = async () => {
+      if (hasUnsavedChanges) {
+        const confirmed = window.confirm('You have unsaved changes. Are you sure you want to proceed?');
+        if (!confirmed) {
+          return;
+        }
+      }
+
       try {
-        // First check access
         const accessResponse = await fetch(`/api/projects/${params.projectId}/access`);
         const accessData = await accessResponse.json();
         
@@ -115,7 +137,6 @@ export default function ProjectPage({ params }) {
           return;
         }
 
-        // Then fetch project data
         const response = await fetch(`/api/projects/${params.projectId}`);
         if (!response.ok) {
           throw new Error(await response.text() || 'Failed to fetch project');
@@ -125,6 +146,7 @@ export default function ProjectPage({ params }) {
         setIsShared(data.shared);
         setIsOwner(session?.user?.id === data.userId);
         setError(null);
+        setHasUnsavedChanges(false);
       } catch (error) {
         console.error('Error:', error);
         setError(error.message);
@@ -135,12 +157,23 @@ export default function ProjectPage({ params }) {
     };
 
     checkAccess();
-  }, [status, params.projectId, router, session?.user?.id]);
+  }, [status, params.projectId, router, session?.user?.id, hasUnsavedChanges]);
+
+  // Handle beforeunload event
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   if (loading) {
-    return (
-      <Loading />
-    );
+    return <Loading />;
   }
 
   if (error) {
@@ -173,14 +206,13 @@ export default function ProjectPage({ params }) {
 
   return (
     <div className="relative">
-      
-
-      {/* Editor */}
-      <div  >
+      <div>
         <Editor
           projectId={params.projectId}
           initialData={projectData}
           isOwner={isOwner}
+          onChangesSaved={() => setHasUnsavedChanges(false)}
+          onChangesUnsaved={() => setHasUnsavedChanges(true)}
         />
       </div>
     </div>

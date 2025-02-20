@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, FolderOpen, Share2, Settings, LogOut, CreditCard, ChevronRight, Sparkles } from "lucide-react";
+import { PlusCircle, FolderOpen, Share2, Settings, LogOut, CreditCard, ChevronRight, Sparkles, FileText } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -121,7 +121,7 @@ export   function SideBarHere() {
             <h2 className="mb-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Projects</h2>
             <div className="space-y-1.5">
               <MenuItem href="/projects" icon={FolderOpen}>All Projects</MenuItem>
-              <MenuItem href="#" onClick={handleNewProject} icon={PlusCircle} disabled={isCreating}>
+              <MenuItem href="/projects/new" onClick={handleNewProject} icon={PlusCircle} disabled={isCreating}>
                 {isCreating ? "Creating..." : "New Project"}
               </MenuItem>
               <MenuItem href="/projects/shared" icon={Share2}>Shared Projects</MenuItem>
@@ -132,6 +132,16 @@ export   function SideBarHere() {
                 badge={<TemplatesBadge />}
               >
                 Templates
+              </MenuItem>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="mb-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Articles</h2>
+            <div className="space-y-1.5">
+              <MenuItem href="/projects/articles" icon={FileText}>All Articles</MenuItem>
+              <MenuItem href="/articles/new" icon={PlusCircle}>
+                New Article
               </MenuItem>
             </div>
           </div>

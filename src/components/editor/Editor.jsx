@@ -61,7 +61,7 @@ export default function Editor({
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [layout, setLayout] = useState('sketch');
+  const [layout, setLayout] = useState('split');
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [excalidrawData, setExcalidrawData] = useState(

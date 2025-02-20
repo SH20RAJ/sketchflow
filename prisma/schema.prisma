@@ -19,6 +19,9 @@ model User {
   projects      Project[]
   subscription  Subscription?
   payments      Payment[]
+  articles      Article[]
+  comments      Comment[]
+  claps         Clap[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
@@ -130,6 +133,8 @@ model Plan {
   price         Int
   duration      Int            @default(30) // duration in days, default 30 days
   features      String         @db.Text // Stored as JSON string
+  active        Boolean        @default(true)
+  billingCycle  BillingCycle   @default(MONTHLY)
   subscriptions Subscription[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -145,6 +150,7 @@ model Payment {
   currency             String   @default("INR")
   status               String
   orderId              String?  @unique
+  gatewayData          Json?
   userId               String
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt            DateTime @default(now())
@@ -159,7 +165,73 @@ enum SubscriptionStatus {
   EXPIRED
 }
 
-enum BillingInterval {
+enum BillingCycle {
   MONTHLY
   YEARLY
+}
+
+model Article {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  content     String    @db.LongText
+  excerpt     String    @db.Text
+  coverImage  String?
+  published   Boolean   @default(false)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+  claps       Clap[]
+  tags        Tag[]
+  seoTitle    String?
+  seoDesc     String?
+  readingTime Int       @default(0)
+  views       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@fulltext([title, content])
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String    @db.Text
+  articleId String
+  article   Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Comment[] @relation("CommentReplies")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([articleId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+model Clap {
+  id        String   @id @default(cuid())
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  count     Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([articleId, userId])
+  @@index([articleId])
+  @@index([userId])
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  articles  Article[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }

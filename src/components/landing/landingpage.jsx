@@ -180,20 +180,19 @@ export default function LandingPage() {
                     </Button>
                   </Link>
                 )}
-                <Button
-                  onClick={() => {
-                    window.open(
-                      "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                      "_blank"
-                    );
-                  }}
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto text-gray-700 hover:text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl group border-2 hover:border-blue-200 transition-colors"
+                <Link
+                  href={"/investors"}
                 >
-                  <Play className="mr-2 h-5 w-5" />
-                  Watch Demo
-                </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full sm:w-auto text-gray-700 hover:text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl group border-2 hover:border-blue-200 transition-colors"
+                  >
+
+                    <Play className="mr-2 h-5 w-5" />
+                    Be a Partner
+                  </Button>
+                </Link>
               </div>
 
               {/* Feature Pills */}
@@ -940,7 +939,7 @@ export default function LandingPage() {
             >
               <Link href="/login">
                 <Button
-                   size="lg"
+                  size="lg"
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   Try SketchFlow Free
