@@ -29,6 +29,29 @@ export function MarkdownEditor({ content, onChange, readOnly = false }) {
         disableLocalStorage={true}
         value={editorContent}
         onUpdate={handleUpdate}
+        handleImageUpload={async (file) => {
+          try {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await fetch('/api/upload', {
+              method: 'POST',
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error || 'Failed to upload image');
+            }
+
+            return data.url;
+          } catch (error) {
+            console.error('Image upload error:', error);
+            return null;
+          }
+        }}
+  
         editable={!readOnly}
         className="h-full min-h-[500px]   rounded-lg border-0"
       />
