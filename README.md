@@ -123,6 +123,9 @@ We welcome contributions from the community! Follow these steps to contribute:
 4. Open a pull request with a detailed description of your changes.
 
 ## Roadmap
+For a detailed roadmap and future development plans, check out our [Plans](plans.md) document.
+
+Key highlights of upcoming features:
 - Add more AI-powered tools for text/image suggestions.
 - Improve UI/UX with feedback from early users.
 - Expand template library.
