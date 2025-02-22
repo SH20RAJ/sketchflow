@@ -42,17 +42,38 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast.success('Message sent successfully!');
-    setIsSubmitting(false);
-    setFormData({
-      name: '',
-      email: '',
-      company: '',
-      message: ''
-    });
+    try {
+      // Create the email body with formatted content
+      const emailBody = `
+Name: ${formData.name}
+Company: ${formData.company || 'Not specified'}
+Email: ${formData.email}
+
+Message:
+${formData.message}
+      `.trim();
+
+      // Create the mailto URL with encoded parameters
+      const mailtoUrl = `mailto:sh20raj@gmail.com?subject=Contact Form Submission from ${encodeURIComponent(formData.name)}&body=${encodeURIComponent(emailBody)}`;
+
+      // Open the mailto link
+      window.location.href = mailtoUrl;
+
+      // Show success message
+      toast.success('Opening your email client...');
+
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        company: '',
+        message: ''
+      });
+    } catch (error) {
+      toast.error('Failed to open email client. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFeedbackSubmit = async (e) => {
@@ -111,25 +132,7 @@ export default function ContactPage() {
           </p>
         </motion.div>
 
-        {/* LinkedIn Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-center mb-12"
-        >
-          <Button
-            size="lg"
-            className="bg-[#0077B5] hover:bg-[#006399] text-white px-8 py-6 rounded-xl text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group"
-            asChild
-          >
-            <Link href="https://www.linkedin.com/in/sh20raj/" target="_blank" rel="noopener noreferrer">
-              <Linkedin className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
-              Connect on LinkedIn
-              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
-          </Button>
-        </motion.div>
+        
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-6xl mx-auto">
           {/* Contact Form */}
@@ -241,6 +244,26 @@ export default function ContactPage() {
             </form>
           </motion.div>
         </div>
+
+        {/* LinkedIn Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-center mt-12"
+        >
+          <Button
+            size="lg"
+            className="bg-[#0077B5] hover:bg-[#006399] text-white px-8 py-6 rounded-xl text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group"
+            asChild
+          >
+            <Link href="https://www.linkedin.com/in/sh20raj/" target="_blank" rel="noopener noreferrer">
+              <Linkedin className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
+              Connect on LinkedIn
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
+          </Button>
+        </motion.div>
 
         {/* Contact Info Cards */}
         <motion.div
