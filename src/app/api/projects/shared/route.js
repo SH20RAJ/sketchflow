@@ -6,8 +6,6 @@ import { auth } from "@/auth";
 const prisma = new PrismaClient();
 
 // Mark route as dynamic
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 export async function GET(request) {
   let session = null;
@@ -26,7 +24,7 @@ export async function GET(request) {
       where: {
         AND: [
           { shared: true },
-          { userId: { not: session.user.id } }, // Exclude user's own projects
+          // { userId: { not: session.user.id } }, // Exclude user's own projects
         ],
       },
       include: {

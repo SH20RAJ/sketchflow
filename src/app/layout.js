@@ -15,7 +15,7 @@ export const metadata = {
     description: 'Unleash creativity with our real-time collaborative digital whiteboard for teams.',
     images: [
       {
-        url: 'https://sketchflow.space/og-image.jpg',
+        url: 'https://sketchflow.space/og.png',
         width: 1200,
         height: 630,
         alt: 'SketchFlow Collaborative Whiteboard',

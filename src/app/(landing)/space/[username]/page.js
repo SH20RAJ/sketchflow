@@ -10,19 +10,56 @@ import {
   Layout,
   Pencil,
   ExternalLink,
-  Mail
+  Mail,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
+import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 
 const fetcher = (...args) => fetch(...args).then(res => res.json());
 
 export default function SpacePage() {
   const params = useParams();
   const router = useRouter();
+  const [isCloning, setIsCloning] = useState(false);
+
+  const handleCloneProject = useCallback(async (projectId) => {
+    setIsCloning(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/clone`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (response.status === 401) {
+        setIsCloning(false);
+        router.push("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to clone project');
+      }
+
+      toast.success(data.message || 'Project cloned successfully');
+
+      if (data.id) {
+        router.push(`/project/${data.id}`);
+      }
+    } catch (error) {
+      console.error('Clone error:', error);
+      toast.error(error.message || 'Failed to clone project');
+    } finally {
+      setIsCloning(false);
+    }
+  }, [router]);
+
   const username = params.username;
 
   const { data: spaceData, error } = useSWR(`/api/space/${username}`, fetcher);
@@ -233,10 +270,20 @@ export default function SpacePage() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => router.push(`/project/${project.id}/clone`)}
+                      onClick={() => handleCloneProject(project.id)}
+                      disabled={isCloning}
                     >
-                      <GitFork className="h-4 w-4 mr-1" />
-                      Clone
+                      {isCloning ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          Cloning...
+                        </>
+                      ) : (
+                        <>
+                          <GitFork className="h-4 w-4 mr-1" />
+                          Clone
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
