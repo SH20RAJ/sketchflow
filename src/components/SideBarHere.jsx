@@ -49,7 +49,7 @@ const MenuItem = ({ href, icon: Icon, children, className, badge }) => {
   );
 };
 
-export   function SideBarHere() {
+export function SideBarHere() {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
 
