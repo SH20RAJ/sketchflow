@@ -18,7 +18,7 @@ export default function PaymentGatewaySelector({ isOpen, onClose, onSelect, load
     {
       id: 'cashfree',
       name: 'Cashfree',
-      logo: '/payment/cashfree.svg',
+      logo: '/payment/cashfree.png',
       enabled: false,
       description: 'Coming soon'
     },
@@ -32,7 +32,7 @@ export default function PaymentGatewaySelector({ isOpen, onClose, onSelect, load
     {
       id: 'lemonsqueezy',
       name: 'LemonSqueezy',
-      logo: '/payment/lemonsqueezy.svg',
+      logo: '/payment/lemonsqueezy.png',
       enabled: false,
       description: 'Coming soon'
     }

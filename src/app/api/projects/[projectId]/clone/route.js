@@ -25,8 +25,8 @@ export async function POST(request, { params }) {
         const originalProject = await prisma.project.findUnique({
             where: { id: projectId },
             include: {
-                diagram: true,
-                markdown: true,
+                diagrams: true,
+                markdowns: true,
             },
         });
 
@@ -48,6 +48,10 @@ export async function POST(request, { params }) {
             );
         }
 
+        // Get the main diagram and markdown
+        const mainDiagram = originalProject.diagrams[0];
+        const mainMarkdown = originalProject.markdowns[0];
+
         // Create a new project as a clone with all its related data
         const clonedProject = await prisma.project.create({
             data: {
@@ -55,16 +59,22 @@ export async function POST(request, { params }) {
                 description: originalProject.description || '',
                 userId: session.user.id,
                 shared: false,
-                diagram: {
+                diagrams: {
                     create: {
-                        content: originalProject.diagram?.content || {},
+                        name: mainDiagram?.name || "Main",
+                        content: mainDiagram?.content || { elements: [], appState: {} },
                     },
                 },
-                markdown: {
+                markdowns: {
                     create: {
-                        content: originalProject.markdown?.content || '',
+                        name: mainMarkdown?.name || "Notes",
+                        content: mainMarkdown?.content || '',
                     },
                 },
+            },
+            include: {
+                diagrams: true,
+                markdowns: true,
             },
         });
 
