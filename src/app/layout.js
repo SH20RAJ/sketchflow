@@ -44,12 +44,12 @@ export const metadata = {
   },
   
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    icon: '/icons/icon-512x512.png',
+    shortcut: '/icons/icon-192x192.png',
+    apple: '/icons/icon-192x192.png',
   },
   
-  manifest: '/site.webmanifest',
+  manifest: '/manifest.json',
   
   verification: {
     google: 'google-site-verification-code',
@@ -83,8 +83,8 @@ export const metadata = {
   
   appleWebApp: {
     capable: true,
-    title: 'SketchFlow',
     statusBarStyle: 'default',
+    title: 'SketchFlow'
   },
   
   formatDetection: {
@@ -99,6 +99,7 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  userScalable: 'no'
 };
 
 export const themeColor = [
