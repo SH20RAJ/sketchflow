@@ -88,7 +88,25 @@ export default function LandingPage() {
 
   return (
     <>
-      <main className="overflow-hidden  ">
+      {/* Announcement Banner */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white fixed top-0 left-0 right-0 z-50">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-center text-center">
+            <div className="animate-pulse mr-3">🎉</div>
+            <p className="text-sm md:text-base font-medium">
+              Special Offer: Get 1 Month FREE Pro Membership! Valid until March 27, 2025.{" "}
+              <Link
+                href="https://forms.gle/jExHz49gSyo3Hn2y7"
+                className="underline font-semibold hover:text-blue-100 transition-colors ml-1"
+              >
+                Claim Now →
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <main className="overflow-hidden mt-14">
         {/* Hero Section */}
         <section
           id="home"
