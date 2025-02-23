@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
 
 export async function GET(request) {
   try {

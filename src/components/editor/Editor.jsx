@@ -45,7 +45,43 @@ const DEFAULT_DATA = {
 
 ---
 
-A collaborative diagramming and markdown editor.
+A professional diagramming and markdown editor that combines the power of Excalidraw and Markdown.
+
+## Features
+
+### 🎨 Drawing Tools
+- Free-hand drawing
+- Shapes and arrows
+- Text annotations
+- Custom colors and styles
+
+### 📝 Markdown Support
+- Full markdown syntax
+- Real-time preview
+- Code blocks with syntax highlighting
+- Tables and lists
+
+### 💾 Project Management
+- Auto-saving
+- Project sharing
+- Custom project names
+- Public/private visibility
+
+## Getting Started
+
+1. Create a new project
+2. Use the drawing tools on the left panel
+3. Write markdown in the right panel
+4. Save and share your work!
+
+## Tips
+- Use \`Ctrl + S\` to save
+- Toggle between split/full views
+- Export diagrams as PNG/SVG
+- Share projects via unique links
+
+---
+Made with ❤️ by SketchFlow Team
 
   `,
   name: "Untitled Project" + Math.floor(Math.random() * 1000),

@@ -3,17 +3,18 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
+
+// Helper function to check if user is admin
+const isAdminUser = (email) => {
+  const adminEmail = process.env.ADMIN_EMAIL || 'sh20raj@gmail.com';
+  return email === adminEmail;
+};
 
 export async function GET(request, { params }) {
   try {
     const session = await auth();
-    console.log('Access check - Session:', { 
-      userId: session?.user?.id,
-      email: session?.user?.email 
-    });
-    console.log('Access check - Project ID:', params.projectId);
     
+    // Get current project
     const project = await prisma.project.findUnique({
       where: {
         id: params.projectId,
@@ -25,10 +26,7 @@ export async function GET(request, { params }) {
       },
     });
 
-    console.log('Access check - Project found:', project);
-
     if (!project) {
-      console.log('Access check - Project not found');
       return NextResponse.json({ 
         hasAccess: false, 
         isShared: false,
@@ -37,14 +35,15 @@ export async function GET(request, { params }) {
     }
 
     // Check if user has access
-    const hasAccess = session?.user?.id === project.userId;
-    const isShared = project.shared;
-
-    console.log('Access check - Result:', { hasAccess, isShared });
+    const isAdmin = session?.user?.email ? isAdminUser(session.user.email) : false;
+    const isOwner = session?.user?.id === project.userId;
+    const hasAccess = isOwner || project.shared || isAdmin;
 
     return NextResponse.json({
       hasAccess,
-      isShared,
+      isShared: project.shared,
+      isOwner,
+      isAdmin,
       projectId: project.id,
       userId: project.userId,
       sessionUserId: session?.user?.id
@@ -53,8 +52,7 @@ export async function GET(request, { params }) {
     console.error("Access check error:", {
       error: error.message,
       stack: error.stack,
-      projectId: params.projectId,
-      userId: session?.user?.id
+      projectId: params.projectId
     });
     return NextResponse.json({ 
       hasAccess: false, 
@@ -62,7 +60,5 @@ export async function GET(request, { params }) {
       error: "Failed to check access",
       details: error.message
     }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 } 

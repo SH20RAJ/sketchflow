@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
 
 // Helper function to check if user is admin
 const isAdminUser = (email) => {

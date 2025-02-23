@@ -2,11 +2,10 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from '@prisma/client';
 import { auth } from "@/auth";
 
+export const dynamic = 'force-dynamic';
+
 // Initialize Prisma Client
 const prisma = new PrismaClient();
-
-export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
 
 export async function GET(request) {
   let session = null;
