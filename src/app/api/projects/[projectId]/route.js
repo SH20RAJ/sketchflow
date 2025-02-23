@@ -5,42 +5,55 @@ import { auth } from "@/auth";
 export async function GET(request, { params }) {
   try {
     const session = await auth();
-    console.log('Project fetch - Session:', { 
-      userId: session?.user?.id,
-      email: session?.user?.email 
-    });
-    console.log('Project fetch - Project ID:', params.projectId);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    // First find the project
+    const { projectId } = params;
+
+    // Get current project with user details
     const project = await prisma.project.findUnique({
-      where: {
-        id: params.projectId,
-      },
+      where: { id: projectId },
       include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
+        },
         diagrams: true,
-        markdowns: true,
-      },
-    });
-
-    console.log('Project fetch - Project found:', { 
-      id: project?.id, 
-      userId: project?.userId,
-      shared: project?.shared 
+        markdowns: true
+      }
     });
 
     if (!project) {
-      console.log('Project fetch - Project not found');
-      return new NextResponse("Project not found", { status: 404 });
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    // Check access
-    const isOwner = session?.user?.id === project.userId;
-    const hasAccess = isOwner || project.shared;
+    // Check if user is admin
+    const isAdmin = session.user.email === 'sh20raj@gmail.com';
+    const isOwner = project.userId === session.user.id;
 
-    console.log('Project fetch - Access check:', { isOwner, hasAccess });
+    // Allow access if user is owner, project is shared, or user is admin
+    if (!isOwner && !project.shared && !isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    if (!hasAccess) {
-      return new NextResponse("Unauthorized", { status: 401 });
+    // If admin is viewing someone else's project, log it
+    if (isAdmin && !isOwner) {
+      await prisma.adminLog.create({
+        data: {
+          action: 'VIEW_PROJECT',
+          details: JSON.stringify({
+            projectId,
+            projectName: project.name,
+            ownerId: project.userId
+          }),
+          userId: session.user.id
+        }
+      });
     }
 
     // Get the main diagram and markdown
@@ -55,20 +68,16 @@ export async function GET(request, { params }) {
       ...project,
       markdown: mainMarkdown,
       diagram: mainDiagram,
-      isOwner,
+      isOwner
     };
 
-    console.log('Project fetch - Success');
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Project fetch error:", {
-      error: error.message,
-      stack: error.stack,
-      projectId: params.projectId
-    });
-    return new NextResponse("Internal Server Error", { status: 500 });
-  } finally {
-    await prisma.$disconnect();
+    console.error('Project fetch error:', error);
+    return NextResponse.json(
+      { error: "Failed to fetch project" },
+      { status: 500 }
+    );
   }
 }
 
@@ -76,28 +85,57 @@ export async function DELETE(request, { params }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const deletedProject = await prisma.project.deleteMany({
-      where: {
-        id: params.projectId,
-        userId: session.user.id,
-      },
+    const { projectId } = params;
+
+    const project = await prisma.project.findUnique({
+      where: { id: projectId }
     });
 
-    if (deletedProject.count === 0) {
-      return new NextResponse("Project not found or unauthorized", {
-        status: 404,
+    if (!project) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    // Check if user is admin
+    const isAdmin = session.user.email === 'sh20raj@gmail.com';
+    const isOwner = project.userId === session.user.id;
+
+    // Only allow deletion if user is owner or admin
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Delete project and related data
+    await prisma.$transaction([
+      prisma.diagram.deleteMany({ where: { projectId } }),
+      prisma.markdown.deleteMany({ where: { projectId } }),
+      prisma.project.delete({ where: { id: projectId } })
+    ]);
+
+    // If admin is deleting someone else's project, log it
+    if (isAdmin && !isOwner) {
+      await prisma.adminLog.create({
+        data: {
+          action: 'DELETE_PROJECT',
+          details: JSON.stringify({
+            projectId,
+            projectName: project.name,
+            ownerId: project.userId
+          }),
+          userId: session.user.id
+        }
       });
     }
 
-    return new NextResponse("Project deleted", { status: 200 });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Project delete error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
-  } finally {
-    await prisma.$disconnect();
+    console.error('Project delete error:', error);
+    return NextResponse.json(
+      { error: "Failed to delete project" },
+      { status: 500 }
+    );
   }
 }
 
@@ -105,37 +143,57 @@ export async function PATCH(request, { params }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const updatedProject = await prisma.project.updateMany({
-      where: {
-        id: params.projectId,
-        userId: session.user.id,
-      },
-      data: {
-        name: body.name,
-        description: body.description,
-      },
+    const { projectId } = params;
+    const data = await request.json();
+
+    const project = await prisma.project.findUnique({
+      where: { id: projectId }
     });
 
-    if (updatedProject.count === 0) {
-      return new NextResponse("Project not found or unauthorized", {
-        status: 404,
+    if (!project) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    // Check if user is admin
+    const isAdmin = session.user.email === 'sh20raj@gmail.com';
+    const isOwner = project.userId === session.user.id;
+
+    // Only allow update if user is owner or admin
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const updatedProject = await prisma.project.update({
+      where: { id: projectId },
+      data
+    });
+
+    // If admin is updating someone else's project, log it
+    if (isAdmin && !isOwner) {
+      await prisma.adminLog.create({
+        data: {
+          action: 'UPDATE_PROJECT',
+          details: JSON.stringify({
+            projectId,
+            projectName: project.name,
+            ownerId: project.userId,
+            changes: data
+          }),
+          userId: session.user.id
+        }
       });
     }
 
-    const project = await prisma.project.findUnique({
-      where: { id: params.projectId },
-    });
-
-    return NextResponse.json(project);
+    return NextResponse.json(updatedProject);
   } catch (error) {
-    console.error("Project update error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
-  } finally {
-    await prisma.$disconnect();
+    console.error('Project update error:', error);
+    return NextResponse.json(
+      { error: "Failed to update project" },
+      { status: 500 }
+    );
   }
 }
 
@@ -143,41 +201,66 @@ export async function POST(request, { params }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { projectId } = params;
+
     const project = await prisma.project.findUnique({
-      where: {
-        id: params.projectId,
-        userId: session.user.id,
-      },
+      where: { id: projectId },
       include: {
-        diagrams: true,
-      },
+        diagrams: true
+      }
     });
 
     if (!project) {
-      return new NextResponse("Project not found", { status: 404 });
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    // Check if user is admin
+    const isAdmin = session.user.email === 'sh20raj@gmail.com';
+    const isOwner = project.userId === session.user.id;
+
+    // Only allow updates if user is owner or admin
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
     const mainDiagram = project.diagrams[0];
 
-    await prisma.diagram.update({
+    const updatedDiagram = await prisma.diagram.update({
       where: { id: mainDiagram.id },
       data: {
         content: {
           ...mainDiagram.content,
-          ...body,
-        },
-      },
+          ...body
+        }
+      }
     });
 
-    return new NextResponse("OK");
+    // If admin is updating someone else's project, log it
+    if (isAdmin && !isOwner) {
+      await prisma.adminLog.create({
+        data: {
+          action: 'UPDATE_PROJECT_DIAGRAM',
+          details: JSON.stringify({
+            projectId,
+            projectName: project.name,
+            ownerId: project.userId,
+            diagramId: mainDiagram.id
+          }),
+          userId: session.user.id
+        }
+      });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Project save error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
-  } finally {
-    await prisma.$disconnect();
+    console.error('Project update error:', error);
+    return NextResponse.json(
+      { error: "Failed to update project" },
+      { status: 500 }
+    );
   }
 }
