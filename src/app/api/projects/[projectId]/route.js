@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
+// Helper function to check if user is admin
+const isAdminUser = (email) => {
+  const adminEmail = process.env.ADMIN_EMAIL || 'sh20raj@gmail.com';
+  return email === adminEmail;
+};
+
 export async function GET(request, { params }) {
   try {
     const session = await auth();
@@ -33,7 +42,7 @@ export async function GET(request, { params }) {
     }
 
     // Check if user is admin
-    const isAdmin = session.user.email === 'sh20raj@gmail.com';
+    const isAdmin = isAdminUser(session.user.email);
     const isOwner = project.userId === session.user.id;
 
     // Allow access if user is owner, project is shared, or user is admin
@@ -99,7 +108,7 @@ export async function DELETE(request, { params }) {
     }
 
     // Check if user is admin
-    const isAdmin = session.user.email === 'sh20raj@gmail.com';
+    const isAdmin = isAdminUser(session.user.email);
     const isOwner = project.userId === session.user.id;
 
     // Only allow deletion if user is owner or admin
@@ -158,7 +167,7 @@ export async function PATCH(request, { params }) {
     }
 
     // Check if user is admin
-    const isAdmin = session.user.email === 'sh20raj@gmail.com';
+    const isAdmin = isAdminUser(session.user.email);
     const isOwner = project.userId === session.user.id;
 
     // Only allow update if user is owner or admin
@@ -218,7 +227,7 @@ export async function POST(request, { params }) {
     }
 
     // Check if user is admin
-    const isAdmin = session.user.email === 'sh20raj@gmail.com';
+    const isAdmin = isAdminUser(session.user.email);
     const isOwner = project.userId === session.user.id;
 
     // Only allow updates if user is owner or admin

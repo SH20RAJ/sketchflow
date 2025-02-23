@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 const prisma = new PrismaClient();
 

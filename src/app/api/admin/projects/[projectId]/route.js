@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 export async function DELETE(request, { params }) {
   try {
     const session = await auth();

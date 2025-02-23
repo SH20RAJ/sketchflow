@@ -5,7 +5,8 @@ import { auth } from "@/auth";
 // Initialize Prisma Client
 const prisma = new PrismaClient();
 
-// Mark route as dynamic
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 export async function GET(request) {
   let session = null;

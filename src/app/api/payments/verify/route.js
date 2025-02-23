@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { verifyPaymentSignature } from '@/lib/cashfree';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 const prisma = new PrismaClient();
 
