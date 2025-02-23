@@ -24,6 +24,7 @@ model User {
   claps         Clap[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  AdminLog      AdminLog[]
 }
 
 model Account {
@@ -234,4 +235,29 @@ model Tag {
   articles  Article[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  section   String
+  key       String
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([section, key], name: "section_key")
+  @@index([section])
+}
+
+model AdminLog {
+  id        String   @id @default(cuid())
+  action    String
+  section   String?
+  details   String   @db.Text
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([action])
+  @@index([userId])
 }
