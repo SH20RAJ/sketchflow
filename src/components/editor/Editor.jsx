@@ -118,10 +118,6 @@ export default function Editor({
   const handleLayoutChange = useCallback((newLayout) => {
     setPreviousLayout(layout);
     setLayout(newLayout);
-
-    let m = markdown;
-    
-    setMarkdown(m)
   }, [layout]);
 
   useEffect(() => {
@@ -274,14 +270,13 @@ export default function Editor({
                 initialData={excalidrawData}
                 viewModeEnabled={!isOwner}
                 UIOptions={{
-                  dockedToolbar: true, // Ensures toolbar is docked and not floating
-                  toolbarPosition: "left", // Moves toolbar to the left
+                  dockedToolbar: true,
+                  toolbarPosition: "left",
                   canvasActions: {
-                    saveToActiveFile: false, // Example action control
+                    saveToActiveFile: false,
                   }
                 }}
               />
-
             </ResizablePanel>
           )}
         </ResizablePanelGroup>

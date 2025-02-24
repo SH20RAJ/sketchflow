@@ -6,7 +6,7 @@ import { useEffect, useState, useCallback } from 'react';
 export function MarkdownEditor({ content, onChange, readOnly = false }) {
   const [editorContent, setEditorContent] = useState(content || "");
 
-  // Update local state when content prop changes
+  // Update local state when content prop changes and is different
   useEffect(() => {
     if (content !== undefined && content !== editorContent) {
       setEditorContent(content);
@@ -51,9 +51,8 @@ export function MarkdownEditor({ content, onChange, readOnly = false }) {
             return null;
           }
         }}
-  
         editable={!readOnly}
-        className="h-full min-h-[500px]   rounded-lg border-0"
+        className="h-full min-h-[500px] rounded-lg border-0"
       />
     </div>
   );

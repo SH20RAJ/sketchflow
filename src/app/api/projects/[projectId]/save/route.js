@@ -39,11 +39,11 @@ export async function POST(req, { params }) {
     let existingDiagram = project.diagrams[0];
 
     existingDiagram.content.appState.collaborators = [];
-    console.log(
-      existingDiagram,
-      "ff",
-      existingDiagram.content.appState.collaborators
-    );
+    // console.log(
+    //   existingDiagram,
+    //   "ff",
+    //   existingDiagram.content.appState.collaborators
+    // );
     
 
     let existingMarkdown = project.markdowns[0];
