@@ -17,6 +17,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   projects      Project[]
+  projectTags   ProjectTag[]
   subscription  Subscription?
   payments      Payment[]
   articles      Article[]
@@ -70,17 +71,35 @@ model VerificationToken {
 }
 
 model Project {
-  id          String     @id @default(cuid())
+  id          String       @id @default(cuid())
   name        String
   description String?
+  emoji       String? // Project emoji
+  color       String? // Project background color
   userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   diagrams    Diagram[]
   markdowns   Markdown[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  shared      Boolean    @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  shared      Boolean      @default(false)
+  projectTags ProjectTag[] // Relation to ProjectTag
 
+  @@index([userId])
+}
+
+model ProjectTag {
+  id        String    @id @default(cuid())
+  name      String
+  emoji     String? // Tag emoji
+  color     String? // Tag color for visual distinction
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([name, userId]) // Each tag name should be unique per user
   @@index([userId])
 }
 

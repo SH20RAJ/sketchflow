@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
     Pencil,
     Save,
@@ -16,6 +17,8 @@ import {
     ChevronDown,
     Menu,
     GitFork,
+    Tag,
+    Plus
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -61,6 +64,7 @@ const layouts = [
 ];
 
 export function EditorNavbar({
+    project,
     projectName,
     isEditingName,
     setIsEditingName,
@@ -81,6 +85,34 @@ export function EditorNavbar({
     handleDescriptionChange
 }) {
     const [isCloning, setIsCloning] = useState(false);
+const [showTagDialog, setShowTagDialog] = useState(false);
+const [selectedTags, setSelectedTags] = useState([]);
+
+const handleTagsUpdated = (updatedTags) => {
+    // Update the project's tags
+    if (project) {
+        project.projectTags = updatedTags;
+    }
+};
+
+const handleRemoveTag = async (tagId) => {
+    try {
+        const response = await fetch(`/api/projects/${projectId}/tags/${tagId}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to remove tag');
+        
+        // Remove the tag from the project's tags
+        if (project && project.projectTags) {
+            project.projectTags = project.projectTags.filter(tag => tag.id !== tagId);
+        }
+        
+        toast.success('Tag removed successfully');
+    } catch (error) {
+        console.error('Error:', error);
+        toast.error('Failed to remove tag');
+    }
+};
 
     const handleCloneProject = async () => {
         setIsCloning(true);
@@ -164,6 +196,44 @@ export function EditorNavbar({
                                             className="w-full px-3 py-2 text-sm rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[60px] resize-none"
                                             placeholder="Add a project description..."
                                         />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-medium text-gray-700">Tags</label>
+                                        <div className="flex flex-wrap gap-2 min-h-[32px] p-1 bg-gray-50 rounded-md">
+                                            {project?.projectTags?.map((tag) => (
+                                                <Badge
+                                                    key={tag.id}
+                                                    variant="secondary"
+                                                    className="flex items-center gap-1.5 px-2 py-1 transition-all hover:shadow-sm"
+                                                    style={{
+                                                        backgroundColor: tag.color || '#e2e8f0',
+                                                        color: tag.color ? '#fff' : '#64748b'
+                                                    }}
+                                                >
+                                                    {tag.emoji && <span className="text-sm">{tag.emoji}</span>}
+                                                    <span className="font-medium">{tag.name}</span>
+                                                    {isOwner && (
+                                                        <button
+                                                            onClick={() => handleRemoveTag(tag.id)}
+                                                            className="ml-1 p-0.5 rounded-full hover:bg-black/10 transition-colors"
+                                                        >
+                                                            <X className="h-3 w-3" />
+                                                        </button>
+                                                    )}
+                                                </Badge>
+                                            ))}
+                                            {isOwner && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-7 text-xs gap-1 hover:bg-gray-100 transition-colors"
+                                                    onClick={() => setShowTagDialog(true)}
+                                                >
+                                                    <Plus className="h-3 w-3" />
+                                                    Add Tag
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                                 <DropdownMenuSeparator />

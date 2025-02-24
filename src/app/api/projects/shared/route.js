@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
 export const dynamic = 'force-dynamic';
-
-// Initialize Prisma Client
-const prisma = new PrismaClient();
 
 export async function GET(request) {
   let session = null;
@@ -63,7 +60,5 @@ export async function GET(request) {
       { error: "Failed to fetch shared projects", details: error.message },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 } 

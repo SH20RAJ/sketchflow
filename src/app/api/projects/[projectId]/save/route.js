@@ -11,7 +11,7 @@ export async function POST(req, { params }) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { excalidraw, markdown, name } = await req.json();
+    const { excalidraw, markdown, name, description } = await req.json();
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
@@ -81,7 +81,7 @@ export async function POST(req, { params }) {
 
       const updatedProject = await prisma.project.update({
         where: { id: params.projectId },
-        data: { name },
+        data: { name , description },
       });
 
       return NextResponse.json({

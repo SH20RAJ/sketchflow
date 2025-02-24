@@ -2,65 +2,95 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  try {
-    console.log('Starting to seed plans...');
-    
-    // Check if Pro plan exists
-    let proPlan = await prisma.plan.findFirst({
-      where: { name: 'Pro' }
-    });
+  // Create sample tags
+  const tags = await Promise.all([
+    prisma.projectTag.create({
+      data: {
+        name: 'Work',
+        emoji: '💼',
+        color: '#4F46E5',
+        userId: 'cm7a40d760000m8k01lti3i1y' // Replace with your test user ID
+      }
+    }),
+    prisma.projectTag.create({
+      data: {
+        name: 'Personal',
+        emoji: '🏠',
+        color: '#10B981',
+        userId: 'cm7a40d760000m8k01lti3i1y'
+      }
+    }),
+    prisma.projectTag.create({
+      data: {
+        name: 'Ideas',
+        emoji: '💡',
+        color: '#F59E0B',
+        userId: 'cm7a40d760000m8k01lti3i1y'
+      }
+    })
+  ]);
 
-    // Create Pro plan if it doesn't exist
-    if (!proPlan) {
-      proPlan = await prisma.plan.create({
-        data: {
-          name: 'Pro',
-          description: 'For power users',
-          price: 1999,
-          duration: 30,
-          features: JSON.stringify({
-            projectLimit: -1, // unlimited
-            templates: 'premium',
-            support: 'priority',
-            features: ['core', 'advanced']
-          })
+  console.log('Created sample tags:', tags);
+
+  // Create sample projects with tags
+  const projects = await Promise.all([
+    prisma.project.create({
+      data: {
+        name: 'Project Planning',
+        description: 'Planning for Q2 2024',
+        emoji: '📊',
+        color: '#4F46E5',
+        userId: 'cm7a40d760000m8k01lti3i1y',
+        projectTags: {
+          connect: [{ id: tags[0].id }] // Work tag
+        },
+        diagrams: {
+          create: {
+            name: 'Main',
+            content: { elements: [], appState: {} }
+          }
         }
-      });
-      console.log('Created Pro plan:', proPlan.id);
-    }
-
-    // Check if Pro Yearly plan exists
-    let proYearlyPlan = await prisma.plan.findFirst({
-      where: { name: 'Pro Yearly' }
-    });
-
-    // Create Pro Yearly plan if it doesn't exist
-    if (!proYearlyPlan) {
-      proYearlyPlan = await prisma.plan.create({
-        data: {
-          name: 'Pro Yearly',
-          description: 'Best value for professionals',
-          price: 19999,
-          duration: 365,
-          features: JSON.stringify({
-            projectLimit: -1,
-            templates: 'premium',
-            support: 'priority',
-            features: ['core', 'advanced', 'early_access']
-          })
+      }
+    }),
+    prisma.project.create({
+      data: {
+        name: 'Home Renovation',
+        description: 'Ideas for home improvement',
+        emoji: '🏡',
+        color: '#10B981',
+        userId: 'cm7a40d760000m8k01lti3i1y',
+        projectTags: {
+          connect: [{ id: tags[1].id }] // Personal tag
+        },
+        diagrams: {
+          create: {
+            name: 'Main',
+            content: { elements: [], appState: {} }
+          }
         }
-      });
-      console.log('Created Pro Yearly plan:', proYearlyPlan.id);
-    }
+      }
+    }),
+    prisma.project.create({
+      data: {
+        name: 'Startup Ideas',
+        description: 'Collection of potential startup ideas',
+        emoji: '🚀',
+        color: '#F59E0B',
+        userId: 'cm7a40d760000m8k01lti3i1y',
+        projectTags: {
+          connect: [{ id: tags[2].id }] // Ideas tag
+        },
+        diagrams: {
+          create: {
+            name: 'Main',
+            content: { elements: [], appState: {} }
+          }
+        }
+      }
+    })
+  ]);
 
-    console.log('Plans seeded successfully:', {
-      pro: { id: proPlan.id, name: proPlan.name },
-      proYearly: { id: proYearlyPlan.id, name: proYearlyPlan.name }
-    });
-  } catch (error) {
-    console.error('Error seeding plans:', error);
-    throw error;
-  }
+  console.log('Created sample projects:', projects);
 }
 
 main()

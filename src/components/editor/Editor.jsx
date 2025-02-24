@@ -33,6 +33,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import { EditorNavbar } from "./EditorNavbar";
+import { TagDialog } from "./TagDialog";
 
 const DEFAULT_DATA = {
   excalidraw: {
@@ -114,6 +115,11 @@ export default function Editor({
   const [projectDescription, setProjectDescription] = useState(
     initialData?.description || ''
   );
+  const [showTagDialog, setShowTagDialog] = useState(false);
+
+  const handleTagsUpdated = async () => {
+    await mutate();
+  };
 
   const handleLayoutChange = useCallback((newLayout) => {
     setPreviousLayout(layout);

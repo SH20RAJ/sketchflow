@@ -1,42 +1,50 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/prisma";
+import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // console.log("Session ", session);
+    const { searchParams } = new URL(request.url);
+    const tagId = searchParams.get('tagId');
+    const sortBy = searchParams.get('sortBy') || 'updatedAt';
+    const order = searchParams.get('order') || 'desc';
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: {
-        projects: {
-          orderBy: { updatedAt: "desc" },
-          include: {
-            diagrams: true,
-            markdowns: true,
-          },
-        },
+    // Build where clause for filtering
+    const where = {
+      userId: session.user.id,
+      ...(tagId && tagId !== 'all' && {
+        projectTags: {
+          some: { id: tagId }
+        }
+      })
+    };
+
+    const projects = await prisma.project.findMany({
+      where,
+      orderBy: {
+        [sortBy]: order
       },
+      include: {
+        diagrams: true,
+        markdowns: true,
+        projectTags: true
+      }
     });
 
-    if (!user) {
-      return new NextResponse("User not found", { status: 404 });
-    }
-
     return NextResponse.json({
-      projects: user.projects,
-      count: user.projects.length,
+      projects,
+      count: projects.length,
     });
   } catch (error) {
     console.error("Error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch projects" }, { status: 500 });
   }
 }
 
@@ -44,7 +52,7 @@ export async function POST(request) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -52,7 +60,7 @@ export async function POST(request) {
     });
 
     if (!user) {
-      return new NextResponse("User not found", { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const projectCount = await prisma.project.count({
@@ -61,14 +69,20 @@ export async function POST(request) {
 
     // Check project limit for free users
     if (projectCount >= 100 && !user.subscription) {
-      return new NextResponse("Project limit reached", { status: 403 });
+      return NextResponse.json({ error: "Project limit reached" }, { status: 403 });
     }
 
     const body = await request.json();
     const project = await prisma.project.create({
       data: {
         name: body.name || "Untitled Project",
+        description: body.description,
+        emoji: body.emoji,
+        color: body.color,
         userId: user.id,
+        projectTags: body.tagIds ? {
+          connect: body.tagIds.map(id => ({ id }))
+        } : undefined,
         diagrams: {
           create: {
             name: "Main",
@@ -78,14 +92,13 @@ export async function POST(request) {
       },
       include: {
         diagrams: true,
+        projectTags: true
       },
     });
 
     return NextResponse.json(project);
   } catch (error) {
     console.error("Project creation error:", error);
-    return new NextResponse(error.message || "Internal Server Error", {
-      status: 500,
-    });
+    return NextResponse.json({ error: error.message || "Failed to create project" }, { status: 500 });
   }
 }
