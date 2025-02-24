@@ -115,6 +115,19 @@ export default function RootLayout({ children }) {
           src="https://sdk.cashfree.com/js/v3/cashfree.js"
           strategy="beforeInteractive"
         />
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-ETJGGD22FR"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-ETJGGD22FR');
+          `}
+        </Script>
       </head>
       <body className={`antialiased`}>
         <Providers>{children}</Providers>
