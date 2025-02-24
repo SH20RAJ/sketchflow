@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import Editor from '@/components/editor/Editor';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Share2, Copy, Lock, Globe, Loader2, AlertCircle, Layout, Tag } from 'lucide-react';
+import { AlertCircle, Globe, Layout, Tag } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -15,7 +15,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Loading from '@/app/loading';
 
 export default function ProjectPage({ params }) {

@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ArrowRight, Shield, Lock, ChevronLeft } from 'lucide-react';
-import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Loader2, Shield, Lock } from 'lucide-react';
 import Image from 'next/image';
 
 export default function LoginPage() {

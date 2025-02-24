@@ -1,7 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash, Clock, Globe, Share2, Users } from "lucide-react";
+import { Pencil, Trash, Clock, Globe, Users } from "lucide-react";
 import { format } from "date-fns";
 import { useRouter } from 'next/navigation';
 
