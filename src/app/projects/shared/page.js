@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Pencil, Search, Clock, Users, GitFork, ArrowLeft } from "lucide-react";
+import { Pencil, Search, Clock, Users, GitFork, ArrowLeft, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -223,6 +223,7 @@ export default function SharedProjectsPage() {
                       <CardTitle className="text-lg font-semibold text-gray-900">
                         {project.name}
                       </CardTitle>
+                      <Globe className="h-4 w-4 text-green-500" />
                     </div>
                     <CardDescription className="text-sm text-gray-500">
                       {project.description || "No description"}

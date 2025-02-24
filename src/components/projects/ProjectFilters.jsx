@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ export function ProjectFilters() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [showCreateTag, setShowCreateTag] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
 
     const currentTag = searchParams.get('tagId') || 'all';
     const currentSort = searchParams.get('sortBy') || 'updatedAt';
@@ -42,6 +42,14 @@ export function ProjectFilters() {
         });
         router.push(`/projects?${params.toString()}`);
     }, [router, searchParams]);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            updateFilters({ search: searchQuery });
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery, updateFilters]);
 
     return (
         <div className="flex flex-wrap gap-4 items-center">
@@ -98,22 +106,19 @@ export function ProjectFilters() {
                 onClick={() => updateFilters({ order: currentOrder === 'asc' ? 'desc' : 'asc' })}
                 className="w-10 h-10"
             >
-                {currentOrder === 'asc' ? <SortAsc size={18} /> : <SortDesc size={18} />}
+                {currentOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
             </Button>
 
             <Button
                 variant="outline"
-                className="gap-2"
+                size="icon"
                 onClick={() => setShowCreateTag(true)}
+                className="w-10 h-10"
             >
                 <Plus className="h-4 w-4" />
-                New Tag
             </Button>
 
-            <CreateTagDialog
-                open={showCreateTag}
-                onOpenChange={setShowCreateTag}
-            />
+            <CreateTagDialog open={showCreateTag} onOpenChange={setShowCreateTag} />
         </div>
     );
-} 
+}

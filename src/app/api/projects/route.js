@@ -15,6 +15,7 @@ export async function GET(request) {
     const tagId = searchParams.get('tagId');
     const sortBy = searchParams.get('sortBy') || 'updatedAt';
     const order = searchParams.get('order') || 'desc';
+    const search = searchParams.get('search');
 
     // Build where clause for filtering
     const where = {
@@ -23,6 +24,12 @@ export async function GET(request) {
         projectTags: {
           some: { id: tagId }
         }
+      }),
+      ...(search && {
+        OR: [
+          { name: { contains: search } },
+          { description: { contains: search } }
+        ]
       })
     };
 

@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { prisma } from "@/prisma";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +8,7 @@ export async function POST(req, { params }) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { excalidraw, markdown, name, description } = await req.json();
@@ -18,7 +18,7 @@ export async function POST(req, { params }) {
     });
 
     if (!user) {
-      return new NextResponse("User not found", { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const project = await prisma.project.findUnique({
@@ -33,7 +33,7 @@ export async function POST(req, { params }) {
     });
 
     if (!project) {
-      return new NextResponse("Project not found", { status: 404 });
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
     let existingDiagram = project.diagrams[0];
@@ -92,14 +92,16 @@ export async function POST(req, { params }) {
       });
     } catch (err) {
       console.error("Database operation failed:", err);
-      return new NextResponse(err.message || "Failed to save project", {
-        status: 500,
-      });
+      return NextResponse.json(
+        { error: err.message || "Failed to save project" },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error("Save error:", error);
-    return new NextResponse(error.message || "Internal Server Error", {
-      status: 500,
-    });
+    return NextResponse.json(
+      { error: error.message || "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
