@@ -199,16 +199,18 @@ export default function LandingPage() {
                   </Link>
                 )}
                 <Link
-                  href={"/investors"}
+                  href={"/try"}
                 >
                   <Button
                     size="lg"
                     variant="outline"
-                    className="w-full sm:w-auto text-gray-700 hover:text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 rounded-xl group border-2 hover:border-blue-200 transition-colors"
+                    className="w-full sm:w-auto text-gray-700 hover:text-blue-600 bg-white/80 backdrop-blur-sm hover:bg-blue-50 text-lg px-8 py-6 rounded-xl group border-2 border-gray-200 hover:border-blue-200 transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-1 flex items-center justify-center gap-3"
                   >
-
-                    <Play className="mr-2 h-5 w-5" />
-                    Be a Partner
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-blue-100 rounded-full blur-lg opacity-50"></div>
+                      <Play className="h-5 w-5 relative text-blue-600 group-hover:scale-110 transition-transform" />
+                    </div>
+                    <span className="font-medium">Try Free (No Login)</span>
                   </Button>
                 </Link>
               </div>

@@ -3,7 +3,7 @@
 import { Editor } from "novel-lightweight";
 import { useEffect, useState, useCallback } from 'react';
 
-export function MarkdownEditor({ content, onChange, readOnly = false }) {
+export function MarkdownEditor({ content, onChange, readOnly = false, disableLocalStorage = true }) {
   const [editorContent, setEditorContent] = useState(content || "");
 
   // Update local state when content prop changes and is different
@@ -26,7 +26,7 @@ export function MarkdownEditor({ content, onChange, readOnly = false }) {
     <div className="w-full h-full overflow-auto min-h-[500px]">
       <Editor
         defaultValue={editorContent}
-        disableLocalStorage={true}
+        disableLocalStorage={disableLocalStorage}
         value={editorContent}
         onUpdate={handleUpdate}
         handleImageUpload={async (file) => {

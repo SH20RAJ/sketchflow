@@ -3,9 +3,9 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata = {
-  title: "SketchFlow - Collaborative Whiteboard for Creative Teams",
-  description: "SketchFlow empowers teams to brainstorm, design, and collaborate in real-time on a shared digital canvas.",
-  
+  title: "SketchFlow - Free Online Whiteboard & Digital Canvas | No Login Required",
+  description: "Create, teach and collaborate in real-time with SketchFlow's free online whiteboard. A powerful Eraser.io alternative with no login required. Start drawing instantly!",
+  keywords: "SketchFlow, Free online whiteboard for teaching, Whiteboard online free no login, free whiteboard online tool, digital canvas, Online Whiteboard for Realtime Collaboration, Erasor io alternative free",
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -25,10 +25,10 @@ export const metadata = {
   
   twitter: {
     card: 'summary_large_image',
-    title: 'SketchFlow - Collaborative Whiteboard for Creative Teams',
-    description: 'Unleash creativity with our real-time collaborative digital whiteboard for teams.',
+    title: 'SketchFlow - Professional Whiteboard for Creative Teams',
+    description: 'Unleash creativity with our real-time professional digital whiteboard for teams.',
     creator: '@sketchflow',
-    images: ['https://sketchflow.space/twitter-image.jpg'],
+    images: ['https://sketchflow.space/og.png'],
   },
   
   robots: {
