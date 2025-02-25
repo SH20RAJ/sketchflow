@@ -5,17 +5,17 @@ import { debounce } from "lodash";
 import dynamic from "next/dynamic";
 
 const Excalidraw = dynamic(
-  async () => {
-    const { Excalidraw, restore: excalidrawRestore, restoreAppState: excalidrawRestoreAppState, restoreElements: excalidrawRestoreElements } = await import("@excalidraw/excalidraw");
-    Object.assign(restore, { value: excalidrawRestore });
-    Object.assign(restoreAppState, { value: excalidrawRestoreAppState });
-    Object.assign(restoreElements, { value: excalidrawRestoreElements });
-    return Excalidraw;
-  },
-  { ssr: false }
+    async () => {
+        const { Excalidraw, restore: excalidrawRestore, restoreAppState: excalidrawRestoreAppState, restoreElements: excalidrawRestoreElements } = await import("@excalidraw/excalidraw");
+        Object.assign(restore, { value: excalidrawRestore });
+        Object.assign(restoreAppState, { value: excalidrawRestoreAppState });
+        Object.assign(restoreElements, { value: excalidrawRestoreElements });
+        return Excalidraw;
+    },
+    { ssr: false }
 );
 
-const { restore, restoreAppState, restoreElements } = { restore: () => {}, restoreAppState: () => {}, restoreElements: () => {} };
+const { restore, restoreAppState, restoreElements } = { restore: () => { }, restoreAppState: () => { }, restoreElements: () => { } };
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -149,7 +149,7 @@ export default function TryEditor({ initialData = {}, readOnly = false }) {
             <div className="border-b h-12 flex items-center justify-between bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 px-4">
                 <div className="flex items-center gap-2">
                     <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-                        <Image src="/logo.svg" alt="Logo" width={24} height={24} className="rounded-md" />
+                        <Image src="/logo.png" alt="Logo" width={24} height={24} className="rounded-md" />
                     </Link>
                     <div className="h-6 w-px bg-gray-200 mx-1" />
                     <span className="font-medium text-sm text-gray-700">{projectName}</span>
@@ -217,9 +217,9 @@ export default function TryEditor({ initialData = {}, readOnly = false }) {
                                     onChange={handleExcalidrawChange}
                                     viewModeEnabled={readOnly}
                                 >
-                                            {/* <WelcomeScreen /> */}
+                                    {/* <WelcomeScreen /> */}
 
-                                    </Excalidraw>
+                                </Excalidraw>
                             </div>
                         </ResizablePanel>
 

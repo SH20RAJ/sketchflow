@@ -108,7 +108,7 @@ export function SideBarHere() {
         <MotionContainer>
           <div className="relative">
             <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-lg" />
-            <img src="/logo.svg" alt="SketchFlow" className="relative h-8 w-auto" />
+            <img src="/logo.png" alt="SketchFlow" className="relative h-8 w-auto" />
           </div>
           <Link href="/" className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text hover:opacity-80 transition-opacity">
             SketchFlow

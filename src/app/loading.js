@@ -43,7 +43,7 @@ export default function Loading() {
           >
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/10 to-indigo-500/10 blur-2xl animate-pulse" />
             <div className="relative bg-white/90 backdrop-blur-md rounded-2xl p-10 shadow-lg flex flex-col items-center justify-center">
-              <img src="/logo.svg" alt="Logo" className="h-14 w-14 mb-4" />
+              <img src="/logo.png" alt="Logo" className="h-14 w-14 mb-4" />
               {/* <LoadingSpinner className="h-6 w-6 text-blue-600 mb-3" /> */}
               <h2 className="text-2xl font-semibold text-gray-800">SketchFlow</h2>
             </div>

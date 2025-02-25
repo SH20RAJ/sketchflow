@@ -87,34 +87,34 @@ export function EditorNavbar({
     lastSaved
 }) {
     const [isCloning, setIsCloning] = useState(false);
-const [showTagDialog, setShowTagDialog] = useState(false);
-const [selectedTags, setSelectedTags] = useState([]);
+    const [showTagDialog, setShowTagDialog] = useState(false);
+    const [selectedTags, setSelectedTags] = useState([]);
 
-const handleTagsUpdated = (updatedTags) => {
-    // Update the project's tags
-    if (project) {
-        project.projectTags = updatedTags;
-    }
-};
-
-const handleRemoveTag = async (tagId) => {
-    try {
-        const response = await fetch(`/api/projects/${projectId}/tags/${tagId}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Failed to remove tag');
-        
-        // Remove the tag from the project's tags
-        if (project && project.projectTags) {
-            project.projectTags = project.projectTags.filter(tag => tag.id !== tagId);
+    const handleTagsUpdated = (updatedTags) => {
+        // Update the project's tags
+        if (project) {
+            project.projectTags = updatedTags;
         }
-        
-        toast.success('Tag removed successfully');
-    } catch (error) {
-        console.error('Error:', error);
-        toast.error('Failed to remove tag');
-    }
-};
+    };
+
+    const handleRemoveTag = async (tagId) => {
+        try {
+            const response = await fetch(`/api/projects/${projectId}/tags/${tagId}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) throw new Error('Failed to remove tag');
+
+            // Remove the tag from the project's tags
+            if (project && project.projectTags) {
+                project.projectTags = project.projectTags.filter(tag => tag.id !== tagId);
+            }
+
+            toast.success('Tag removed successfully');
+        } catch (error) {
+            console.error('Error:', error);
+            toast.error('Failed to remove tag');
+        }
+    };
 
     const handleCloneProject = async () => {
         setIsCloning(true);
@@ -160,7 +160,7 @@ const handleRemoveTag = async (tagId) => {
                     className="flex items-center hover:opacity-80 transition-opacity p-1.5"
                 >
                     <Image
-                        src="/logo.svg"
+                        src="/logo.png"
                         alt="Logo"
                         width={24}
                         height={24}
@@ -304,9 +304,9 @@ const handleRemoveTag = async (tagId) => {
                                     <Save className="h-3.5 w-3.5" />
                                     <span className="text-xs">
                                         {autoSaveStatus === 'saving' ? 'Saving...' :
-                                         autoSaveStatus === 'error' ? 'Save failed' :
-                                         autoSaveStatus === 'unsaved' ? 'Save' :
-                                         `Saved ${lastSaved ? new Date(lastSaved).toLocaleTimeString() : ''}`}
+                                            autoSaveStatus === 'error' ? 'Save failed' :
+                                                autoSaveStatus === 'unsaved' ? 'Save' :
+                                                    `Saved ${lastSaved ? new Date(lastSaved).toLocaleTimeString() : ''}`}
                                     </span>
                                 </>
                             )}

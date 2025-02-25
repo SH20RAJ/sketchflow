@@ -104,7 +104,7 @@ export default function LoginPage() {
             <div className="relative">
               <div className="absolute inset-0 bg-blue-500/20 rounded-lg blur-lg group-hover:bg-blue-500/30 transition-all duration-300"></div>
               <Image
-                src="/logo.svg"
+                src="/logo.png"
                 alt="SketchFlow"
                 width={40}
                 height={40}
@@ -164,7 +164,7 @@ export default function LoginPage() {
                     className="absolute inset-0 bg-blue-500/20 rounded-full blur-lg"
                   />
                   <Image
-                    src="/logo.svg"
+                    src="/logo.png"
                     alt="SketchFlow"
                     width={60}
                     height={60}

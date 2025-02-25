@@ -9,7 +9,7 @@ export default function LandingFooter() {
     <footer className="relative bg-gradient-to-b from-gray-900 to-black text-white py-24 overflow-hidden">
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -22,12 +22,12 @@ export default function LandingFooter() {
             viewport={{ once: true }}
           >
             <div className="flex items-center gap-3 mb-8">
-              <motion.img 
+              <motion.img
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.7 }}
-                src="/logo.svg" 
-                alt="SketchFlow" 
-                className="h-10 w-auto" 
+                src="/logo.png"
+                alt="SketchFlow"
+                className="h-10 w-auto"
               />
               <span className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 text-transparent bg-clip-text">
                 SketchFlow
@@ -111,7 +111,7 @@ export default function LandingFooter() {
           ))}
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

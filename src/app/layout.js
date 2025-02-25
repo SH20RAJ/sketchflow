@@ -5,7 +5,6 @@ import { Providers } from "./providers";
 export const metadata = {
   title: "SketchFlow - Free Online Whiteboard & Digital Canvas | No Login Required",
   description: "Create, teach and collaborate in real-time with SketchFlow's free online whiteboard. A powerful Eraser.io alternative with no login required. Start drawing instantly!",
-  keywords: "SketchFlow, Free online whiteboard for teaching, Whiteboard online free no login, free whiteboard online tool, digital canvas, Online Whiteboard for Realtime Collaboration, Erasor io alternative free",
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -69,16 +68,18 @@ export const metadata = {
   publisher: 'SketchFlow Inc.',
   
   keywords: [
-    'collaborative whiteboard',
-    'real-time collaboration',
-    'team brainstorming',
+    'SketchFlow',
+    'Free online whiteboard for teaching',
+    'Whiteboard online free no login',
+    'free whiteboard online tool',
     'digital canvas',
-    'creative tools',
-    'remote collaboration',
-    'visual thinking',
-    'design collaboration',
-    'team productivity',
-    'sketch flow'
+    'Online Whiteboard for Realtime Collaboration',
+    'Erasor io alternative free',
+    'online drawing tool',
+    'free digital whiteboard',
+    'collaborative whiteboard no login',
+    'teaching whiteboard online',
+    'free drawing board online'
   ],
   
   appleWebApp: {
