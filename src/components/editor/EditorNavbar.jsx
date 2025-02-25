@@ -82,7 +82,9 @@ export function EditorNavbar({
     projectId,
     copyShareLink,
     projectDescription,
-    handleDescriptionChange
+    handleDescriptionChange,
+    autoSaveStatus,
+    lastSaved
 }) {
     const [isCloning, setIsCloning] = useState(false);
 const [showTagDialog, setShowTagDialog] = useState(false);
@@ -300,7 +302,12 @@ const handleRemoveTag = async (tagId) => {
                             ) : (
                                 <>
                                     <Save className="h-3.5 w-3.5" />
-                                    <span className="text-xs">Save</span>
+                                    <span className="text-xs">
+                                        {autoSaveStatus === 'saving' ? 'Saving...' :
+                                         autoSaveStatus === 'error' ? 'Save failed' :
+                                         autoSaveStatus === 'unsaved' ? 'Save' :
+                                         `Saved ${lastSaved ? new Date(lastSaved).toLocaleTimeString() : ''}`}
+                                    </span>
                                 </>
                             )}
                         </Button>

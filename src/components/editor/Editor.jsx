@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
+import { debounce } from "lodash";
 import useSWR from "swr";
 import { Excalidraw } from "@excalidraw/excalidraw";
 import { LoadingButton } from "@/components/ui/loading";
@@ -99,6 +100,8 @@ export default function Editor({
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [layout, setLayout] = useState('split');
+  const [autoSaveStatus, setAutoSaveStatus] = useState('saved');
+  const [lastSaved, setLastSaved] = useState(new Date());
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [excalidrawData, setExcalidrawData] = useState(
@@ -150,11 +153,44 @@ export default function Editor({
 
   const handleExcalidrawChange = useCallback((elements, appState) => {
     setExcalidrawData({ elements, appState });
+    setAutoSaveStatus('unsaved');
+    debouncedAutoSave();
   }, []);
+
+  const debouncedAutoSave = useCallback(
+    debounce(async () => {
+      if (!projectId) return;
+      setAutoSaveStatus('saving');
+      try {
+        const response = await fetch(`/api/projects/${projectId}/save`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            excalidraw: excalidrawData,
+            markdown,
+            name: projectName,
+            description: projectDescription,
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok)
+          throw new Error(result.message || "Failed to save project");
+        mutate(result);
+        setLastSaved(new Date());
+        setAutoSaveStatus('saved');
+      } catch (err) {
+        console.error("Auto-save error:", err);
+        setAutoSaveStatus('error');
+      }
+    }, 2000),
+    [projectId, excalidrawData, markdown, projectName, projectDescription, mutate]
+  );
 
   const handleMarkdownChange = useCallback((newMarkdown) => {
     setMarkdown(newMarkdown);
-  }, []);
+    setAutoSaveStatus('unsaved');
+    debouncedAutoSave();
+  }, [debouncedAutoSave]);
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -245,6 +281,8 @@ export default function Editor({
         copyShareLink={copyShareLink}
         projectDescription={projectDescription}
         handleDescriptionChange={handleDescriptionChange}
+        autoSaveStatus={autoSaveStatus}
+        lastSaved={lastSaved}
       />
 
       <div className="flex-1 min-h-0 relative">

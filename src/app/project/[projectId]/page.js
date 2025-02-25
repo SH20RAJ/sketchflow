@@ -6,16 +6,9 @@ import { useSession } from 'next-auth/react';
 import Editor from '@/components/editor/Editor';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, Globe, Layout, Tag } from 'lucide-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Share2, Copy, Lock, Globe, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Loading from '@/app/loading';
 
 export default function ProjectPage({ params }) {
@@ -28,9 +21,6 @@ export default function ProjectPage({ params }) {
   const [isOwner, setIsOwner] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [cloning, setCloning] = useState(false);
-  const [showTagSelector, setShowTagSelector] = useState(false);
-  const [projects, setProjects] = useState([]);
-  const [showProjectSwitcher, setShowProjectSwitcher] = useState(false);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -147,22 +137,6 @@ export default function ProjectPage({ params }) {
     checkAccess();
   }, [status, params.projectId, router, session?.user?.id]);
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch('/api/projects');
-        if (response.ok) {
-          const data = await response.json();
-          setProjects(data.projects || []);
-        }
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      }
-    };
-
-    fetchProjects();
-  }, []);
-
   if (loading) {
     return (
       <Loading />
@@ -199,91 +173,15 @@ export default function ProjectPage({ params }) {
 
   return (
     <div className="relative">
-      {/* Project Switcher */}
-      <div className="absolute bottom-4 left-4 z-50">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2 group relative"
-          onClick={() => setShowProjectSwitcher(true)}
-        >
-          <Layout className="h-4 w-4" />
-          Switch Project
-          {isShared && (
-            <Globe className="h-3.5 w-3.5 text-green-500 absolute -right-6 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
-          )}
-        </Button>
-
-        <Sheet open={showProjectSwitcher} onOpenChange={setShowProjectSwitcher}>
-          <SheetContent side="left">
-            <SheetHeader>
-              <SheetTitle>Switch Project</SheetTitle>
-              <SheetDescription>Select a project to switch to</SheetDescription>
-            </SheetHeader>
-            <div className="mt-4 space-y-2">
-              {projects.map((project) => (
-                <Button
-                  key={project.id}
-                  variant="ghost"
-                  className={`w-full justify-start ${project.id === params.projectId ? 'bg-blue-50 text-blue-600' : ''}`}
-                  onClick={() => {
-                    router.push(`/project/${project.id}`);
-                    setShowProjectSwitcher(false);
-                  }}
-                >
-                  <Layout className="h-4 w-4 mr-2" />
-                  {project.name}
-                </Button>
-              ))}
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
+      
 
       {/* Editor */}
-      <div>
+      <div  >
         <Editor
           projectId={params.projectId}
           initialData={projectData}
           isOwner={isOwner}
         />
-      </div>
-
-      {/* Tag Selector */}
-      <div className="absolute bottom-4 right-4 z-50">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={() => setShowTagSelector(true)}
-        >
-          <Tag className="h-4 w-4" />
-          Tags
-        </Button>
-
-        <Sheet open={showTagSelector} onOpenChange={setShowTagSelector}>
-          <SheetContent side="bottom" className="h-[40vh]">
-            <SheetHeader>
-              <SheetTitle>Manage Tags</SheetTitle>
-              <SheetDescription>Add or remove tags from this project</SheetDescription>
-            </SheetHeader>
-            <div className="mt-4">
-              <div className="flex flex-wrap gap-2">
-                {['UI/UX', 'Frontend', 'Backend', 'Database', 'API'].map((tag) => (
-                  <Button
-                    key={tag}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-1"
-                  >
-                    <Tag className="h-3 w-3" />
-                    {tag}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
     </div>
   );
