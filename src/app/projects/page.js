@@ -89,7 +89,7 @@ export default function ProjectsPage({ searchParams }) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">My Projects</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">My Projects</h1>
         </div>
         <ProjectFilters />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
@@ -141,7 +141,7 @@ export default function ProjectsPage({ searchParams }) {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">My Projects</h1>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">My Projects</h1>
         <div className="flex items-center gap-4">
           <Link href="/projects/new">
             <Button className="gap-2">
