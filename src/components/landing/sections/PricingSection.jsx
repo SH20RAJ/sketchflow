@@ -48,6 +48,10 @@ export default function PricingSection() {
                 <CheckCircle2 className="h-5 w-5 text-green-500 mr-3" />
                 Community Support
               </li>
+              <li className="flex items-center text-gray-500/50">
+                <CheckCircle2 className="h-5 w-5 text-green-500 mr-3" />
+                AI Features (Coming Soon)
+              </li>
             </ul>
             <Link href="/subscription" className="block">
               <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white py-6 rounded-xl">
@@ -88,7 +92,7 @@ export default function PricingSection() {
               </li>
               <li className="flex items-center text-blue-100">
                 <CheckCircle2 className="h-5 w-5 text-blue-300 mr-3" />
-                Priority Support
+                AI Features 🪄
               </li>
               <li className="flex items-center text-blue-100">
                 <CheckCircle2 className="h-5 w-5 text-blue-300 mr-3" />

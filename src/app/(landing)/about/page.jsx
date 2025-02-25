@@ -106,6 +106,7 @@ export default function AboutPage() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 shadow-lg border border-white/20 mb-16"
         >
+          {/* <img src="/logo.png" alt="logo" /> */}
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Our Mission</h2>
             <p className="text-lg text-gray-600 leading-relaxed">
@@ -129,6 +130,7 @@ export default function AboutPage() {
             <div className="relative bg-white rounded-2xl shadow-2xl p-4 transform -rotate-2 hover:rotate-0 transition-transform duration-500">
               <div className="aspect-video rounded-xl overflow-hidden bg-gray-100">
                 {/* Replace with actual office/team image */}
+                <img src="/logo.png" alt="logo" />
                 <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200" />
               </div>
             </div>
@@ -136,7 +138,7 @@ export default function AboutPage() {
           <div>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Our Story</h2>
             <p className="text-lg text-gray-600 leading-relaxed mb-6">
-              Founded in 2024, SketchFlow emerged from a simple observation: teams needed
+              Founded in 2025, SketchFlow emerged from a simple observation: teams needed
               a better way to collaborate visually. We've built a platform that combines
               the best of whiteboarding and documentation, making it easier than ever for
               teams to work together.
@@ -192,7 +194,7 @@ export default function AboutPage() {
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-6 rounded-xl"
               asChild
             >
-              <Link href="/signup">
+              <Link href="/login">
                 Get Started
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
