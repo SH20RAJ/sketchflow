@@ -41,22 +41,22 @@ export default function ArticlePage() {
                 >
                     <div className="flex items-center gap-2 mb-4">
                         <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                            {post.category}
+                            {post?.category}
                         </span>
                     </div>
 
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-transparent bg-clip-text mb-6">
-                        {post.title}
+                        {post?.title}
                     </h1>
 
                     <div className="flex items-center gap-6 text-gray-600">
                         <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
-                            <span>{post.date}</span>
+                            <span>{post?.date}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4" />
-                            <span>{post.readTime}</span>
+                            <span>{post?.readTime}</span>
                         </div>
                     </div>
                 </motion.header>
@@ -69,16 +69,13 @@ export default function ArticlePage() {
                     className="flex items-center gap-4 mb-8 bg-white/80 backdrop-blur-xl rounded-xl p-4 border border-white/20"
                 >
                     <img
-                        src={post.author.avatar}
-                        alt={post.author.name}
+                        src={post?.author?.avatar || 'https://via.placeholder.com/48'}
+                        alt={post?.author?.name || 'Author'}
                         className="w-12 h-12 rounded-full"
-                        onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/48';
-                        }}
                     />
                     <div>
-                        <div className="font-medium text-gray-900">{post.author.name}</div>
-                        <div className="text-gray-600 text-sm">{post.author.role}</div>
+                        <div className="font-medium text-gray-900">{post?.author?.name || 'Anonymous'}</div>
+                        <div className="text-gray-600 text-sm">{post?.author?.role || 'Contributor'}</div>
                     </div>
                 </motion.div>
 
@@ -89,7 +86,7 @@ export default function ArticlePage() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="prose prose-lg max-w-none bg-white/80 backdrop-blur-xl rounded-2xl p-8 shadow-lg border border-white/20"
                 >
-                    {post.content.map((block, index) => {
+                    {post?.content.map((block, index) => {
                         switch (block.type) {
                             case 'paragraph':
                                 return (

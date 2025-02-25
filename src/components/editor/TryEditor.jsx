@@ -162,8 +162,10 @@ export default function TryEditor({ initialData = {}, readOnly = false }) {
                             variant={layout === "split" ? "default" : "ghost"}
                             onClick={() => setLayout("split")}
                             className={`h-7 gap-2 px-3 text-xs font-medium ${layout === "split" ? 'bg-white hover:bg-gray-50 text-black shadow-md' : 'text-gray-600 hover:text-gray-900'}`}
+                            aria-label="Switch to Split View"
+                            aria-pressed={layout === "split"}
                         >
-                            <SplitSquareHorizontal className="h-3.5 w-3.5" />
+                            <SplitSquareHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
                             <span className="hidden sm:inline">Split View</span>
                         </Button>
                         <Button
@@ -171,8 +173,10 @@ export default function TryEditor({ initialData = {}, readOnly = false }) {
                             variant={layout === "canvas" ? "default" : "ghost"}
                             onClick={() => setLayout("canvas")}
                             className={`h-7 gap-2 px-3 text-xs font-medium ${layout === "canvas" ? 'bg-white hover:bg-gray-50 text-black shadow-md' : 'text-gray-600 hover:text-gray-900'}`}
+                            aria-label="Switch to Canvas View"
+                            aria-pressed={layout === "canvas"}
                         >
-                            <Layout className="h-3.5 w-3.5" />
+                            <Layout className="h-3.5 w-3.5" aria-hidden="true" />
                             <span className="hidden sm:inline">Canvas View</span>
                         </Button>
                         <Button
@@ -180,8 +184,10 @@ export default function TryEditor({ initialData = {}, readOnly = false }) {
                             variant={layout === "markdown" ? "default" : "ghost"}
                             onClick={() => setLayout("markdown")}
                             className={`h-7 gap-2 px-3 text-xs font-medium ${layout === "markdown" ? 'bg-white hover:bg-gray-50 text-black shadow-md' : 'text-gray-600 hover:text-gray-900'}`}
+                            aria-label="Switch to Document View"
+                            aria-pressed={layout === "markdown"}
                         >
-                            <FileText className="h-3.5 w-3.5" />
+                            <FileText className="h-3.5 w-3.5" aria-hidden="true" />
                             <span className="hidden sm:inline">Document View</span>
                         </Button>
                     </div>
@@ -192,8 +198,9 @@ export default function TryEditor({ initialData = {}, readOnly = false }) {
                         size="sm"
                         as={Button}
                         className="h-8 w-full flex p-4 rounded-sm justify-center items-center gap-2 bg-blue-600 text-white hover:bg-blue-700"
+                        aria-label="Login to save your work"
                     >
-                        <Save className="h-3.5 w-3.5" />
+                        <Save className="h-3.5 w-3.5" aria-hidden="true" />
                         <span className="text-xs">Login</span>
                     </Link>
                 </div>

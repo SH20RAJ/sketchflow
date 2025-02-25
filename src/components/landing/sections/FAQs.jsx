@@ -45,17 +45,32 @@ export default function FAQs() {
           </p>
         </div>
         <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="w-full space-y-4">
+          <Accordion 
+            type="single" 
+            collapsible 
+            className="w-full space-y-4"
+            aria-label="Frequently Asked Questions"
+          >
             {faqs.map((faq, index) => (
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`}
                 className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200"
+                aria-labelledby={`faq-heading-${index}`}
               >
-                <AccordionTrigger className="px-6 py-4 text-left text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors duration-200">
+                <AccordionTrigger 
+                  className="px-6 py-4 text-left text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors duration-200"
+                  id={`faq-heading-${index}`}
+                  aria-controls={`faq-content-${index}`}
+                >
                   {faq.q}
                 </AccordionTrigger>
-                <AccordionContent className="px-6 py-4 text-gray-600 bg-gray-50">
+                <AccordionContent 
+                  className="px-6 py-4 text-gray-600 bg-gray-50"
+                  id={`faq-content-${index}`}
+                  role="region"
+                  aria-labelledby={`faq-heading-${index}`}
+                >
                   {faq.a}
                 </AccordionContent>
               </AccordionItem>
