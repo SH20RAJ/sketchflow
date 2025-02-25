@@ -207,7 +207,7 @@ export default function ProjectsPage({ searchParams }) {
               and remove all of its data from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className={"text-blue-600"}>
             <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
