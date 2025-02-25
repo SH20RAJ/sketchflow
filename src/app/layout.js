@@ -112,10 +112,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className=" ">
       <head>
-        <Script 
+        {/* <Script 
           src="https://sdk.cashfree.com/js/v3/cashfree.js"
           strategy="beforeInteractive"
-        />
+        /> */}
         {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-ETJGGD22FR"
