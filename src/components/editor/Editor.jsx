@@ -127,6 +127,9 @@ export default function Editor({
   const handleLayoutChange = useCallback((newLayout) => {
     setPreviousLayout(layout);
     setLayout(newLayout);
+
+    let m = markdown;
+    setMarkdown(m);
   }, [layout]);
 
   useEffect(() => {
