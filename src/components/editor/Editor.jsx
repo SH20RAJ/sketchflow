@@ -45,63 +45,34 @@ const DEFAULT_DATA = {
   markdown: `
 # SketchFlow
 
----
-
-A professional diagramming and markdown editor that combines the power of Excalidraw and Markdown.
+A diagramming and markdown editor combining Excalidraw and Markdown.
 
 ## Features
+- 🎨 Drawing with shapes, arrows, and text
+- 📝 Full markdown with live preview
+- 💾 Auto-save and project sharing
+- 🔄 Split/full view modes
+- 🔗 Public/private sharing
 
-### 🎨 Drawing Tools
-- Free-hand drawing
-- Shapes and arrows
-- Text annotations
-- Custom colors and styles
-
-### 📝 Markdown Support
-- Full markdown syntax
-- Real-time preview
-- Code blocks with syntax highlighting
-- Tables and lists
-
-### 💾 Project Management
-- Auto-saving
-- Project sharing
-- Custom project names
-- Public/private visibility
-
-## Getting Started
-
-1. Create a new project
-2. Use the drawing tools on the left panel
-3. Write markdown in the right panel
-4. Save and share your work!
-
-## Tips
-- Use \`Ctrl + S\` to save
-- Toggle between split/full views
-- Export diagrams as PNG/SVG
-- Share projects via unique links
+## Quick Start
+1. Create project
+2. Draw on left
+3. Write on right
+4. Share your work
 
 ---
-Made with ❤️ by SketchFlow Team
-
+Made with ❤️ by SketchFlow
   `,
   name: "Untitled Project" + Math.floor(Math.random() * 1000),
 };
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function Editor({
-  projectId,
-  initialData = {},
-  isOwner = false,
-}) {
+export default function Editor({ projectId, initialData = {}, isOwner = false }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [layout, setLayout] = useState('split');
-  const [autoSaveStatus, setAutoSaveStatus] = useState('saved');
-  const [lastSaved, setLastSaved] = useState(new Date());
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [excalidrawData, setExcalidrawData] = useState(
@@ -156,8 +127,10 @@ export default function Editor({
 
   const handleExcalidrawChange = useCallback((elements, appState) => {
     setExcalidrawData({ elements, appState });
-    setAutoSaveStatus('unsaved');
-    debouncedAutoSave();
+  }, []);
+
+  const handleMarkdownChange = useCallback((newMarkdown) => {
+    setMarkdown(newMarkdown);
   }, []);
 
   const debouncedAutoSave = useCallback(
@@ -188,12 +161,6 @@ export default function Editor({
     }, 2000),
     [projectId, excalidrawData, markdown, projectName, projectDescription, mutate]
   );
-
-  const handleMarkdownChange = useCallback((newMarkdown) => {
-    setMarkdown(newMarkdown);
-    setAutoSaveStatus('unsaved');
-    debouncedAutoSave();
-  }, [debouncedAutoSave]);
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -284,8 +251,6 @@ export default function Editor({
         copyShareLink={copyShareLink}
         projectDescription={projectDescription}
         handleDescriptionChange={handleDescriptionChange}
-        autoSaveStatus={autoSaveStatus}
-        lastSaved={lastSaved}
       />
 
       <div className="flex-1 min-h-0 relative">
