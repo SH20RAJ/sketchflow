@@ -37,13 +37,13 @@ const MenuItem = ({ href, icon: Icon, children, className, badge }) => {
         )} />
         <span className="flex-1 font-medium">{children}</span>
         {badge}
-        <ChevronRight className={cn(
+        {/* <ChevronRight className={cn(
           "h-4 w-4 text-gray-400",
           "transition-all duration-300",
           "opacity-0 -translate-x-2",
           "group-hover:opacity-100 group-hover:translate-x-0",
           "group-hover:text-blue-500"
-        )} />
+        )} /> */}
       </Link>
     </Button>
   );
@@ -135,17 +135,42 @@ export function SideBarHere() {
               </MenuItem>
             </div>
           </div>
-
-          <div>
+          
+          <Separator className="my-4" />
+          
+          {/* <div>
             <h2 className="mb-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Articles</h2>
             <div className="space-y-1.5">
-              <MenuItem href="/projects/articles" icon={FileText}>All Articles</MenuItem>
-              <MenuItem href="/articles/new" icon={PlusCircle}>
+              <MenuItem 
+                href="#" 
+                icon={FileText}
+                className="opacity-50 cursor-not-allowed"
+                onClick={(e) => {
+                  e.preventDefault();
+                  toast.info("Articles feature coming soon!");
+                }}
+              >
+                All Articles
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded-full bg-gradient-to-r from-yellow-600/10 to-yellow-400/10 text-yellow-600 border border-yellow-200 text-xs font-medium">
+                  Coming Soon
+                </span>
+              </MenuItem>
+              <MenuItem 
+                href="#" 
+                icon={PlusCircle}
+                className="opacity-50 cursor-not-allowed"
+                onClick={(e) => {
+                  e.preventDefault();
+                  toast.info("Articles feature coming soon!");
+                }}
+              >
                 New Article
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded-full bg-gradient-to-r from-yellow-600/10 to-yellow-400/10 text-yellow-600 border border-yellow-200 text-xs font-medium">
+                  Coming Soon
+                </span>
               </MenuItem>
             </div>
-          </div>
-
+          </div> */}
           <div className="px-4">
             <div className="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200/50 space-y-3 shadow-sm hover:shadow-md transition-shadow duration-200">
               <div className="flex justify-between text-sm">
