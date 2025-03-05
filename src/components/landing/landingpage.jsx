@@ -111,9 +111,8 @@ export default function LandingPage() {
         {/* Features Section */}
         <FeaturesSection />
 
-        <PricingSection />
-
-        <Testimonials />
+        {/* <PricingSection /> */}
+ 
 
         {/* Hero CTA Section with Glassmorphism */}
         <section className="py-32 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 relative overflow-hidden">
@@ -480,6 +479,9 @@ export default function LandingPage() {
             </motion.div>
           </div>
         </section>
+
+        <Testimonials />
+
 
         {/* New FAQ Section */}
         <FAQs />
