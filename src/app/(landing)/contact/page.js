@@ -42,25 +42,39 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
+    // Form validation
+    if (!formData.name.trim()) {
+      toast.error('Please enter your name');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      toast.error('Please enter a valid email address');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.message.trim()) {
+      toast.error('Please enter your message');
+      setIsSubmitting(false);
+      return;
+    }
+    
     try {
-      // Create the email body with formatted content
-      const emailBody = `
-Name: ${formData.name}
-Company: ${formData.company || 'Not specified'}
-Email: ${formData.email}
+      // Send email using server API
+      const response = await fetch('/api/contact/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
 
-Message:
-${formData.message}
-      `.trim();
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to send message. Please try again later.');
+      }
 
-      // Create the mailto URL with encoded parameters
-      const mailtoUrl = `mailto:sh20raj@gmail.com?subject=Contact Form Submission from ${encodeURIComponent(formData.name)}&body=${encodeURIComponent(emailBody)}`;
-
-      // Open the mailto link
-      window.location.href = mailtoUrl;
-
-      // Show success message
-      toast.success('Opening your email client...');
+      toast.success('Message sent successfully! We\'ll get back to you soon.');
 
       // Reset form
       setFormData({
@@ -70,7 +84,8 @@ ${formData.message}
         message: ''
       });
     } catch (error) {
-      toast.error('Failed to open email client. Please try again.');
+      console.error('Contact form error:', error);
+      toast.error(error.message || 'Failed to send message. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
@@ -273,10 +288,10 @@ ${formData.message}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-16"
         >
           {[
-            { icon: Mail, title: "Email", info: "contact@sketchflow.space" },
-            { icon: Phone, title: "Phone", info: "+1 (555) 123-4567" },
-            { icon: MapPin, title: "Office", info: "123 Innovation Street, Tech City" },
-            { icon: Clock, title: "Hours", info: "Mon-Fri: 9AM-6PM EST" }
+            { icon: Mail, title: "Email", info: "support@sketchflow.space" },
+            { icon: Phone, title: "Phone", info: "+91 (999) 999-9999" },
+            { icon: MapPin, title: "Office", info: "Bangalore, Karnataka, India" },
+            { icon: Clock, title: "Hours", info: "Mon-Fri: 10AM-7PM IST" }
           ].map((item, index) => (
             <motion.div
               key={index}
@@ -296,4 +311,4 @@ ${formData.message}
       </div>
     </div>
   );
-} 
+}
