@@ -1,4 +1,3 @@
-'use client'
 import HeroCTASection from "./sections/HeroCTASection";
 import StatsSection from "./sections/StatsSection";
 import HeroSection from "./sections/HeroSection";
