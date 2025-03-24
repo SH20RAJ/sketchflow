@@ -34,15 +34,20 @@ export default function LandingNavBar() {
                 alt="SketchFlow"
                 className="h-10 w-auto hover:rotate-360 transition-all duration-500"
               />
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 text-transparent bg-clip-text">
-                SketchFlow
-              </span>
+<div className="flex items-center">
+  <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 text-transparent bg-clip-text">
+    SketchFlow
+  </span>
+  <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full">
+    BETA
+  </span>
+</div>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
-            {["Home", "Features", "Pricing", "Contact"].map((item) => (
+            {["Home", "Features",  "Contact"].map((item) => (
               <div key={item} className="relative group">
                 <Link
                   href={item === "Home" ? "/#" : `/${item.toLowerCase()}`}

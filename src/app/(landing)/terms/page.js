@@ -77,6 +77,13 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-gray-800">7. Beta Status and Feature Availability</h2>
+            <p className="text-gray-600 leading-relaxed">
+              Please note that SketchFlow is currently in beta phase. Some features mentioned on our website, including but not limited to real-time collaboration and AI-powered generation capabilities, may not be fully implemented or available at this time. We are actively developing these features and will make them available as soon as they meet our quality standards. Users will be notified when new features are released.
+            </p>
+          </section>
+
+          <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-gray-800">Contact</h2>
             <p className="text-gray-600 leading-relaxed">
               If you have any questions about these Terms, please contact us at:

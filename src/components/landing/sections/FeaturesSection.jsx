@@ -31,9 +31,14 @@ export default function FeaturesSection() {
                 <Users className="h-6 w-6 text-white" />
               </div>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Real-time Collaboration
-            </h3>
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-xl font-semibold text-gray-900">
+                Real-time Collaboration
+              </h3>
+              <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs font-medium rounded-full">
+                Coming Soon
+              </span>
+            </div>
             <p className="text-gray-600">
               Work together seamlessly with your team in real-time. Share
               ideas instantly and boost productivity.
@@ -46,9 +51,14 @@ export default function FeaturesSection() {
                 <CheckCircle2 className="h-6 w-6 text-white" />
               </div>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Smart Diagrams
-            </h3>
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-xl font-semibold text-gray-900">
+                Smart Diagrams
+              </h3>
+              <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs font-medium rounded-full">
+                Coming Soon
+              </span>
+            </div>
             <p className="text-gray-600">
               Create professional diagrams with intelligent tools and
               templates. AI-powered suggestions help you design faster.

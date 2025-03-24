@@ -16,11 +16,11 @@ export default function LandingPage() {
       <main className="overflow-hidden">
         <HeroSection />
         <FeaturesSection />
-        <HeroCTASection />
         <StatsSection />
 
         <HowItWorksSection />
         <UseCasesSection />
+        <HeroCTASection />
         <SocialProofSection />
         <ComparisonSection />
         <Testimonials />

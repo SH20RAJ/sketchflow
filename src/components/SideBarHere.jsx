@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, FolderOpen, Share2, Settings, LogOut, CreditCard, ChevronRight, Sparkles, FileText } from "lucide-react";
+import { PlusCircle, FolderOpen, Share2, Settings, LogOut, CreditCard, ChevronRight, Sparkles, FileText, Tag } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -125,14 +125,8 @@ export function SideBarHere() {
                 {isCreating ? "Creating..." : "New Project"}
               </MenuItem>
               <MenuItem href="/projects/shared" icon={Share2}>Shared Projects</MenuItem>
-              <MenuItem
-                href="/projects/templates"
-                icon={Sparkles}
-                className="relative"
-                badge={<TemplatesBadge />}
-              >
-                Templates
-              </MenuItem>
+              <MenuItem href="/projects/tag-manage" icon={Tag}>Manage Tags</MenuItem>
+              
             </div>
           </div>
           

@@ -10,24 +10,28 @@ import {
 export default function FAQs() {
   const faqs = [
     {
-      q: "How does the free trial work?",
-      a: "Start with our 14-day free trial with full access to all Pro features. No credit card required.",
+      q: "What makes SketchFlow unique?",
+      a: "SketchFlow combines a real-time collaborative whiteboard with a powerful markdown editor, allowing you to seamlessly switch between visual diagrams and structured documentation in one workspace.",
     },
     {
-      q: "Can I collaborate with my team?",
-      a: "Yes! Invite unlimited team members and collaborate in real-time on all your projects.",
+      q: "How does the collaboration feature work?",
+      a: "Our real-time collaboration allows multiple team members to work simultaneously on the same canvas and document. You can see live cursor movements, drawing changes, and text edits from all participants.",
     },
     {
-      q: "What happens to my data?",
-      a: "Your data is securely stored and backed up. We use enterprise-grade encryption to protect your information.",
+      q: "What drawing tools are available?",
+      a: "SketchFlow offers a comprehensive set of drawing tools including free-hand drawing, shapes, arrows, text annotations, and custom colors. You can also use AI-powered design suggestions to enhance your diagrams.",
     },
     {
-      q: "Can I export my diagrams?",
-      a: "Export your diagrams in multiple formats including PNG, SVG, and PDF. Pro users get access to additional export options.",
+      q: "Can I use templates?",
+      a: "Yes! SketchFlow comes with a variety of pre-built templates for different use cases like brainstorming, project planning, and system design. Pro users get access to additional premium templates.",
     },
     {
-      q: "Do you offer enterprise plans?",
-      a: "Yes, we offer custom enterprise plans with additional features, dedicated support, and custom integrations.",
+      q: "How does the export feature work?",
+      a: "You can export your work in multiple formats: PNG and SVG for diagrams, PDF for combined canvas and documentation, and even record your whiteboard sessions as MP4 videos. Pro users get access to additional export options and higher resolution exports.",
+    },
+    {
+      q: "Is my data secure?",
+      a: "Yes, we use enterprise-grade encryption for all data storage and transmission. Your projects are automatically backed up, and Pro users get additional backup options and data retention controls.",
     },
   ]
 
