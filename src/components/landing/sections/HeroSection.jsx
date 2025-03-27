@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ArrowRight, Shield, Users, Zap, Star, Play } from "lucide-react";
 import { motion } from "framer-motion";
+import { RainbowButton } from "@/components/magicui/rainbow-button";
 
 export default function HeroSection() {
   const { data: session, status } = useSession();
@@ -104,17 +105,17 @@ export default function HeroSection() {
           <Link
             href={"/try"}
           >
-            <Button
+            <RainbowButton
               size="lg"
               variant="outline"
-              className="w-full sm:w-auto text-gray-700 hover:text-blue-600 bg-white/80 backdrop-blur-sm hover:bg-blue-50 text-lg px-8 py-6 rounded-xl group border-2 border-gray-200 hover:border-blue-200 transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-1 flex items-center justify-center gap-3"
+              className="w-full sm:w-auto   hover:text-blue-600 bg-white/80 backdrop-blur-sm hover:bg-blue-50 text-lg px-8 py-6 rounded-xl group border-2 border-gray-200 hover:border-blue-200 transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-1 flex items-center justify-center gap-3"
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-blue-100 rounded-full blur-lg opacity-50"></div>
                 <Play className="h-5 w-5 relative text-blue-600 group-hover:scale-110 transition-transform" />
               </div>
               <span className="font-medium">Try Free (No Login)</span>
-            </Button>
+            </RainbowButton>
           </Link>
         </div>
 
