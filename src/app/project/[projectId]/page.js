@@ -1,15 +1,24 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import Editor from '@/components/editor/Editor';
+import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Share2, Copy, Lock, Globe, Loader2, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Loading from '@/app/loading';
+
+// Dynamically import the Editor component with SSR disabled
+const Editor = dynamic(() => import('@/components/editor/Editor'), {
+  ssr: false,
+  loading: () => <Loading />
+});
+
+// SWR fetcher function
+const fetcher = (url) => fetch(url).then(res => res.json());
 
 export default function ProjectPage({ params }) {
   const router = useRouter();
