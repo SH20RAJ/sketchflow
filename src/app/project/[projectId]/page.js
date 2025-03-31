@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, useMemo, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -163,8 +163,20 @@ export default function ProjectPage({ params }) {
           <Card className="w-full max-w-md">
             <CardContent className="pt-6">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Project Not Found</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Easy Login to view the content</h2>
               <p className="text-gray-600 mb-6">{error}</p>
+<Button
+  className="w-full mb-4"
+  variant="outline"
+  onClick={() => signIn('google')}
+>
+  <img
+    src="https://www.google.com/favicon.ico"
+    alt="Google"
+    className="w-4 h-4 mr-2"
+  />
+  Sign in with Google
+</Button>
               <Button
                 className="w-full"
                 onClick={() => router.push('/projects')}
