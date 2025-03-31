@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -36,6 +36,20 @@ export default function SubscriptionPage() {
     if (typeof window !== 'undefined' && window.paypal) {
       setPaypalLoaded(true);
     }
+    
+    // Show beta notification on component mount
+    toast.warning(
+      "⚠️ Beta Notice: Subscriptions are currently unavailable as we're in beta. We're working on:",
+      {
+        description: [
+          "• Payment system security enhancements",
+          "• Infrastructure scaling improvements",
+          "• Feature stability testing",
+          "• Integration with multiple payment providers"
+        ].join('\n'),
+        duration: 10000,
+      }
+    );
   }, []);
 
   const plans = [
@@ -89,84 +103,14 @@ export default function SubscriptionPage() {
   ];
 
   const handleSubscribe = async (planType) => {
-    setSelectedPlanType(planType);
-    setShowPaymentSelector(true);
+    toast.error("Subscriptions are currently unavailable during beta phase. Please check back later!");
+    return;
   };
 
   const handlePaymentGatewaySelect = async (gatewayId) => {
-    try {
-      setLoading(true);
-
-      if (gatewayId === 'paypal') {
-        // Initialize PayPal
-        if (!window.paypal) {
-          throw new Error('PayPal SDK not loaded');
-        }
-
-        // Use the actual plan ID from your PayPal dashboard
-        const planId = 'P-8C522601C5328290YM642VZI';
-        const buttonContainerId = `paypal-button-container-${planId}`;
-        
-        // Create a new div with unique ID for the button
-        const container = document.getElementById('paypal-button-container');
-        container.innerHTML = `<div id="${buttonContainerId}"></div>`;
-
-        const paypalButtonsComponent = paypal.Buttons({
-          style: {
-            shape: 'rect',
-            color: 'white',
-            layout: 'horizontal',
-            label: 'subscribe'
-          },
-          createSubscription: function(data, actions) {
-            return actions.subscription.create({
-              plan_id: planId // Use the actual PayPal plan ID
-            });
-          },
-          onApprove: async function(data, actions) {
-            try {
-              console.log('Subscription ID:', data.subscriptionID); // Log the subscription ID
-              // Create payment record
-              const response = await fetch("/api/payments/paypal/success", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  subscriptionId: data.subscriptionID,
-                  planType: selectedPlanType
-                })
-              });
-
-              if (!response.ok) {
-                throw new Error('Failed to update subscription status');
-              }
-
-              toast.success("Subscription successful!");
-              mutate(); // Refresh subscription data
-              router.push('/projects');
-            } catch (error) {
-              console.error("Error updating subscription:", error);
-              toast.error("Subscription created but failed to update status. Please contact support.");
-            }
-          },
-          onError: function(err) {
-            console.error('PayPal Error:', err);
-            toast.error("PayPal subscription failed. Please try again.");
-          }
-        });
-
-        if (paypalButtonsComponent.isEligible()) {
-          paypalButtonsComponent.render(`#${buttonContainerId}`);
-        } else {
-          toast.error("PayPal Buttons are not eligible");
-        }
-      }
-    } catch (error) {
-      console.error("Payment error:", error);
-      toast.error(error.message || "Failed to process payment");
-    } finally {
-      setLoading(false);
-      setShowPaymentSelector(false);
-    }
+    toast.error("Payment processing is temporarily disabled during our beta phase.");
+    setShowPaymentSelector(false);
+    setLoading(false);
   };
 
   const handleNavigation = () => {
@@ -191,6 +135,21 @@ export default function SubscriptionPage() {
       />
 
       <div className="container mx-auto px-4 py-8">
+        {/* Beta Notice Banner */}
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
+          <div className="flex items-center">
+            <AlertTriangle className="h-6 w-6 text-yellow-400 mr-3" />
+            <div>
+              <p className="text-sm text-yellow-700 font-medium">
+                Beta Phase Notice
+              </p>
+              <p className="text-sm text-yellow-600 mt-1">
+                Subscriptions are currently unavailable while we enhance our payment systems and infrastructure. Stay tuned for updates!
+              </p>
+            </div>
+          </div>
+        </div>
+
         <nav className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text mb-2">
@@ -224,9 +183,12 @@ export default function SubscriptionPage() {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Select the perfect plan for your needs. Upgrade or downgrade at any time.
           </p>
+          <p className="text-md text-yellow-600 mt-4">
+            ⚠️ Subscriptions will be available soon after beta testing is complete
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto opacity-75">
           {plans.map((plan) => (
             <motion.div
               key={plan.id}
@@ -274,16 +236,9 @@ export default function SubscriptionPage() {
                         plan.id.startsWith("pro") ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-900 hover:bg-gray-800"
                       )}
                       onClick={() => handleSubscribe(plan.id.includes("yearly") ? "yearly" : "monthly")}
-                      disabled={loading && selectedPlan === plan.id}
+                      disabled={true}
                     >
-                      {loading && selectedPlan === plan.id ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        plan.id === "free" ? "Get Started" : "Upgrade"
-                      )}
+                      Coming Soon
                     </Button>
                   )}
                 </CardFooter>
