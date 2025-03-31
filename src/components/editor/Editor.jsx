@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { debounce } from "lodash";
 import useSWR from "swr";
 import { Excalidraw } from "@excalidraw/excalidraw";
 import { MarkdownEditor } from "./MarkdownEditor";
 import { useRouter } from "next/navigation";
-import { ResizablePanel, ResizablePanelGroup } from "../ui/resizable";
+import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from "../ui/resizable";
 import { toast } from "sonner";
 import { EditorNavbar } from "./EditorNavbar";
 
@@ -52,9 +51,6 @@ export default function Editor({ projectId, initialData = {}, isOwner = false })
   const handleLayoutChange = useCallback((newLayout) => {
     setPreviousLayout(layout);
     setLayout(newLayout);
-
-    let m = markdown;
-    setMarkdown(m);
   }, [layout]);
 
   useEffect(() => {
@@ -86,35 +82,6 @@ export default function Editor({ projectId, initialData = {}, isOwner = false })
   const handleMarkdownChange = useCallback((newMarkdown) => {
     setMarkdown(newMarkdown);
   }, []);
-
-  const debouncedAutoSave = useCallback(
-    debounce(async () => {
-      if (!projectId) return;
-      setAutoSaveStatus('saving');
-      try {
-        const response = await fetch(`/api/projects/${projectId}/save`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            excalidraw: excalidrawData,
-            markdown,
-            name: projectName,
-            description: projectDescription,
-          }),
-        });
-        const result = await response.json();
-        if (!response.ok)
-          throw new Error(result.message || "Failed to save project");
-        mutate(result);
-        setLastSaved(new Date());
-        setAutoSaveStatus('saved');
-      } catch (err) {
-        console.error("Auto-save error:", err);
-        setAutoSaveStatus('error');
-      }
-    }, 2000),
-    [projectId, excalidrawData, markdown, projectName, projectDescription, mutate]
-  );
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -224,6 +191,7 @@ export default function Editor({ projectId, initialData = {}, isOwner = false })
               />
             </div>
           </ResizablePanel>
+          <ResizableHandle withHandle />
           <ResizablePanel
             defaultSize={layout === 'split' ? 70 : 100}
             className={`min-h-0 ${layout === 'markdown' ? 'hidden' : ''}`}
