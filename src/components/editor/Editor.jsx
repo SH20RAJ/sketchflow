@@ -4,37 +4,11 @@ import React, { useState, useCallback, useEffect } from "react";
 import { debounce } from "lodash";
 import useSWR from "swr";
 import { Excalidraw } from "@excalidraw/excalidraw";
-import { LoadingButton } from "@/components/ui/loading";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Pencil,
-  Save,
-  X,
-  Layout,
-  Share2,
-  Copy,
-  Globe,
-  Loader2,
-} from "lucide-react";
 import { MarkdownEditor } from "./MarkdownEditor";
 import { useRouter } from "next/navigation";
 import { ResizablePanel, ResizablePanelGroup } from "../ui/resizable";
-import Image from "next/image";
-import Link from "next/link";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { motion } from "framer-motion";
 import { EditorNavbar } from "./EditorNavbar";
-import { TagDialog } from "./TagDialog";
 
 const DEFAULT_DATA = {
   excalidraw: {
@@ -42,27 +16,7 @@ const DEFAULT_DATA = {
     appState: { viewBackgroundColor: "#ffffff" },
     scrollToContent: true,
   },
-  markdown: `
-# SketchFlow
-
-A diagramming and markdown editor combining Excalidraw and Markdown.
-
-## Features
-- 🎨 Drawing with shapes, arrows, and text
-- 📝 Full markdown with live preview
-- 💾 Auto-save and project sharing
-- 🔄 Split/full view modes
-- 🔗 Public/private sharing
-
-## Quick Start
-1. Create project
-2. Draw on left
-3. Write on right
-4. Share your work
-
----
-Made with ❤️ by SketchFlow
-  `,
+  markdown: ``,
   name: "Untitled Project" + Math.floor(Math.random() * 1000),
 };
 
@@ -258,39 +212,35 @@ export default function Editor({ projectId, initialData = {}, isOwner = false })
           direction={layout === 'split' ? 'horizontal' : 'vertical'}
           className="rounded-lg"
         >
-          {layout !== 'sketch' && (
-            <ResizablePanel
-              defaultSize={layout === 'split' ? 30 : 100}
-              className="min-h-0"
-            >
-              <div className="h-full overflow-auto">
-                <MarkdownEditor
-                  content={markdown}
-                  onChange={handleMarkdownChange}
-                  readOnly={!isOwner}
-                />
-              </div>
-            </ResizablePanel>
-          )}
-          {layout !== 'markdown' && (
-            <ResizablePanel
-              defaultSize={layout === 'split' ? 70 : 100}
-              className="min-h-0"
-            >
-              <Excalidraw
-                onChange={handleExcalidrawChange}
-                initialData={excalidrawData}
-                viewModeEnabled={!isOwner}
-                UIOptions={{
-                  dockedToolbar: true,
-                  toolbarPosition: "left",
-                  canvasActions: {
-                    saveToActiveFile: false,
-                  }
-                }}
+          <ResizablePanel
+            defaultSize={layout === 'split' ? 30 : 100}
+            className={`min-h-0 ${layout === 'sketch' ? 'hidden' : ''}`}
+          >
+            <div className="h-full overflow-auto">
+              <MarkdownEditor
+                content={markdown}
+                onChange={handleMarkdownChange}
+                readOnly={!isOwner}
               />
-            </ResizablePanel>
-          )}
+            </div>
+          </ResizablePanel>
+          <ResizablePanel
+            defaultSize={layout === 'split' ? 70 : 100}
+            className={`min-h-0 ${layout === 'markdown' ? 'hidden' : ''}`}
+          >
+            <Excalidraw
+              onChange={handleExcalidrawChange}
+              initialData={excalidrawData}
+              viewModeEnabled={!isOwner}
+              UIOptions={{
+                dockedToolbar: true,
+                toolbarPosition: "left",
+                canvasActions: {
+                  saveToActiveFile: false,
+                }
+              }}
+            />
+          </ResizablePanel>
         </ResizablePanelGroup>
       </div>
     </div>
