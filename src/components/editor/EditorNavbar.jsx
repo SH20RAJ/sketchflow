@@ -306,7 +306,7 @@ export function EditorNavbar({
                                         {autoSaveStatus === 'saving' ? 'Saving...' :
                                             autoSaveStatus === 'error' ? 'Save failed' :
                                                 autoSaveStatus === 'unsaved' ? 'Save' :
-                                                    `Saved ${lastSaved ? new Date(lastSaved).toLocaleTimeString() : ''}`}
+                                                    `Save ${lastSaved ? new Date(lastSaved).toLocaleTimeString() : ''}`}
                                     </span>
                                 </>
                             )}
