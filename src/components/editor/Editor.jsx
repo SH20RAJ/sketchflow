@@ -43,6 +43,9 @@ export default function Editor({ projectId, initialData = {}, isOwner = false, i
     initialData?.description || ''
   );
   const [showTagDialog, setShowTagDialog] = useState(false);
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+  const [autoSaveInterval, setAutoSaveInterval] = useState(80000); // 30 seconds
 
   const handleTagsUpdated = async () => {
     await mutate();
@@ -53,12 +56,90 @@ export default function Editor({ projectId, initialData = {}, isOwner = false, i
     setLayout(newLayout);
   }, [layout]);
 
+  // Auto-save functionality - only on content changes
+  useEffect(() => {
+    if (!autoSaveEnabled || !projectId) return;
+    if (isSaving) return; // Don't trigger a new save if already saving
+
+    // Create a debounced save function
+    const debouncedSave = setTimeout(async () => {
+      if (excalidrawData || markdown) {
+        try {
+          setIsSaving(true);
+          const response = await fetch(`/api/projects/${projectId}/save`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              excalidraw: excalidrawData,
+              markdown,
+              name: projectName,
+              description: projectDescription,
+            }),
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            mutate(result);
+            setLastSaved(new Date());
+            console.log('Auto-saved project after content change');
+          }
+        } catch (err) {
+          console.error("Auto-save error:", err);
+        } finally {
+          setIsSaving(false);
+        }
+      }
+    }, 2000); // 2 second debounce
+
+    return () => clearTimeout(debouncedSave);
+  }, [excalidrawData, markdown]); // Only trigger on content changes
+
+  // Auto-save on project name or description changes
+  useEffect(() => {
+    if (!autoSaveEnabled || !projectId || isSaving) return;
+
+    // Only save if we have a name (to avoid saving empty projects)
+    if (!projectName) return;
+
+    // Create a debounced save function with longer delay for metadata changes
+    const debouncedMetadataSave = setTimeout(async () => {
+      try {
+        setIsSaving(true);
+        const response = await fetch(`/api/projects/${projectId}/save`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            excalidraw: excalidrawData,
+            markdown,
+            name: projectName,
+            description: projectDescription,
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          mutate(result);
+          setLastSaved(new Date());
+          console.log('Auto-saved project after metadata change');
+        }
+      } catch (err) {
+        console.error("Metadata auto-save error:", err);
+      } finally {
+        setIsSaving(false);
+      }
+    }, 3000); // 3 second debounce for metadata changes
+
+    return () => clearTimeout(debouncedMetadataSave);
+  }, [projectName, projectDescription]);
+
+  // Save markdown to localStorage as backup
   useEffect(() => {
     if (markdown) {
       localStorage.setItem('markdown-content', markdown);
     }
   }, [markdown]);
 
+  // Load markdown from localStorage if available
   useEffect(() => {
     const savedMarkdown = localStorage.getItem('markdown-content');
     if (savedMarkdown && !markdown) {
@@ -101,6 +182,7 @@ export default function Editor({ projectId, initialData = {}, isOwner = false, i
         throw new Error(result.message || "Failed to save project");
       mutate(result);
       setIsEditingName(false);
+      setLastSaved(new Date());
       toast.success("Project saved successfully");
     } catch (err) {
       console.error("Save error:", err);
@@ -109,6 +191,45 @@ export default function Editor({ projectId, initialData = {}, isOwner = false, i
       setIsSaving(false);
     }
   }, [projectId, excalidrawData, markdown, projectName, projectDescription, mutate]);
+
+  // Sync function to fetch the latest project data from the database
+  const handleSync = useCallback(async () => {
+    try {
+      toast.loading("Syncing project...");
+
+      // Fetch the latest project data
+      const response = await fetch(`/api/projects/${projectId}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch project data");
+      }
+
+      const latestData = await response.json();
+
+      // Update the local state with the latest data
+      if (latestData.markdown?.content) {
+        setMarkdown(latestData.markdown.content);
+      }
+
+      if (latestData.diagram?.content) {
+        setExcalidrawData(latestData.diagram.content);
+      }
+
+      setProjectName(latestData.name || DEFAULT_DATA.name);
+      setProjectDescription(latestData.description || '');
+      setIsShared(latestData.shared || false);
+
+      // Update the SWR cache
+      mutate(latestData);
+
+      toast.dismiss();
+      toast.success("Project synced successfully");
+    } catch (error) {
+      console.error("Sync error:", error);
+      toast.dismiss();
+      toast.error("Failed to sync project: " + error.message);
+    }
+  }, [projectId, mutate]);
 
   const toggleShare = async () => {
     setIsSharing(true);
@@ -162,6 +283,9 @@ export default function Editor({ projectId, initialData = {}, isOwner = false, i
         isShared={isShared}
         isCollaborator={isCollaborator}
         collaboratorRole={collaboratorRole}
+        autoSaveEnabled={autoSaveEnabled}
+        setAutoSaveEnabled={setAutoSaveEnabled}
+        lastSaved={lastSaved}
         layout={layout}
         setLayout={handleLayoutChange}
         handleSave={handleSave}
@@ -174,6 +298,7 @@ export default function Editor({ projectId, initialData = {}, isOwner = false, i
         copyShareLink={copyShareLink}
         projectDescription={projectDescription}
         handleDescriptionChange={handleDescriptionChange}
+        handleSync={handleSync}
       />
 
       <div className="flex-1 min-h-0 relative">

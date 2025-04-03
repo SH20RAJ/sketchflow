@@ -20,7 +20,9 @@ import {
     FileJson,
     Users,
     UserPlus,
-    Activity
+    Activity,
+    Clock,
+    RefreshCw
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -73,13 +75,15 @@ const layouts = [
 ];
 
 export function EditorNavbar({
-    project,
     projectName,
     handleNameChange,
     isOwner,
     isShared,
     isCollaborator = false,
     collaboratorRole = null,
+    autoSaveEnabled = true,
+    setAutoSaveEnabled = () => {},
+    lastSaved = null,
     layout,
     setLayout,
     handleSave,
@@ -93,7 +97,7 @@ export function EditorNavbar({
     projectDescription,
     handleDescriptionChange,
     autoSaveStatus,
-    lastSaved
+    handleSync
 }) {
     const [isCloning, setIsCloning] = useState(false);
     const [showImportDialog, setShowImportDialog] = useState(false);
@@ -106,23 +110,26 @@ export function EditorNavbar({
 
 
     // Export project as JSON
-    const handleExportProject = () => {
-        console.log('Export project called', { project, projectName, projectDescription });
-
-        if (!project) {
-            console.error('Project is undefined');
-            toast.error('Cannot export: Project data is missing');
-            return;
-        }
+    const handleExportProject = async () => {
+        console.log('Export project called', { projectId, projectName, projectDescription });
 
         try {
+            // Fetch the latest project data
+            const response = await fetch(`/api/projects/${projectId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch project data for export');
+            }
+
+            const projectData = await response.json();
+            console.log('Fetched project data for export:', projectData);
+
             // Create a JSON object with all project data
             const exportData = {
                 name: projectName || 'Untitled Project',
                 description: projectDescription || '',
-                content: project.content || '',
-                diagram: project.diagram || '',
-                tags: project.projectTags || [],
+                content: projectData.markdown?.content || '',
+                diagram: projectData.diagram?.content || '',
+                tags: projectData.projectTags || [],
                 exportedAt: new Date().toISOString(),
                 version: '1.0'
             };
@@ -168,10 +175,11 @@ export function EditorNavbar({
         try {
             // Parse the JSON data
             const parsedData = JSON.parse(importData);
+            console.log('Parsed import data:', parsedData);
 
             // Validate the imported data
             if (!parsedData.name || !parsedData.content) {
-                throw new Error('Invalid project data format');
+                throw new Error('Invalid project data format: Missing name or content');
             }
 
             if (createNew) {
@@ -184,7 +192,7 @@ export function EditorNavbar({
                     body: JSON.stringify({
                         name: parsedData.name,
                         description: parsedData.description || '',
-                        content: parsedData.content,
+                        markdown: parsedData.content, // Use markdown field for content
                         diagram: parsedData.diagram || '',
                         tags: parsedData.tags || []
                     }),
@@ -207,6 +215,14 @@ export function EditorNavbar({
                 // First save the current state to avoid conflicts
                 await handleSave();
 
+                console.log('Updating project with imported data:', {
+                    projectId,
+                    name: parsedData.name,
+                    description: parsedData.description || projectDescription,
+                    content: parsedData.content,
+                    diagram: parsedData.diagram || ''
+                });
+
                 // Update the project data
                 const response = await fetch(`/api/projects/${projectId}`, {
                     method: 'PUT',
@@ -215,15 +231,17 @@ export function EditorNavbar({
                     },
                     body: JSON.stringify({
                         name: parsedData.name,
-                        description: parsedData.description || project.description,
+                        description: parsedData.description || projectDescription,
                         content: parsedData.content,
-                        diagram: parsedData.diagram || project.diagram
+                        diagram: parsedData.diagram || ''
                     }),
                 });
 
+                const responseData = await response.json();
+                console.log('Update response:', responseData);
+
                 if (!response.ok) {
-                    const data = await response.json();
-                    throw new Error(data.error || 'Failed to update project');
+                    throw new Error(responseData.error || 'Failed to update project');
                 }
 
                 toast.success('Project updated with imported data');
@@ -261,24 +279,7 @@ export function EditorNavbar({
         reader.readAsText(file);
     };
 
-    const handleRemoveTag = async (tagId) => {
-        try {
-            const response = await fetch(`/api/projects/${projectId}/tags/${tagId}`, {
-                method: 'DELETE',
-            });
-            if (!response.ok) throw new Error('Failed to remove tag');
-
-            // Remove the tag from the project's tags
-            if (project && project.projectTags) {
-                project.projectTags = project.projectTags.filter(tag => tag.id !== tagId);
-            }
-
-            toast.success('Tag removed successfully');
-        } catch (error) {
-            console.error('Error:', error);
-            toast.error('Failed to remove tag');
-        }
-    };
+    // Tag management is handled elsewhere
 
     const handleCloneProject = async () => {
         setIsCloning(true);
@@ -375,7 +376,22 @@ export function EditorNavbar({
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleSave} disabled={isSaving} className="h-9">
                                 <Save className="h-4 w-4 mr-2" />
-                                Save changes
+                                Save changes {lastSaved && `(Last: ${new Date(lastSaved).toLocaleTimeString()})`}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => setAutoSaveEnabled(!autoSaveEnabled)}
+                                className="h-9"
+                            >
+                                <Clock className="h-4 w-4 mr-2" />
+                                {autoSaveEnabled ? 'Disable Auto-save' : 'Enable Auto-save'}
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                                onClick={handleSync}
+                                className="h-9"
+                            >
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                                Sync with Server
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <h1 className="px-2 py-1 text-sm font-semibold text-gray-500">Collaboration</h1>

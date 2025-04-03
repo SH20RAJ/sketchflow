@@ -169,7 +169,7 @@ export async function DELETE(request, { params }) {
   }
 }
 
-export async function PATCH(request, { params }) {
+export async function PUT(request, { params }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -196,10 +196,76 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const updatedProject = await prisma.project.update({
-      where: { id: projectId },
-      data
-    });
+    // Handle content and diagram updates
+    let updatedProject;
+
+    if (data.content || data.diagram) {
+      // Update project name and description
+      updatedProject = await prisma.project.update({
+        where: { id: projectId },
+        data: {
+          name: data.name,
+          description: data.description
+        },
+        include: {
+          diagrams: true,
+          markdowns: true
+        }
+      });
+
+      // Update markdown content if provided
+      if (data.content) {
+        if (updatedProject.markdowns.length > 0) {
+          // Update existing markdown
+          await prisma.markdown.update({
+            where: { id: updatedProject.markdowns[0].id },
+            data: { content: data.content }
+          });
+        } else {
+          // Create new markdown
+          await prisma.markdown.create({
+            data: {
+              content: data.content,
+              projectId
+            }
+          });
+        }
+      }
+
+      // Update diagram content if provided
+      if (data.diagram) {
+        if (updatedProject.diagrams.length > 0) {
+          // Update existing diagram
+          await prisma.diagram.update({
+            where: { id: updatedProject.diagrams[0].id },
+            data: { content: data.diagram }
+          });
+        } else {
+          // Create new diagram
+          await prisma.diagram.create({
+            data: {
+              content: data.diagram,
+              projectId
+            }
+          });
+        }
+      }
+
+      // Fetch the updated project with all related data
+      updatedProject = await prisma.project.findUnique({
+        where: { id: projectId },
+        include: {
+          diagrams: true,
+          markdowns: true
+        }
+      });
+    } else {
+      // Simple update without content changes
+      updatedProject = await prisma.project.update({
+        where: { id: projectId },
+        data
+      });
+    }
 
     // If admin is updating someone else's project, log it
     if (isAdmin && !isOwner) {
