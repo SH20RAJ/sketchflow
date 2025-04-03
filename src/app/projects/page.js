@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Loader2, Trash, FolderOpen, Settings, LogOut } from "lucide-react";
+import { Plus, Loader2, FolderOpen, Settings, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenuContent,
@@ -32,6 +32,7 @@ import { ProjectFilters } from "@/components/projects/ProjectFilters";
 import { ProjectSearch } from "@/components/projects/ProjectSearch";
 import { ProjectPagination } from "@/components/projects/ProjectPagination";
 import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
+import { CollaboratedProjects } from "@/components/projects/CollaboratedProjects";
 import { redirect } from "next/navigation";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
@@ -272,6 +273,9 @@ export default function ProjectsPage({ searchParams }) {
       {pagination && pagination.totalPages > 1 && (
         <ProjectPagination pagination={pagination} />
       )}
+
+      {/* Collaborated Projects Section */}
+      <CollaboratedProjects searchQuery={search || ''} />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>

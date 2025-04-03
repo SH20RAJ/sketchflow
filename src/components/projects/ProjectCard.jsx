@@ -8,7 +8,7 @@ import { format } from "date-fns";
 import { useRouter } from 'next/navigation';
 import { AddTagToProjectDialog } from './AddTagToProjectDialog';
 
-export function ProjectCard({ project, onDelete }) {
+export function ProjectCard({ project, onDelete, isCollaborated = false, roleBadge = null }) {
     const router = useRouter();
     const [showTagDialog, setShowTagDialog] = useState(false);
     return (
@@ -33,9 +33,15 @@ export function ProjectCard({ project, onDelete }) {
                                 </Link>
                             </CardTitle>
                         </div>
-                        {project.shared && (
-                            <Globe className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        )}
+                        <div className="flex items-center gap-2">
+                            {roleBadge}
+                            {project.shared && !isCollaborated && (
+                                <Globe className="h-4 w-4 text-green-500 flex-shrink-0" />
+                            )}
+                            {isCollaborated && (
+                                <Users className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                            )}
+                        </div>
                     </div>
 
                     {project.projectTags && project.projectTags.length > 0 && (
@@ -79,10 +85,16 @@ export function ProjectCard({ project, onDelete }) {
                         <Clock className="h-3.5 w-3.5" />
                         <span>{format(new Date(project.updatedAt), "MMM d, yyyy")}</span>
                     </div>
-                    {project.shared && (
+                    {project.shared && !isCollaborated && (
                         <div className="flex items-center gap-1 text-purple-500 group-hover:text-purple-600 transition-colors duration-200">
                             <Users className="h-3.5 w-3.5" />
                             <span>Shared</span>
+                        </div>
+                    )}
+                    {isCollaborated && project.owner && (
+                        <div className="flex items-center gap-1 text-blue-500 group-hover:text-blue-600 transition-colors duration-200">
+                            <Users className="h-3.5 w-3.5" />
+                            <span>By {project.owner.name || 'Unknown'}</span>
                         </div>
                     )}
                 </div>
@@ -108,14 +120,16 @@ export function ProjectCard({ project, onDelete }) {
                         <span className="text-xs">Tags</span>
                     </Button>
                 </div>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-gray-500 hover:text-red-600 hover:bg-red-50/80 transition-all duration-200 rounded-md h-7 sm:h-8 w-7 sm:w-8 p-0"
-                    onClick={() => onDelete(project)}
-                >
-                    <Trash className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </Button>
+                {onDelete && !isCollaborated && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-500 hover:text-red-600 hover:bg-red-50/80 transition-all duration-200 rounded-md h-7 sm:h-8 w-7 sm:w-8 p-0"
+                        onClick={() => onDelete(project)}
+                    >
+                        <Trash className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    </Button>
+                )}
             </CardFooter>
 
             {/* Add Tag Dialog */}

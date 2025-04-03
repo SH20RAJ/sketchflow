@@ -1,6 +1,9 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from '@prisma/client';
+
+// Initialize Prisma client
+const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +24,8 @@ export async function POST(req, { params }) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const project = await prisma.project.findUnique({
+    // First check if user is the project owner
+    let project = await prisma.project.findUnique({
       where: {
         id: params.projectId,
         userId: user.id,
@@ -32,8 +36,47 @@ export async function POST(req, { params }) {
       },
     });
 
+    // If not the owner, check if user is a collaborator with EDITOR role
     if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      // Check if project exists
+      const projectExists = await prisma.project.findUnique({
+        where: {
+          id: params.projectId,
+        },
+        include: {
+          diagrams: true,
+          markdowns: true,
+        },
+      });
+
+      if (!projectExists) {
+        return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      }
+
+      // Check if user is a collaborator with EDITOR role
+      const collaborator = await prisma.projectCollaborator.findUnique({
+        where: {
+          projectId_userId: {
+            projectId: params.projectId,
+            userId: user.id
+          }
+        },
+        select: {
+          role: true,
+          inviteStatus: true
+        }
+      });
+
+      const isEditor = collaborator &&
+                      collaborator.inviteStatus === "ACCEPTED" &&
+                      collaborator.role === "EDITOR";
+
+      if (!isEditor) {
+        return NextResponse.json({ error: "You don't have permission to edit this project" }, { status: 403 });
+      }
+
+      // If user is a collaborator with EDITOR role, use the project
+      project = projectExists;
     }
 
     let existingDiagram = project.diagrams[0];
@@ -44,7 +87,7 @@ export async function POST(req, { params }) {
     //   "ff",
     //   existingDiagram.content.appState.collaborators
     // );
-    
+
 
     let existingMarkdown = project.markdowns[0];
 

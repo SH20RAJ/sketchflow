@@ -78,6 +78,8 @@ export function EditorNavbar({
     handleNameChange,
     isOwner,
     isShared,
+    isCollaborator = false,
+    collaboratorRole = null,
     layout,
     setLayout,
     handleSave,
@@ -101,7 +103,7 @@ export function EditorNavbar({
     const [showCollaboratorsDialog, setShowCollaboratorsDialog] = useState(false);
     const [showActivityFeed, setShowActivityFeed] = useState(false);
 
-  
+
 
     // Export project as JSON
     const handleExportProject = () => {
@@ -430,7 +432,8 @@ export function EditorNavbar({
 
             {/* Right Section */}
             <div className="flex items-center gap-2 px-2">
-                {isOwner ? (
+                {/* Show save button for owner or editor collaborators */}
+                {(isOwner || (isCollaborator && collaboratorRole === 'EDITOR')) ? (
                     <>
                         <Button
                             onClick={handleSave}

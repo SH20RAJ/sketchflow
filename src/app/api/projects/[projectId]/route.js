@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from '@prisma/client';
 import { auth } from "@/auth";
+
+// Initialize Prisma client
+const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 
@@ -44,8 +47,25 @@ export async function GET(request, { params }) {
     const isAdmin = isAdminUser(session.user.email);
     const isOwner = project.userId === session.user.id;
 
-    // Allow access if user is owner, project is shared, or user is admin
-    if (!isOwner && !project.shared && !isAdmin) {
+    // Check if user is a collaborator
+    const collaborator = await prisma.projectCollaborator.findUnique({
+      where: {
+        projectId_userId: {
+          projectId,
+          userId: session.user.id
+        }
+      },
+      select: {
+        role: true,
+        inviteStatus: true
+      }
+    });
+
+    const isCollaborator = collaborator && collaborator.inviteStatus === "ACCEPTED";
+    const collaboratorRole = isCollaborator ? collaborator.role : null;
+
+    // Allow access if user is owner, project is shared, user is admin, or user is a collaborator
+    if (!isOwner && !project.shared && !isAdmin && !isCollaborator) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -76,7 +96,9 @@ export async function GET(request, { params }) {
       ...project,
       markdown: mainMarkdown,
       diagram: mainDiagram,
-      isOwner
+      isOwner,
+      isCollaborator,
+      collaboratorRole
     };
 
     return NextResponse.json(response);

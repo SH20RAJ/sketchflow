@@ -28,6 +28,8 @@ export default function ProjectPage({ params }) {
   const [error, setError] = useState(null);
   const [isShared, setIsShared] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [isCollaborator, setIsCollaborator] = useState(false);
+  const [collaboratorRole, setCollaboratorRole] = useState(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [cloning, setCloning] = useState(false);
 
@@ -127,7 +129,7 @@ export default function ProjectPage({ params }) {
 
         console.log('Access check response:', accessData);
 
-        if (!accessData.hasAccess && !accessData.isShared) {
+        if (!accessData.hasAccess) {
           if (status === 'unauthenticated') {
             toast.error('Please log in to view this project');
             router.push('/login');
@@ -147,6 +149,8 @@ export default function ProjectPage({ params }) {
         setProjectData(data);
         setIsShared(data.shared);
         setIsOwner(session?.user?.id === data.userId);
+        setIsCollaborator(data.isCollaborator || false);
+        setCollaboratorRole(data.collaboratorRole || null);
         setError(null);
       } catch (error) {
         console.error('Error:', error);
@@ -216,6 +220,8 @@ export default function ProjectPage({ params }) {
           projectId={params.projectId}
           initialData={projectData}
           isOwner={isOwner}
+          isCollaborator={isCollaborator}
+          collaboratorRole={collaboratorRole}
         />
       </div>
     </div>

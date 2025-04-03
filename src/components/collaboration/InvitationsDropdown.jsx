@@ -35,7 +35,7 @@ export function InvitationsDropdown() {
     try {
       const response = await fetch('/api/collaborations/invitations');
       if (!response.ok) throw new Error('Failed to fetch invitations');
-      
+
       const data = await response.json();
       setInvitations(data.invitations || []);
     } catch (error) {
@@ -55,13 +55,20 @@ export function InvitationsDropdown() {
       });
 
       if (!response.ok) throw new Error('Failed to respond to invitation');
-      
+
       const data = await response.json();
       setInvitations(prev => prev.filter(inv => inv.projectId !== projectId));
       toast.success(data.message);
-      
+      setIsOpen(false); // Close dropdown after responding
+
       if (status === 'ACCEPTED') {
-        router.push(`/project/${projectId}`);
+        // Refresh the projects page to show the new collaborated project
+        if (window.location.pathname === '/projects') {
+          window.location.reload();
+        } else {
+          // Navigate to the project page
+          router.push(`/project/${projectId}`);
+        }
       }
     } catch (error) {
       console.error('Error responding to invitation:', error);
@@ -99,7 +106,7 @@ export function InvitationsDropdown() {
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel>Project Invitations</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        
+
         {isLoading ? (
           <div className="flex justify-center items-center py-4">
             <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
@@ -119,8 +126,8 @@ export function InvitationsDropdown() {
                         {invitation.project.emoji}
                       </div>
                     ) : (
-                      <div 
-                        className="h-full w-full" 
+                      <div
+                        className="h-full w-full"
                         style={{ backgroundColor: invitation.project.color || '#4F46E5' }}
                       />
                     )}
@@ -136,9 +143,9 @@ export function InvitationsDropdown() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-2">
-                  <Button 
-                    variant="default" 
-                    size="sm" 
+                  <Button
+                    variant="default"
+                    size="sm"
                     className="flex-1 h-8 gap-1"
                     onClick={() => respondToInvitation(invitation.projectId, 'ACCEPTED')}
                     disabled={processingId === invitation.projectId}
@@ -150,9 +157,9 @@ export function InvitationsDropdown() {
                     )}
                     Accept
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="flex-1 h-8 gap-1"
                     onClick={() => respondToInvitation(invitation.projectId, 'REJECTED')}
                     disabled={processingId === invitation.projectId}

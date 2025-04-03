@@ -21,7 +21,7 @@ const DEFAULT_DATA = {
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function Editor({ projectId, initialData = {}, isOwner = false }) {
+export default function Editor({ projectId, initialData = {}, isOwner = false, isCollaborator = false, collaboratorRole = null }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -160,6 +160,8 @@ export default function Editor({ projectId, initialData = {}, isOwner = false })
         handleNameChange={handleNameChange}
         isOwner={isOwner}
         isShared={isShared}
+        isCollaborator={isCollaborator}
+        collaboratorRole={collaboratorRole}
         layout={layout}
         setLayout={handleLayoutChange}
         handleSave={handleSave}
@@ -187,7 +189,7 @@ export default function Editor({ projectId, initialData = {}, isOwner = false })
               <MarkdownEditor
                 content={markdown}
                 onChange={handleMarkdownChange}
-                readOnly={!isOwner}
+                readOnly={!(isOwner || (isCollaborator && collaboratorRole === 'EDITOR'))}
               />
             </div>
           </ResizablePanel>
@@ -199,7 +201,7 @@ export default function Editor({ projectId, initialData = {}, isOwner = false })
             <Excalidraw
               onChange={handleExcalidrawChange}
               initialData={excalidrawData}
-              viewModeEnabled={!isOwner}
+              viewModeEnabled={!(isOwner || (isCollaborator && collaboratorRole === 'EDITOR'))}
               UIOptions={{
                 dockedToolbar: true,
                 toolbarPosition: "left",
