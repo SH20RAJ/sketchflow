@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-    Pencil,
     Save,
     X,
     Share2,
@@ -15,10 +14,10 @@ import {
     SplitSquareHorizontal,
     FileText,
     ChevronDown,
-    Menu,
     GitFork,
-    Tag,
-    Plus
+    Download,
+    Upload,
+    FileJson
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -66,8 +65,6 @@ const layouts = [
 export function EditorNavbar({
     project,
     projectName,
-    isEditingName,
-    setIsEditingName,
     handleNameChange,
     isOwner,
     isShared,
@@ -87,14 +84,165 @@ export function EditorNavbar({
     lastSaved
 }) {
     const [isCloning, setIsCloning] = useState(false);
-    const [showTagDialog, setShowTagDialog] = useState(false);
-    const [selectedTags, setSelectedTags] = useState([]);
+    const [showImportDialog, setShowImportDialog] = useState(false);
+    const [importData, setImportData] = useState('');
+    const [isImporting, setIsImporting] = useState(false);
+    const [importError, setImportError] = useState('');
 
-    const handleTagsUpdated = (updatedTags) => {
-        // Update the project's tags
-        if (project) {
-            project.projectTags = updatedTags;
+    // Export project as JSON
+    const handleExportProject = () => {
+        console.log('Export project called', { project, projectName, projectDescription });
+
+        if (!project) {
+            console.error('Project is undefined');
+            toast.error('Cannot export: Project data is missing');
+            return;
         }
+
+        try {
+            // Create a JSON object with all project data
+            const exportData = {
+                name: projectName || 'Untitled Project',
+                description: projectDescription || '',
+                content: project.content || '',
+                diagram: project.diagram || '',
+                tags: project.projectTags || [],
+                exportedAt: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            console.log('Export data prepared:', exportData);
+
+            // Convert to JSON string
+            const jsonString = JSON.stringify(exportData, null, 2);
+
+            // Create a blob and download link
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            // Create download link and trigger download
+            const a = document.createElement('a');
+            a.href = url;
+            const filename = `${(projectName || 'untitled').replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = filename;
+            console.log('Downloading file:', filename);
+
+            // Append to body, click, and remove
+            document.body.appendChild(a);
+            setTimeout(() => {
+                a.click();
+                // Clean up
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    toast.success('Project exported successfully');
+                }, 100);
+            }, 0);
+        } catch (error) {
+            console.error('Export error:', error);
+            toast.error(`Failed to export project: ${error.message}`);
+        }
+    };
+
+    // Import project from JSON
+    const handleImportProject = async (createNew = false) => {
+        setIsImporting(true);
+        setImportError('');
+
+        try {
+            // Parse the JSON data
+            const parsedData = JSON.parse(importData);
+
+            // Validate the imported data
+            if (!parsedData.name || !parsedData.content) {
+                throw new Error('Invalid project data format');
+            }
+
+            if (createNew) {
+                // Create a new project with the imported data
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: parsedData.name,
+                        description: parsedData.description || '',
+                        content: parsedData.content,
+                        diagram: parsedData.diagram || '',
+                        tags: parsedData.tags || []
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to create project');
+                }
+
+                toast.success('Project imported and created successfully');
+
+                // Redirect to the new project
+                if (data.id) {
+                    window.location.replace(`/project/${data.id}`);
+                }
+            } else {
+                // Update the current project with the imported data
+                // First save the current state to avoid conflicts
+                await handleSave();
+
+                // Update the project data
+                const response = await fetch(`/api/projects/${projectId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: parsedData.name,
+                        description: parsedData.description || project.description,
+                        content: parsedData.content,
+                        diagram: parsedData.diagram || project.diagram
+                    }),
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to update project');
+                }
+
+                toast.success('Project updated with imported data');
+
+                // Reload the page to show the updated project
+                window.location.reload();
+            }
+
+            setShowImportDialog(false);
+        } catch (error) {
+            console.error('Import error:', error);
+            setImportError(error.message || 'Failed to import project');
+            toast.error(error.message || 'Failed to import project');
+        } finally {
+            setIsImporting(false);
+        }
+    };
+
+    // Handle file upload for import
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                setImportData(e.target.result);
+                setImportError('');
+                // Validate JSON format
+                JSON.parse(e.target.result);
+            } catch (error) {
+                setImportError('Invalid JSON file format');
+            }
+        };
+        reader.readAsText(file);
     };
 
     const handleRemoveTag = async (tagId) => {
@@ -199,44 +347,7 @@ export function EditorNavbar({
                                             placeholder="Add a project description..."
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-medium text-gray-700">Tags</label>
-                                        <div className="flex flex-wrap gap-2 min-h-[32px] p-1 bg-gray-50 rounded-md">
-                                            {project?.projectTags?.map((tag) => (
-                                                <Badge
-                                                    key={tag.id}
-                                                    variant="secondary"
-                                                    className="flex items-center gap-1.5 px-2 py-1 transition-all hover:shadow-sm"
-                                                    style={{
-                                                        backgroundColor: tag.color || '#e2e8f0',
-                                                        color: tag.color ? '#fff' : '#64748b'
-                                                    }}
-                                                >
-                                                    {tag.emoji && <span className="text-sm">{tag.emoji}</span>}
-                                                    <span className="font-medium">{tag.name}</span>
-                                                    {isOwner && (
-                                                        <button
-                                                            onClick={() => handleRemoveTag(tag.id)}
-                                                            className="ml-1 p-0.5 rounded-full hover:bg-black/10 transition-colors"
-                                                        >
-                                                            <X className="h-3 w-3" />
-                                                        </button>
-                                                    )}
-                                                </Badge>
-                                            ))}
-                                            {isOwner && (
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="h-7 text-xs gap-1 hover:bg-gray-100 transition-colors"
-                                                    onClick={() => setShowTagDialog(true)}
-                                                >
-                                                    <Plus className="h-3 w-3" />
-                                                    Add Tag
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </div>
+                                    
                                 </div>
                                 <DropdownMenuSeparator />
                             </>
@@ -249,6 +360,16 @@ export function EditorNavbar({
                             <DropdownMenuItem onClick={handleSave} disabled={isSaving} className="h-9">
                                 <Save className="h-4 w-4 mr-2" />
                                 Save changes
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <h1 className="px-2 py-1 text-sm font-semibold text-gray-500">Beta Features</h1>
+                            <DropdownMenuItem onClick={handleExportProject} className="h-9">
+                                <Download className="h-4 w-4 mr-2" />
+                                Export as JSON
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setShowImportDialog(true)} className="h-9">
+                                <Upload className="h-4 w-4 mr-2" />
+                                Import from JSON
                             </DropdownMenuItem>
                         </div>
                     </DropdownMenuContent>
@@ -368,6 +489,86 @@ export function EditorNavbar({
                                             </div>
                                         </div>
                                     )}
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+
+                        {/* Import Dialog */}
+                        <Dialog
+                            open={showImportDialog}
+                            onOpenChange={setShowImportDialog}
+                        >
+                            <DialogContent className="sm:max-w-md">
+                                <DialogHeader>
+                                    <DialogTitle>Import Project</DialogTitle>
+                                    <DialogDescription>
+                                        Import a project from a JSON file. You can either update this project or create a new one.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">
+                                            Upload JSON file
+                                        </label>
+                                        <div className="flex flex-col gap-3">
+                                            <Input
+                                                type="file"
+                                                accept=".json"
+                                                onChange={handleFileUpload}
+                                                className="cursor-pointer"
+                                            />
+                                            {importError && (
+                                                <p className="text-sm text-red-500">{importError}</p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {importData && (
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">
+                                                Preview
+                                            </label>
+                                            <div className="bg-gray-50 p-3 rounded-md text-xs font-mono overflow-auto max-h-[200px]">
+                                                <pre>{importData.substring(0, 500)}{importData.length > 500 ? '...' : ''}</pre>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-end gap-3 pt-4">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setShowImportDialog(false)}
+                                            disabled={isImporting}
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleImportProject(false)}
+                                            disabled={!importData || isImporting}
+                                            className="gap-2"
+                                        >
+                                            {isImporting ? (
+                                                <>
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                    Importing...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Upload className="h-4 w-4" />
+                                                    Update Current Project
+                                                </>
+                                            )}
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleImportProject(true)}
+                                            disabled={!importData || isImporting}
+                                            variant="secondary"
+                                            className="gap-2"
+                                        >
+                                            <FileJson className="h-4 w-4" />
+                                            Create New Project
+                                        </Button>
+                                    </div>
                                 </div>
                             </DialogContent>
                         </Dialog>

@@ -54,9 +54,9 @@ export function SideBarHere() {
   const [isCreating, setIsCreating] = useState(false);
 
   const { data: subscriptionData } = useSWR('/api/subscription', fetcher);
-  const { data: projectsData, mutate: mutateProjects } = useSWR('/api/projects', fetcher);
+  const { data: projectsData, mutate: mutateProjects } = useSWR('/api/projects?limit=1', fetcher);
 
-  const projectCount = projectsData?.count || 0;
+  const projectCount = projectsData?.pagination?.total || 0;
   const maxProjects = subscriptionData?.isPro ? "∞" : "100";
   const percentageUsed = subscriptionData?.isPro ? 0 : (projectCount / 100) * 100;
   const isPro = subscriptionData?.isPro;
@@ -121,22 +121,19 @@ export function SideBarHere() {
             <h2 className="mb-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Projects</h2>
             <div className="space-y-1.5">
               <MenuItem href="/projects" icon={FolderOpen}>All Projects</MenuItem>
-              <MenuItem href="/projects/new" onClick={handleNewProject} icon={PlusCircle} disabled={isCreating}>
-                {isCreating ? "Creating..." : "New Project"}
-              </MenuItem>
               <MenuItem href="/projects/shared" icon={Share2}>Shared Projects</MenuItem>
               <MenuItem href="/projects/tag-manage" icon={Tag}>Manage Tags</MenuItem>
-              
+
             </div>
           </div>
-          
+
           <Separator className="my-4" />
-          
+
           {/* <div>
             <h2 className="mb-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Articles</h2>
             <div className="space-y-1.5">
-              <MenuItem 
-                href="#" 
+              <MenuItem
+                href="#"
                 icon={FileText}
                 className="opacity-50 cursor-not-allowed"
                 onClick={(e) => {
@@ -149,8 +146,8 @@ export function SideBarHere() {
                   Coming Soon
                 </span>
               </MenuItem>
-              <MenuItem 
-                href="#" 
+              <MenuItem
+                href="#"
                 icon={PlusCircle}
                 className="opacity-50 cursor-not-allowed"
                 onClick={(e) => {
