@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash, Clock, Globe, Users } from "lucide-react";
+import { Pencil, Trash, Clock, Globe, Users, Tag } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { useRouter } from 'next/navigation';
+import { AddTagToProjectDialog } from './AddTagToProjectDialog';
 
 export function ProjectCard({ project, onDelete }) {
     const router = useRouter();
+    const [showTagDialog, setShowTagDialog] = useState(false);
     return (
         <Card
             style={{
@@ -67,15 +70,26 @@ export function ProjectCard({ project, onDelete }) {
                 </div>
             </CardContent>
             <CardFooter className="flex justify-between mt-auto border-t pt-4 border-gray-100/50">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-gray-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50/80 transition-all duration-200 flex-1 mr-2 rounded-md shadow-sm"
-                    onClick={() => router.push(`/project/${project.id}`)}
-                >
-                    <Pencil className="h-3.5 w-3.5 mr-2 transition-transform group-hover:scale-105 duration-200" />
-                    <span className="font-medium">Edit Project</span>
-                </Button>
+                <div className="flex gap-2 flex-1">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-gray-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50/80 transition-all duration-200 flex-1 rounded-md shadow-sm"
+                        onClick={() => router.push(`/project/${project.id}`)}
+                    >
+                        <Pencil className="h-3.5 w-3.5 mr-2 transition-transform group-hover:scale-105 duration-200" />
+                        <span className="font-medium">Edit</span>
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:bg-purple-50/80 transition-all duration-200 rounded-md shadow-sm"
+                        onClick={() => setShowTagDialog(true)}
+                    >
+                        <Tag className="h-3.5 w-3.5 mr-2 transition-transform group-hover:scale-105 duration-200" />
+                        <span className="font-medium">Tags</span>
+                    </Button>
+                </div>
                 <Button
                     variant="ghost"
                     size="sm"
@@ -85,6 +99,15 @@ export function ProjectCard({ project, onDelete }) {
                     <Trash className="h-3.5 w-3.5 transition-transform group-hover:scale-105 duration-200" />
                 </Button>
             </CardFooter>
+
+            {/* Add Tag Dialog */}
+            {showTagDialog && (
+                <AddTagToProjectDialog
+                    open={showTagDialog}
+                    onOpenChange={setShowTagDialog}
+                    project={project}
+                />
+            )}
         </Card>
     );
 }

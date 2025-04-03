@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import useSWR, { mutate } from 'swr';
 import { Button } from '@/components/ui/button';
@@ -36,13 +36,22 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, Pencil, Trash, FolderOpen, Tag } from 'lucide-react';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+import { Loader2, Plus, Pencil, Trash, FolderOpen, Tag, FileText, Loader } from 'lucide-react';
 import { toast } from 'sonner';
+import { ProjectSelector } from '@/components/projects/ProjectSelector';
+import { TagProjectList } from '@/components/projects/TagProjectList';
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 export default function TagManagePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession({
     required: true,
     onUnauthenticated() {
@@ -55,16 +64,29 @@ export default function TagManagePage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('tags');
+
+  // Get the tagId from URL if present
+  const tagIdFromUrl = searchParams.get('tagId');
 
   // Form states for create/edit
   const [tagName, setTagName] = useState('');
   const [tagEmoji, setTagEmoji] = useState('');
   const [tagColor, setTagColor] = useState('#4F46E5');
 
+  // Fetch tags
   const { data, error, isLoading: isLoadingTags } = useSWR(
     '/api/projects/tags',
     fetcher
   );
+
+  // Fetch project counts for each tag
+  const { data: projectCountsData, isLoading: isLoadingCounts } = useSWR(
+    '/api/projects/tags/counts',
+    fetcher
+  );
+
+  const tagProjectCounts = projectCountsData?.counts || {};
 
   const handleCreateTag = async (e) => {
     e.preventDefault();
@@ -174,6 +196,23 @@ export default function TagManagePage() {
     setIsDeleteDialogOpen(true);
   };
 
+  const handleTagSelect = (tag) => {
+    setSelectedTag(tag);
+    router.push(`/projects/tag-manage?tagId=${tag.id}`);
+    setActiveTab('projects');
+  };
+
+  // Set the selected tag from URL if present
+  useEffect(() => {
+    if (tagIdFromUrl && data?.tags) {
+      const tag = data.tags.find(t => t.id === tagIdFromUrl);
+      if (tag) {
+        setSelectedTag(tag);
+        setActiveTab('projects');
+      }
+    }
+  }, [tagIdFromUrl, data?.tags]);
+
   const resetForm = () => {
     setTagName('');
     setTagEmoji('');
@@ -223,84 +262,155 @@ export default function TagManagePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Manage Tags</h1>
+        <h1 className="text-3xl font-bold">Manage Tags & Projects</h1>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> Create Tag
         </Button>
       </div>
 
-      {tags.length === 0 ? (
-        <Card className="bg-gray-50 border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Tag className="h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-xl font-medium text-gray-700 mb-2">No Tags Found</h3>
-            <p className="text-gray-500 text-center max-w-md mb-6">
-              You haven't created any tags yet. Tags help you organize your projects.
-            </p>
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Create Your First Tag
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tags.map((tag) => (
-            <Card 
-              key={tag.id} 
-              className="group hover:shadow-md transition-all duration-200"
-              style={{
-                backgroundColor: `${tag.color}10` || '#F3F4F6',
-                borderColor: `${tag.color}30` || '#E5E7EB'
-              }}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-2">
-                    <FolderOpen 
-                      className="h-5 w-5" 
-                      style={{ color: tag.color || '#374151' }} 
-                    />
-                    <CardTitle className="text-lg">
-                      {tag.emoji && <span className="mr-1">{tag.emoji}</span>}
-                      {tag.name}
-                    </CardTitle>
-                  </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8" 
-                      onClick={() => openEditDialog(tag)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50" 
-                      onClick={() => openDeleteDialog(tag)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Badge 
-                  variant="outline"
-                  style={{
-                    color: tag.color || '#374151',
-                    borderColor: `${tag.color}30` || '#E5E7EB'
-                  }}
-                >
-                  {/* This would show the count of projects with this tag */}
-                  0 projects
-                </Badge>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+          <TabsTrigger value="tags" className="flex items-center gap-2">
+            <Tag className="h-4 w-4" />
+            Tags
+          </TabsTrigger>
+          <TabsTrigger
+            value="projects"
+            className="flex items-center gap-2"
+            disabled={!selectedTag}
+          >
+            <FileText className="h-4 w-4" />
+            Projects
+            {selectedTag && (
+              <Badge variant="outline" className="ml-2">
+                {selectedTag.name}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="tags" className="mt-6">
+          {tags.length === 0 ? (
+            <Card className="bg-gray-50 border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Tag className="h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-xl font-medium text-gray-700 mb-2">No Tags Found</h3>
+                <p className="text-gray-500 text-center max-w-md mb-6">
+                  You haven't created any tags yet. Tags help you organize your projects.
+                </p>
+                <Button onClick={() => setIsCreateDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" /> Create Your First Tag
+                </Button>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      )}
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tags.map((tag) => (
+                <Card
+                  key={tag.id}
+                  className="group hover:shadow-md transition-all duration-200 cursor-pointer"
+                  style={{
+                    backgroundColor: `${tag.color}10` || '#F3F4F6',
+                    borderColor: `${tag.color}30` || '#E5E7EB'
+                  }}
+                  onClick={() => handleTagSelect(tag)}
+                >
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-2">
+                        <FolderOpen
+                          className="h-5 w-5"
+                          style={{ color: tag.color || '#374151' }}
+                        />
+                        <CardTitle className="text-lg">
+                          {tag.emoji && <span className="mr-1">{tag.emoji}</span>}
+                          {tag.name}
+                        </CardTitle>
+                      </div>
+                      <div
+                        className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => openEditDialog(tag)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                          onClick={() => openDeleteDialog(tag)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <Badge
+                      variant="outline"
+                      style={{
+                        color: tag.color || '#374151',
+                        borderColor: `${tag.color}30` || '#E5E7EB'
+                      }}
+                    >
+                      {isLoadingCounts ? (
+                        <span className="flex items-center">
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          Loading...
+                        </span>
+                      ) : (
+                        `${tagProjectCounts[tag.id] || 0} project${tagProjectCounts[tag.id] !== 1 ? 's' : ''}`
+                      )}
+                    </Badge>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="projects" className="mt-6">
+          {selectedTag ? (
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg border">
+                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <span
+                    className="inline-block w-4 h-4 rounded-full"
+                    style={{ backgroundColor: selectedTag.color || '#4F46E5' }}
+                  ></span>
+                  {selectedTag.emoji && <span className="mr-1">{selectedTag.emoji}</span>}
+                  {selectedTag.name}
+                </h2>
+                <h3 className="text-sm font-medium text-gray-500 mb-3">Add Projects to this Tag</h3>
+                <ProjectSelector tagId={selectedTag.id} />
+              </div>
+
+              <div className="mt-8">
+                <h3 className="text-lg font-medium mb-4">Projects with this Tag</h3>
+                <TagProjectList tagId={selectedTag.id} />
+              </div>
+            </div>
+          ) : (
+            <Card className="bg-gray-50 border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <FileText className="h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-xl font-medium text-gray-700 mb-2">No Tag Selected</h3>
+                <p className="text-gray-500 text-center max-w-md mb-6">
+                  Please select a tag to manage its associated projects.
+                </p>
+                <Button onClick={() => setActiveTab('tags')}>
+                  Select a Tag
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Create Tag Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={handleCreateDialogChange}>
