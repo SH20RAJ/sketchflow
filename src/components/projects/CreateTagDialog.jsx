@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import {
     Dialog,
     DialogContent,
@@ -10,9 +11,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Loader2, Smile } from 'lucide-react';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
+
+// Dynamically import the emoji picker to avoid SSR issues
+const EmojiPicker = dynamic(() => import('emoji-picker-react').then(mod => mod.default), {
+    ssr: false,
+    loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-gray-400" /></div>
+});
 
 export function CreateTagDialog({ open, onOpenChange }) {
     const [name, setName] = useState('');
@@ -73,12 +81,41 @@ export function CreateTagDialog({ open, onOpenChange }) {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="emoji">Emoji (optional)</Label>
-                        <Input
-                            id="emoji"
-                            placeholder="Enter emoji"
-                            value={emoji}
-                            onChange={(e) => setEmoji(e.target.value)}
-                        />
+                        <div className="flex gap-2">
+                            <div className="relative flex-1">
+                                <Input
+                                    id="emoji"
+                                    placeholder="Select or type emoji"
+                                    value={emoji}
+                                    onChange={(e) => setEmoji(e.target.value)}
+                                    className="pr-10"
+                                />
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute right-0 top-0 h-full aspect-square rounded-l-none"
+                                        >
+                                            <Smile className="h-4 w-4 text-gray-500" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-full p-0" align="end">
+                                        <EmojiPicker
+                                            onEmojiClick={(emojiData) => setEmoji(emojiData.emoji)}
+                                            width="100%"
+                                            height="350px"
+                                            previewConfig={{ showPreview: false }}
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                            {emoji && (
+                                <div className="flex items-center justify-center w-10 h-10 text-2xl border rounded-md">
+                                    {emoji}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="color">Color</Label>
@@ -114,4 +151,4 @@ export function CreateTagDialog({ open, onOpenChange }) {
             </DialogContent>
         </Dialog>
     );
-} 
+}

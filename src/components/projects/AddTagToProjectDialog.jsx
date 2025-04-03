@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import {
     Dialog,
     DialogContent,
@@ -11,10 +12,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Loader2, Search, Plus, X, Tag } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Loader2, Search, Plus, X, Tag, Smile } from 'lucide-react';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 import useSWR from 'swr';
+
+// Dynamically import the emoji picker to avoid SSR issues
+const EmojiPicker = dynamic(() => import('emoji-picker-react').then(mod => mod.default), {
+    ssr: false,
+    loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-gray-400" /></div>
+});
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -40,11 +48,42 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
         }
     }, [project]);
 
-    // Filter tags based on search query and exclude already selected ones
-    const filteredTags = allTags.filter(tag =>
-        tag.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !selectedTags.some(st => st.id === tag.id)
-    );
+    // Client-side filtering for immediate results
+    const [clientFilteredTags, setClientFilteredTags] = useState([]);
+    const [showTagList, setShowTagList] = useState(false);
+    const searchInputRef = useRef(null);
+
+    // Update client-filtered tags whenever search query changes
+    useEffect(() => {
+        // Filter tags based on search query and exclude already selected ones
+        const filtered = allTags.filter(tag =>
+            tag.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+            !selectedTags.some(st => st.id === tag.id)
+        );
+        setClientFilteredTags(filtered);
+
+        // Show tag list when search query exists or when focused
+        setShowTagList(searchQuery.length > 0 || document.activeElement === searchInputRef.current);
+    }, [searchQuery, allTags, selectedTags]);
+
+    // Show all available tags when input is focused
+    const handleSearchFocus = () => {
+        setShowTagList(true);
+    };
+
+    // Hide tag list when clicking outside (except when clicking on the search input)
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchInputRef.current && !searchInputRef.current.contains(event.target)) {
+                setShowTagList(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleAddTag = async (tag) => {
         setIsLoading(true);
@@ -183,7 +222,7 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
                         )}
                     </div>
 
-                    <div className="relative">
+                    <div className="relative" ref={searchInputRef}>
                         {isLoading ? (
                             <Loader2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 animate-spin" />
                         ) : (
@@ -194,42 +233,74 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
                             placeholder={isLoading ? "Processing..." : "Search tags..."}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
+                            onFocus={handleSearchFocus}
                             className="pl-10"
                             disabled={isLoading || isLoadingTags}
                         />
                     </div>
 
-                    {searchQuery && !isLoadingTags && (
+                    {showTagList && !isLoadingTags && (
                         <div className="p-2 border rounded-lg max-h-48 overflow-y-auto space-y-1">
                             {isLoading ? (
                                 <div className="flex items-center justify-center py-4">
                                     <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
                                 </div>
-                            ) : filteredTags.length > 0 ? (
-                                filteredTags.map((tag) => (
+                            ) : clientFilteredTags.length > 0 ? (
+                                clientFilteredTags.map((tag) => (
                                     <button
                                         key={tag.id}
                                         onClick={() => handleAddTag(tag)}
-                                        className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2 transition-colors duration-200"
+                                        className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2 transition-colors duration-200 group"
                                         disabled={isLoading}
                                     >
                                         {tag.emoji ? (
-                                            <span>{tag.emoji}</span>
+                                            <span className="text-lg">{tag.emoji}</span>
                                         ) : (
                                             <Tag className="h-4 w-4 text-gray-400" />
                                         )}
                                         <span
-                                            className="flex-1"
-                                            style={{ color: tag.color }}
+                                            className="flex-1 font-medium"
+                                            style={{ color: tag.color || '#374151' }}
                                         >
                                             {tag.name}
                                         </span>
-                                        <Plus className="h-4 w-4 opacity-0 group-hover:opacity-100" />
+                                        <Plus className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100" />
                                     </button>
                                 ))
-                            ) : (
+                            ) : searchQuery.length > 0 ? (
                                 <div className="p-4 text-center text-gray-500">
                                     No matching tags found
+                                </div>
+                            ) : allTags.filter(tag => !selectedTags.some(st => st.id === tag.id)).length > 0 ? (
+                                <div className="space-y-1">
+                                    {allTags
+                                        .filter(tag => !selectedTags.some(st => st.id === tag.id))
+                                        .map((tag) => (
+                                            <button
+                                                key={tag.id}
+                                                onClick={() => handleAddTag(tag)}
+                                                className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2 transition-colors duration-200 group"
+                                                disabled={isLoading}
+                                            >
+                                                {tag.emoji ? (
+                                                    <span className="text-lg">{tag.emoji}</span>
+                                                ) : (
+                                                    <Tag className="h-4 w-4 text-gray-400" />
+                                                )}
+                                                <span
+                                                    className="flex-1 font-medium"
+                                                    style={{ color: tag.color || '#374151' }}
+                                                >
+                                                    {tag.name}
+                                                </span>
+                                                <Plus className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100" />
+                                            </button>
+                                        ))
+                                    }
+                                </div>
+                            ) : (
+                                <div className="p-4 text-center text-gray-500">
+                                    No available tags. Create a new tag to get started.
                                 </div>
                             )}
                         </div>
@@ -269,12 +340,41 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="new-tag-emoji">Emoji (optional)</Label>
-                                <Input
-                                    id="new-tag-emoji"
-                                    placeholder="Enter emoji"
-                                    value={newTagEmoji}
-                                    onChange={(e) => setNewTagEmoji(e.target.value)}
-                                />
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
+                                        <Input
+                                            id="new-tag-emoji"
+                                            placeholder="Select or type emoji"
+                                            value={newTagEmoji}
+                                            onChange={(e) => setNewTagEmoji(e.target.value)}
+                                            className="pr-10"
+                                        />
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="absolute right-0 top-0 h-full aspect-square rounded-l-none"
+                                                >
+                                                    <Smile className="h-4 w-4 text-gray-500" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0" align="end">
+                                                <EmojiPicker
+                                                    onEmojiClick={(emojiData) => setNewTagEmoji(emojiData.emoji)}
+                                                    width="100%"
+                                                    height="350px"
+                                                    previewConfig={{ showPreview: false }}
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                    {newTagEmoji && (
+                                        <div className="flex items-center justify-center w-10 h-10 text-2xl border rounded-md">
+                                            {newTagEmoji}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="new-tag-color">Color</Label>
