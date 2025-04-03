@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { Button } from "@/components/ui/button";
@@ -13,13 +13,13 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Pencil, Search, Clock, Users, GitFork, ArrowLeft, Globe } from "lucide-react";
+import { Pencil, Search, Clock, Users, GitFork, ArrowLeft, Globe, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { toast } from "sonner";
+import { SharedProjectPagination } from "@/components/projects/SharedProjectPagination";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
@@ -42,16 +42,55 @@ const MotionCard = motion(Card);
 
 export default function SharedProjectsPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
+  const { status } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const [isCloning, setIsCloning] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const {
-    data: sharedProjectsData,
-    error: sharedProjectsError,
-    mutate: mutateProjects,
-  } = useSWR(
-    status === "authenticated" ? "/api/projects/shared" : null,
+  // Get current page from URL or default to 1
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+
+  // Update search query when URL changes
+  useEffect(() => {
+    const searchFromUrl = searchParams.get('search') || '';
+    if (searchFromUrl !== searchQuery) {
+      setSearchQuery(searchFromUrl);
+    }
+  }, [searchParams, searchQuery]);
+
+  // Debounce search query to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+
+      // Update URL with search query
+      const params = new URLSearchParams(searchParams);
+      if (searchQuery) {
+        params.set('search', searchQuery);
+      } else {
+        params.delete('search');
+      }
+      params.set('page', '1'); // Reset to first page on new search
+      router.push(`/projects/shared?${params.toString()}`);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, router, searchParams]);
+
+  // Construct API URL with pagination and search parameters
+  const getApiUrl = useCallback(() => {
+    const params = new URLSearchParams();
+    params.set('page', currentPage.toString());
+    params.set('limit', '9'); // 9 items per page (3x3 grid)
+    if (debouncedSearch) {
+      params.set('search', debouncedSearch);
+    }
+    return `/api/projects/shared?${params.toString()}`;
+  }, [currentPage, debouncedSearch]);
+
+  const { data: sharedProjectsData } = useSWR(
+    status === "authenticated" ? getApiUrl() : null,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -105,8 +144,11 @@ export default function SharedProjectsPage() {
         <nav className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">Shared Projects</h1>
         </nav>
+        <div className="flex justify-center items-center my-12">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader>
                 <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
@@ -123,10 +165,7 @@ export default function SharedProjectsPage() {
   }
 
   const projects = sharedProjectsData?.projects || [];
-  const filteredProjects = projects.filter(project => 
-    project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    project.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const pagination = sharedProjectsData?.pagination;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-8 pt-16 md:pt-8">
@@ -165,7 +204,7 @@ export default function SharedProjectsPage() {
       </nav>
 
       <AnimatePresence>
-        {filteredProjects.length === 0 && !searchQuery && (
+        {projects.length === 0 && !searchQuery && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -184,7 +223,7 @@ export default function SharedProjectsPage() {
           </motion.div>
         )}
 
-        {filteredProjects.length === 0 && searchQuery && (
+        {projects.length === 0 && searchQuery && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -207,65 +246,74 @@ export default function SharedProjectsPage() {
           </motion.div>
         )}
 
-        {filteredProjects.length > 0 && (
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {filteredProjects.map((project) => (
-              <motion.div key={project.id} variants={item}>
-                <MotionCard className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 bg-white/50 backdrop-blur-sm border-gray-200/50">
-                  <CardHeader className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-gray-900/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg font-semibold text-gray-900">
-                        {project.name}
-                      </CardTitle>
-                      <Globe className="h-4 w-4 text-green-500" />
-                    </div>
-                    <CardDescription className="text-sm text-gray-500">
-                      {project.description || "No description"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="h-4 w-4" />
-                        {format(new Date(project.createdAt), "MMM d, yyyy")}
+        {projects.length > 0 && (
+          <>
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {projects.map((project) => (
+                <motion.div key={project.id} variants={item}>
+                  <MotionCard className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 bg-white/50 backdrop-blur-sm border-gray-200/50">
+                    <CardHeader className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-b from-gray-900/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg font-semibold text-gray-900">
+                          {project.name}
+                        </CardTitle>
+                        <Globe className="h-4 w-4 text-green-500" />
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <Users className="h-4 w-4" />
-                        Shared by {project.owner?.name || "Unknown"}
+                      <CardDescription className="text-sm text-gray-500">
+                        {project.description || "No description"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="h-4 w-4" />
+                          {format(new Date(project.createdAt), "MMM d, yyyy")}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Users className="h-4 w-4" />
+                          Shared by {project.owner?.name || "Unknown"}
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-gray-600 hover:text-blue-600 hover:border-blue-200 transition-colors"
-                      onClick={() => router.push(`/project/${project.id}`)}
-                    >
-                      <Pencil className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-gray-600 hover:text-blue-600 hover:border-blue-200 transition-colors"
-                      onClick={() => handleCloneProject(project.id)}
-                      disabled={isCloning}
-                    >
-                      <GitFork className="h-4 w-4 mr-1" />
-                      {isCloning ? "Cloning..." : "Clone"}
-                    </Button>
-                  </CardFooter>
-                </MotionCard>
-              </motion.div>
-            ))}
-          </motion.div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-gray-600 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                        onClick={() => router.push(`/project/${project.id}`)}
+                      >
+                        <Pencil className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-gray-600 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                        onClick={() => handleCloneProject(project.id)}
+                        disabled={isCloning}
+                      >
+                        <GitFork className="h-4 w-4 mr-1" />
+                        {isCloning ? "Cloning..." : "Clone"}
+                      </Button>
+                    </CardFooter>
+                  </MotionCard>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <SharedProjectPagination pagination={pagination} />
+              </div>
+            )}
+          </>
         )}
       </AnimatePresence>
     </div>

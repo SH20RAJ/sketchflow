@@ -62,7 +62,7 @@ export default function ProjectPage({ params }) {
       });
 
       if (!response.ok) throw new Error('Failed to update sharing settings');
-      
+
       setIsShared(!isShared);
       toast.success(isShared ? 'Project is now private' : 'Project is now shared');
     } catch (error) {
@@ -84,7 +84,7 @@ export default function ProjectPage({ params }) {
       });
 
       if (!response.ok) throw new Error('Failed to clone project');
-      
+
       const newProject = await response.json();
       toast.success('Project cloned successfully');
       router.push(`/project/${newProject.id}`);
@@ -102,6 +102,20 @@ export default function ProjectPage({ params }) {
     toast.success('Share link copied to clipboard');
   };
 
+  // Update document title when project data changes
+  useEffect(() => {
+    if (projectData?.name) {
+      document.title = `${projectData.name} | SketchFlow`;
+    } else {
+      document.title = 'Project | SketchFlow';
+    }
+
+    // Cleanup function to reset title when component unmounts
+    return () => {
+      document.title = 'SketchFlow';
+    };
+  }, [projectData]);
+
   useEffect(() => {
     if (status === 'loading') return;
 
@@ -110,7 +124,7 @@ export default function ProjectPage({ params }) {
         // First check access
         const accessResponse = await fetch(`/api/projects/${params.projectId}/access`);
         const accessData = await accessResponse.json();
-        
+
         console.log('Access check response:', accessData);
 
         if (!accessData.hasAccess && !accessData.isShared) {
@@ -194,7 +208,7 @@ export default function ProjectPage({ params }) {
 
   return (
     <div className="relative">
-      
+
 
       {/* Editor */}
       <div  >

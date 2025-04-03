@@ -17,7 +17,10 @@ import {
     GitFork,
     Download,
     Upload,
-    FileJson
+    FileJson,
+    Users,
+    UserPlus,
+    Activity
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -37,9 +40,16 @@ import {
     DropdownMenuTrigger,
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { debounce } from "lodash";
+import { CollaboratorsDialog } from "@/components/collaboration/CollaboratorsDialog";
+import { ActivityFeed } from "@/components/collaboration/ActivityFeed";
+
+
 
 const layouts = [
     {
@@ -88,6 +98,10 @@ export function EditorNavbar({
     const [importData, setImportData] = useState('');
     const [isImporting, setIsImporting] = useState(false);
     const [importError, setImportError] = useState('');
+    const [showCollaboratorsDialog, setShowCollaboratorsDialog] = useState(false);
+    const [showActivityFeed, setShowActivityFeed] = useState(false);
+
+  
 
     // Export project as JSON
     const handleExportProject = () => {
@@ -347,7 +361,7 @@ export function EditorNavbar({
                                             placeholder="Add a project description..."
                                         />
                                     </div>
-                                    
+
                                 </div>
                                 <DropdownMenuSeparator />
                             </>
@@ -360,6 +374,16 @@ export function EditorNavbar({
                             <DropdownMenuItem onClick={handleSave} disabled={isSaving} className="h-9">
                                 <Save className="h-4 w-4 mr-2" />
                                 Save changes
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <h1 className="px-2 py-1 text-sm font-semibold text-gray-500">Collaboration</h1>
+                            <DropdownMenuItem onClick={() => setShowCollaboratorsDialog(true)} className="h-9">
+                                <Users className="h-4 w-4 mr-2" />
+                                Manage Collaborators
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setShowActivityFeed(true)} className="h-9">
+                                <Activity className="h-4 w-4 mr-2" />
+                                View Activity
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <h1 className="px-2 py-1 text-sm font-semibold text-gray-500">Beta Features</h1>
@@ -595,6 +619,24 @@ export function EditorNavbar({
                     </Button>
                 )}
             </div>
+
+            {/* Collaboration Components */}
+            {showCollaboratorsDialog && (
+                <CollaboratorsDialog
+                    projectId={projectId}
+                    isOwner={isOwner}
+                    open={showCollaboratorsDialog}
+                    onOpenChange={setShowCollaboratorsDialog}
+                />
+            )}
+
+            {showActivityFeed && (
+                <ActivityFeed
+                    projectId={projectId}
+                    open={showActivityFeed}
+                    onOpenChange={setShowActivityFeed}
+                />
+            )}
         </div>
     );
 }

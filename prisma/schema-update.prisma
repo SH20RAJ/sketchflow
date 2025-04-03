@@ -1,0 +1,95 @@
+// Add these models to your existing schema.prisma file
+
+// Collaboration models
+model ProjectCollaborator {
+  id           String   @id @default(cuid())
+  projectId    String
+  userId       String
+  role         Role     @default(VIEWER)
+  inviteStatus Status   @default(PENDING)
+  invitedBy    String
+  invitedAt    DateTime @default(now())
+  acceptedAt   DateTime?
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inviter      User     @relation("InvitedBy", fields: [invitedBy], references: [id])
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@index([invitedBy])
+}
+
+// Collaboration activity log
+model CollaborationActivity {
+  id           String   @id @default(cuid())
+  projectId    String
+  userId       String
+  action       String   // e.g., "edited", "commented", "added element"
+  details      Json?    // Additional details about the action
+  createdAt    DateTime @default(now())
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Comment on specific elements or sections
+model ProjectComment {
+  id           String   @id @default(cuid())
+  projectId    String
+  userId       String
+  content      String   @db.Text
+  elementId    String?  // ID of the element being commented on (if applicable)
+  position     Json?    // Position in the canvas (x, y coordinates)
+  resolved     Boolean  @default(false)
+  parentId     String?  // For threaded comments
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent       ProjectComment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies      ProjectComment[] @relation("CommentReplies")
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+// Enums for collaboration
+enum Role {
+  OWNER
+  EDITOR
+  COMMENTER
+  VIEWER
+}
+
+enum Status {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+// Update existing models
+
+// Add to User model
+model User {
+  // ... existing fields
+  collaborations      ProjectCollaborator[]
+  invitedCollaborations ProjectCollaborator[] @relation("InvitedBy")
+  collaborationActivities CollaborationActivity[]
+  projectComments     ProjectComment[]
+}
+
+// Add to Project model
+model Project {
+  // ... existing fields
+  collaborators       ProjectCollaborator[]
+  activities          CollaborationActivity[]
+  comments            ProjectComment[]
+  originalProjectId   String?  // For cloned projects
+  originalProject     Project? @relation("ProjectClones", fields: [originalProjectId], references: [id], onDelete: SetNull)
+  clones              Project[] @relation("ProjectClones")
+}

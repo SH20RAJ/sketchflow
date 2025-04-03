@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
   let session = null;
-  
+
   try {
     session = await auth();
     if (!session?.user?.id) {
@@ -16,14 +16,39 @@ export async function GET(request) {
       );
     }
 
-    // Get all projects shared with the user
-    const sharedProjects = await prisma.project.findMany({
-      where: {
-        AND: [
-          { shared: true },
-          // { userId: { not: session.user.id } }, // Exclude user's own projects
+    // Get pagination parameters from URL
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '9', 10); // Default 9 items per page
+    const skip = (page - 1) * limit;
+    const search = searchParams.get('search') || '';
+
+    // Build the where clause
+    const whereClause = {
+      AND: [
+        { shared: true },
+        // { userId: { not: session.user.id } }, // Exclude user's own projects
+      ],
+    };
+
+    // Add search filter if provided
+    if (search) {
+      whereClause.AND.push({
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
         ],
-      },
+      });
+    }
+
+    // Get total count for pagination
+    const totalCount = await prisma.project.count({
+      where: whereClause,
+    });
+
+    // Get paginated projects
+    const sharedProjects = await prisma.project.findMany({
+      where: whereClause,
       include: {
         user: {
           select: {
@@ -37,6 +62,8 @@ export async function GET(request) {
       orderBy: {
         updatedAt: 'desc',
       },
+      skip,
+      take: limit,
     });
 
     // Transform the response to match the expected format
@@ -46,9 +73,19 @@ export async function GET(request) {
       user: undefined, // Remove the user field to avoid duplication
     }));
 
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(totalCount / limit);
+
     return NextResponse.json({
       projects: transformedProjects,
-      count: transformedProjects.length,
+      pagination: {
+        page,
+        limit,
+        totalItems: totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
     });
   } catch (error) {
     console.error("Error fetching shared projects:", {
@@ -61,4 +98,4 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-} 
+}

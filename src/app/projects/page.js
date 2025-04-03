@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
@@ -82,6 +82,16 @@ export default function ProjectsPage({ searchParams }) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [isPending, startTransition] = useTransition();
+
+  // Set page title
+  useEffect(() => {
+    document.title = 'My Projects | SketchFlow';
+
+    // Cleanup function to reset title when component unmounts
+    return () => {
+      document.title = 'SketchFlow';
+    };
+  }, []);
 
   const { tagId, sortBy = 'updatedAt', order = 'desc', search, page = '1' } = searchParams || {};
 

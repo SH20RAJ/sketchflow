@@ -89,6 +89,16 @@ export default function TemplatesPage() {
 
   const isPro = subscriptionData?.isPro;
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Templates | SketchFlow';
+
+    // Cleanup function to reset title when component unmounts
+    return () => {
+      document.title = 'SketchFlow';
+    };
+  }, []);
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
@@ -129,7 +139,7 @@ export default function TemplatesPage() {
             </h1>
             <span className={cn(
               "px-2.5 py-1 rounded-full text-sm font-semibold inline-flex items-center gap-1.5",
-              isPro 
+              isPro
                 ? "bg-gradient-to-r from-blue-600/10 to-blue-400/10 text-blue-600 border border-blue-200"
                 : "bg-gradient-to-r from-gray-600/10 to-gray-400/10 text-gray-600 border border-gray-200"
             )}>
@@ -147,7 +157,7 @@ export default function TemplatesPage() {
             </span>
           </div>
           <p className="text-gray-600 mt-2">
-            {isPro 
+            {isPro
               ? "Start your projects faster with professional templates"
               : "Preview our professional templates - Upgrade to Pro to use them"
             }
@@ -234,4 +244,4 @@ export default function TemplatesPage() {
       </motion.div>
     </div>
   );
-} 
+}

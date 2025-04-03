@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { MotionContainer, MotionProgress } from "@/components/ui/motion-container";
 import { useState } from "react";
 import { toast } from 'sonner';
+import { InvitationsDropdown } from "@/components/collaboration/InvitationsDropdown";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
@@ -106,13 +107,18 @@ export function SideBarHere() {
     <ScrollArea className="h-full py-6">
       <div className="px-3 py-2 space-y-8">
         <MotionContainer>
-          <div className="relative">
-            <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-lg" />
-            <img src="/logo.png" alt="SketchFlow" className="relative h-8 w-auto" />
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-lg" />
+                <img src="/logo.png" alt="SketchFlow" className="relative h-8 w-auto" />
+              </div>
+              <Link href="/" className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text hover:opacity-80 transition-opacity">
+                SketchFlow
+              </Link>
+            </div>
+            <InvitationsDropdown />
           </div>
-          <Link href="/" className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text hover:opacity-80 transition-opacity">
-            SketchFlow
-          </Link>
         </MotionContainer>
         <Separator className="my-4" />
 
