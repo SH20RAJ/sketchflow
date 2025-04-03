@@ -16,6 +16,9 @@ export async function GET(request) {
     const sortBy = searchParams.get('sortBy') || 'updatedAt';
     const order = searchParams.get('order') || 'desc';
     const search = searchParams.get('search');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '12');
+    const skip = (page - 1) * limit;
 
     // Build where clause for filtering
     const where = {
@@ -33,21 +36,37 @@ export async function GET(request) {
       })
     };
 
+    // Get total count for pagination
+    const totalCount = await prisma.project.count({ where });
+
+    // Get projects with only necessary data
     const projects = await prisma.project.findMany({
       where,
       orderBy: {
         [sortBy]: order
       },
       include: {
-        diagrams: true,
-        markdowns: true,
-        projectTags: true
-      }
+        projectTags: {
+          select: {
+            id: true,
+            name: true,
+            emoji: true,
+            color: true
+          }
+        }
+      },
+      skip,
+      take: limit
     });
 
     return NextResponse.json({
       projects,
-      count: projects.length,
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit)
+      }
     });
   } catch (error) {
     console.error("Error:", error);

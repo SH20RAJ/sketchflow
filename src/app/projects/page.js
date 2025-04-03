@@ -37,29 +37,16 @@ import {
 import { signOut } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { MotionGrid, MotionGridItem, MotionFadeIn, AnimatePresence } from "@/components/ui/motion-project";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ProjectFilters } from "@/components/projects/ProjectFilters";
+import { ProjectPagination } from "@/components/projects/ProjectPagination";
 import { redirect } from "next/navigation";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
 
-const item = {
-  hidden: { y: 20, opacity: 0 },
-  show: { y: 0, opacity: 1 }
-};
 
 export default function ProjectsPage({ searchParams }) {
   const router = useRouter();
@@ -73,14 +60,15 @@ export default function ProjectsPage({ searchParams }) {
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [isPending, startTransition] = useTransition();
 
-  const { tagId, sortBy = 'updatedAt', order = 'desc', search } = searchParams || {};
-  
+  const { tagId, sortBy = 'updatedAt', order = 'desc', search, page = '1' } = searchParams || {};
+
   const { data, error, isLoading } = useSWR(
     `/api/projects?${new URLSearchParams({
       tagId: tagId || '',
       sortBy,
       order,
-      search: search || ''
+      search: search || '',
+      page
     })}`,
     fetcher
   );
@@ -88,12 +76,16 @@ export default function ProjectsPage({ searchParams }) {
   if (status === "loading" || isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">My Projects</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">My Projects</h1>
+          <div className="flex items-center gap-4">
+            <div className="w-32 h-10 bg-gray-200 animate-pulse rounded-md"></div>
+            <div className="w-10 h-10 bg-gray-200 animate-pulse rounded-full"></div>
+          </div>
         </div>
-        <ProjectFilters />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-          <ProjectCardSkeleton count={6} />
+        <div className="w-full h-20 bg-gray-100 animate-pulse rounded-lg mb-6"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <ProjectCardSkeleton count={9} />
         </div>
       </div>
     );
@@ -109,6 +101,7 @@ export default function ProjectsPage({ searchParams }) {
   }
 
   const projects = data?.projects || [];
+  const pagination = data?.pagination;
 
   const handleDeleteProject = async (project) => {
     setProjectToDelete(project);
@@ -140,8 +133,8 @@ export default function ProjectsPage({ searchParams }) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">My Projects</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">My Projects</h1>
         <div className="flex items-center gap-4">
           <Link href="/projects/new">
             <Button className="gap-2">
@@ -179,23 +172,34 @@ export default function ProjectsPage({ searchParams }) {
 
       <ProjectFilters />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => (
-          <ProjectCard 
-            key={project.id} 
-            project={project} 
+          <ProjectCard
+            key={project.id}
+            project={project}
             onDelete={handleDeleteProject}
           />
         ))}
       </div>
 
       {projects.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-12 bg-gray-50/80 border border-gray-100 rounded-lg">
+          <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-semibold mb-2">No projects found</h3>
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-4">
             Create a new project to get started
           </p>
+          <Link href="/projects/new">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              New Project
+            </Button>
+          </Link>
         </div>
+      )}
+
+      {pagination && pagination.totalPages > 1 && (
+        <ProjectPagination pagination={pagination} />
       )}
 
       <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
@@ -236,11 +240,22 @@ function ProjectCardSkeleton({ count = 6 }) {
     .map((_, i) => (
       <div
         key={i}
-        className="bg-white rounded-lg shadow-sm p-6 animate-pulse"
+        className="bg-white rounded-lg border border-gray-200 h-[200px] animate-pulse flex flex-col"
       >
-        <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-        <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
-        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+        <div className="p-4 border-b border-gray-100">
+          <div className="h-5 bg-gray-200 rounded w-3/4 mb-3"></div>
+          <div className="h-4 bg-gray-200 rounded-full w-1/3 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+        </div>
+        <div className="flex-1"></div>
+        <div className="p-3 border-t border-gray-100 flex justify-between">
+          <div className="flex gap-2">
+            <div className="h-8 bg-gray-200 rounded w-16"></div>
+            <div className="h-8 bg-gray-200 rounded w-16"></div>
+          </div>
+          <div className="h-8 w-8 bg-gray-200 rounded"></div>
+        </div>
       </div>
     ));
 }
