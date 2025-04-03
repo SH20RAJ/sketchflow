@@ -171,7 +171,7 @@ export default function ProjectsPage({ searchParams }) {
   return (
     <div className="container mx-auto px-4 py-0">
       {/* Header with search */}
-      <div className="sticky w-[calc(100%-132px)] top-0 z-40 bg-white border-b border-gray-100 py-4 px-4 mb-6 shadow-sm">
+      <div className="sticky md:w-[calc(100%-132px)] top-0 z-40 bg-white border-b border-gray-100 py-4 px-4 mb-6 shadow-sm">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 max-w-[1200px] mx-auto">
           <div className="flex items-center gap-3 w-full justify-between sm:justify-start">
             <h1 className="text-2xl font-bold">My Projects</h1>
