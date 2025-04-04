@@ -36,7 +36,7 @@ export default function SubscriptionPage() {
     if (typeof window !== 'undefined' && window.paypal) {
       setPaypalLoaded(true);
     }
-    
+
     // Show beta notification on component mount
     toast.warning(
       "⚠️ Beta Notice: Subscriptions are currently unavailable as we're in beta. We're working on:",
@@ -120,7 +120,7 @@ export default function SubscriptionPage() {
 
   return (
     <>
-      <Script 
+      <Script
         src="https://www.paypal.com/sdk/js?client-id=AaTYsKq8pPFdA83pEKOvtGjlS9_qtGA9xoI9Z9hNybDPaTc6Mk-eHbouHltIRRfLxzi0FHhnCnKO9d7S&vault=true&intent=subscription"
         data-sdk-integration-source="button-factory"
         strategy="afterInteractive"
@@ -136,16 +136,28 @@ export default function SubscriptionPage() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Beta Notice Banner */}
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
-          <div className="flex items-center">
-            <AlertTriangle className="h-6 w-6 text-yellow-400 mr-3" />
-            <div>
-              <p className="text-sm text-yellow-700 font-medium">
-                Beta Phase Notice
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <AlertTriangle className="h-6 w-6 text-yellow-500 mr-3" />
+                <p className="text-base text-yellow-800 font-medium">
+                  Beta Phase Notice
+                </p>
+              </div>
+              <p className="text-yellow-700 mb-4">
+                Our payment infrastructure is currently in beta. To request pro access during this phase, please fill out our request form. You can specify whether you'd like free or paid access in the form.
               </p>
-              <p className="text-sm text-yellow-600 mt-1">
-                Subscriptions are currently unavailable while we enhance our payment systems and infrastructure. Stay tuned for updates!
-              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <Button
+                className="bg-yellow-600 hover:bg-yellow-700 text-white w-full md:w-auto"
+                asChild
+              >
+                <a href="https://forms.gle/2V9q1o8SZNZ5GPt47" target="_blank" rel="noopener noreferrer">
+                  Request Pro Access
+                </a>
+              </Button>
             </div>
           </div>
         </div>
@@ -184,7 +196,7 @@ export default function SubscriptionPage() {
             Select the perfect plan for your needs. Upgrade or downgrade at any time.
           </p>
           <p className="text-md text-yellow-600 mt-4">
-            ⚠️ Subscriptions will be available soon after beta testing is complete
+            ⚠️ Subscriptions will be available soon after beta testing is complete. In the meantime, you can request pro access using our form.
           </p>
         </div>
 
@@ -238,7 +250,7 @@ export default function SubscriptionPage() {
                       onClick={() => handleSubscribe(plan.id.includes("yearly") ? "yearly" : "monthly")}
                       disabled={true}
                     >
-                      Coming Soon
+                      Request via Form
                     </Button>
                   )}
                 </CardFooter>

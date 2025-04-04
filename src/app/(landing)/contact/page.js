@@ -281,7 +281,7 @@ export default function ContactPage() {
         </motion.div>
 
         {/* Contact Info Cards */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
@@ -307,7 +307,7 @@ export default function ContactPage() {
               <p className="text-gray-600">{item.info}</p>
             </motion.div>
           ))}
-        </motion.div>
+        </motion.div> */}
       </div>
     </div>
   );

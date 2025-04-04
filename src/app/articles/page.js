@@ -60,21 +60,21 @@ export default function ArticlesPage() {
           </div>
           <div className="flex gap-2">
             <Button
-              variant={filter === 'all' ? 'default' : 'outline'}
+              variant={filter === 'all' ? 'secondary' : 'outline'}
               onClick={() => setFilter('all')}
               className="min-w-[80px]"
             >
               All
             </Button>
             <Button
-              variant={filter === 'published' ? 'default' : 'outline'}
+              variant={filter === 'published' ? 'secondary' : 'outline'}
               onClick={() => setFilter('published')}
               className="min-w-[80px]"
             >
               Published
             </Button>
             <Button
-              variant={filter === 'draft' ? 'default' : 'outline'}
+              variant={filter === 'draft' ? 'secondary' : 'outline'}
               onClick={() => setFilter('draft')}
               className="min-w-[80px]"
             >

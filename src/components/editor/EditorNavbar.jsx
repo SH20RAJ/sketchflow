@@ -1,32 +1,16 @@
 'use client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-    Save,
-    X,
-    Share2,
-    Copy,
-    Globe,
-    Loader2,
-    Layout,
-    SplitSquareHorizontal,
-    FileText,
-    ChevronDown,
-    GitFork,
-    Download,
-    Upload,
-    FileJson,
-    Users,
-    UserPlus,
-    Activity,
-    Clock,
-    RefreshCw,
-    Code
-} from "lucide-react";
+// React and Next.js imports
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { signIn } from "next-auth/react";
+
+// UI Components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "react-hot-toast";
 import {
     Dialog,
     DialogContent,
@@ -35,7 +19,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -43,18 +26,48 @@ import {
     DropdownMenuTrigger,
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { useState, useRef, useEffect } from "react";
-import { toast } from "react-hot-toast";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { format } from "date-fns";
-import { debounce } from "lodash";
+
+// No utility libraries needed
+
+// Feature Components
 import { CollaboratorsDialog } from "@/components/collaboration/CollaboratorsDialog";
 import { ActivityFeed } from "@/components/collaboration/ActivityFeed";
 import { EmbedProjectDialog } from "@/components/projects/EmbedProjectDialog";
 
+// Icons
+import {
+    // File operations
+    Save,
+    Download,
+    Upload,
+    FileJson,
+
+    // Layout and view
+    Layout,
+    SplitSquareHorizontal,
+    FileText,
+
+    // Collaboration
+    Share2,
+    Users,
+    Activity,
+
+    // Utility icons
+    Copy,
+    Globe,
+    Loader2,
+    ChevronDown,
+    GitFork,
+    Clock,
+    RefreshCw,
+    Code
+} from "lucide-react";
 
 
+
+/**
+ * Layout options for the editor view
+ */
 const layouts = [
     {
         id: 'split',
@@ -76,43 +89,75 @@ const layouts = [
     }
 ];
 
+/**
+ * EditorNavbar Component
+ *
+ * Provides navigation, actions, and controls for the project editor.
+ * Includes project name editing, layout switching, saving, sharing, and more.
+ *
+ * @component
+ */
 export function EditorNavbar({
+    // Project metadata
+    projectId,
     projectName,
-    handleNameChange,
+    projectDescription,
+
+    // Permissions and status
     isOwner,
     isShared,
     isCollaborator = false,
     collaboratorRole = null,
+
+    // Layout controls
+    layout,
+    setLayout,
+
+    // Save functionality
+    handleSave,
+    isSaving,
     autoSaveEnabled = true,
     setAutoSaveEnabled = () => {},
     lastSaved = null,
-    layout,
-    setLayout,
-    handleSave,
-    isSaving,
+    autoSaveStatus,
+    handleSync,
+
+    // Editing handlers
+    handleNameChange,
+    handleDescriptionChange,
+
+    // Share dialog
     showShareDialog,
     setShowShareDialog,
     toggleShare,
     isSharing,
-    projectId,
-    copyShareLink,
-    projectDescription,
-    handleDescriptionChange,
-    autoSaveStatus,
-    handleSync
+    copyShareLink
 }) {
-    const [isCloning, setIsCloning] = useState(false);
+    // =========================================================================
+    // State Management
+    // =========================================================================
+
+    // Dialog visibility states
     const [showImportDialog, setShowImportDialog] = useState(false);
-    const [importData, setImportData] = useState('');
-    const [isImporting, setIsImporting] = useState(false);
-    const [importError, setImportError] = useState('');
     const [showCollaboratorsDialog, setShowCollaboratorsDialog] = useState(false);
     const [showEmbedDialog, setShowEmbedDialog] = useState(false);
     const [showActivityFeed, setShowActivityFeed] = useState(false);
 
+    // Import/Export states
+    const [isCloning, setIsCloning] = useState(false);
+    const [importData, setImportData] = useState('');
+    const [isImporting, setIsImporting] = useState(false);
+    const [importError, setImportError] = useState('');
 
 
-    // Export project as JSON
+
+    // =========================================================================
+    // Export/Import Functions
+    // =========================================================================
+
+    /**
+     * Exports the current project as a JSON file
+     */
     const handleExportProject = async () => {
         console.log('Export project called', { projectId, projectName, projectDescription });
 
@@ -124,7 +169,6 @@ export function EditorNavbar({
             }
 
             const projectData = await response.json();
-            console.log('Fetched project data for export:', projectData);
 
             // Create a JSON object with all project data
             const exportData = {
@@ -136,8 +180,6 @@ export function EditorNavbar({
                 exportedAt: new Date().toISOString(),
                 version: '1.0'
             };
-
-            console.log('Export data prepared:', exportData);
 
             // Convert to JSON string
             const jsonString = JSON.stringify(exportData, null, 2);
@@ -151,7 +193,6 @@ export function EditorNavbar({
             a.href = url;
             const filename = `${(projectName || 'untitled').replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`;
             a.download = filename;
-            console.log('Downloading file:', filename);
 
             // Append to body, click, and remove
             document.body.appendChild(a);
@@ -170,7 +211,30 @@ export function EditorNavbar({
         }
     };
 
-    // Import project from JSON
+    /**
+     * Handles file upload for project import
+     */
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                setImportData(e.target.result);
+            } catch (error) {
+                console.error('Error reading file:', error);
+                setImportError('Invalid file format');
+                toast.error('Invalid file format');
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    /**
+     * Imports a project from JSON data
+     * @param {boolean} createNew - Whether to create a new project or update the current one
+     */
     const handleImportProject = async (createNew = false) => {
         setIsImporting(true);
         setImportError('');
@@ -263,27 +327,15 @@ export function EditorNavbar({
         }
     };
 
-    // Handle file upload for import
-    const handleFileUpload = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+    // File upload is handled by the handleFileUpload function above
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                setImportData(e.target.result);
-                setImportError('');
-                // Validate JSON format
-                JSON.parse(e.target.result);
-            } catch (error) {
-                setImportError('Invalid JSON file format');
-            }
-        };
-        reader.readAsText(file);
-    };
+    // =========================================================================
+    // Project Management Functions
+    // =========================================================================
 
-    // Tag management is handled elsewhere
-
+    /**
+     * Clones the current project
+     */
     const handleCloneProject = async () => {
         setIsCloning(true);
         try {
@@ -319,6 +371,13 @@ export function EditorNavbar({
         }
     };
 
+    // =========================================================================
+    // Render Functions
+    // =========================================================================
+
+    /**
+     * Renders the main navbar component
+     */
     return (
         <div className="border-b h-12 flex items-center justify-between bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
             {/* Left Section */}

@@ -295,7 +295,7 @@ export function CollaboratorsDialog({ projectId, isOwner }) {
                   <div className="grid grid-cols-3 gap-2">
                     <Button
                       type="button"
-                      variant={role === 'EDITOR' ? 'default' : 'outline'}
+                      variant={role === 'EDITOR' ? 'secondary' : 'outline'}
                       className="gap-2"
                       onClick={() => setRole('EDITOR')}
                     >
@@ -304,7 +304,7 @@ export function CollaboratorsDialog({ projectId, isOwner }) {
                     </Button>
                     <Button
                       type="button"
-                      variant={role === 'COMMENTER' ? 'default' : 'outline'}
+                      variant={role === 'COMMENTER' ? 'secondary' : 'outline'}
                       className="gap-2"
                       onClick={() => setRole('COMMENTER')}
                     >
@@ -313,7 +313,7 @@ export function CollaboratorsDialog({ projectId, isOwner }) {
                     </Button>
                     <Button
                       type="button"
-                      variant={role === 'VIEWER' ? 'default' : 'outline'}
+                      variant={role === 'VIEWER' ? 'secondary' : 'outline'}
                       className="gap-2"
                       onClick={() => setRole('VIEWER')}
                     >

@@ -1,27 +1,20 @@
-import {
-    ResizableHandle,
-    ResizablePanel,
-    ResizablePanelGroup,
-  } from "@/components/ui/resizable"
-  
-  export default function ResizableHandleDemo() {
-    return (
-      <ResizablePanelGroup
-        direction="horizontal"
-        className="min-h-[200px] max-w-md rounded-lg border md:min-w-[450px]"
-      >
-        <ResizablePanel defaultSize={25}>
-          <div className="flex h-full items-center justify-center p-6">
-            <span className="font-semibold">Sidebar</span>
-          </div>
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={75}>
-          <div className="flex h-full items-center justify-center p-6">
-            <span className="font-semibold">Content</span>
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    )
+'use server';
+
+ 
+async function fetchContent() {
+  try {
+    const response = await fetch('https://www.1024terabox.com/sharing/embed?surl=EWkWY66FhZKS2WfxwBgd0Q&autoplay=true&mute=false');
+    return await response.text();
+  } catch (error) {
+    console.error('Error fetching content:', error);
+    return '';
   }
-  
+}
+
+export default async function TeraboxContent() {
+  const content = await fetchContent();
+
+  return (
+    <div dangerouslySetInnerHTML={{ __html: content }} />
+  );
+}

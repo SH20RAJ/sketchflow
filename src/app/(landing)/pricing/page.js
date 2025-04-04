@@ -111,11 +111,29 @@ export default function PricingPage() {
           </Card>
         </div>
 
-        <div className="mt-12 text-center text-gray-600">
-          <p>All prices are in USD. Billed monthly unless otherwise noted.</p>
-          <p className="mt-2">Need custom enterprise pricing? <a href="mailto:sales@sketchflow.space" className="text-blue-600 hover:underline">Contact us</a></p>
+        <div className="mt-12 text-center">
+          {/* Beta Notice */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8 max-w-3xl mx-auto">
+            <h3 className="text-lg font-semibold text-yellow-800 mb-2">Payment Infrastructure in Beta</h3>
+            <p className="text-yellow-700 mb-4">
+              Our payment system is currently in beta. To request pro access during this phase, please fill out our request form.
+            </p>
+            <Button
+              className="bg-yellow-600 hover:bg-yellow-700 text-white"
+              asChild
+            >
+              <a href="https://forms.gle/2V9q1o8SZNZ5GPt47" target="_blank" rel="noopener noreferrer">
+                Request Pro Access
+              </a>
+            </Button>
+          </div>
+
+          <div className="text-gray-600">
+            <p>All prices are in USD. Billed monthly unless otherwise noted.</p>
+            <p className="mt-2">Need custom enterprise pricing? <a href="mailto:sales@sketchflow.space" className="text-blue-600 hover:underline">Contact us</a></p>
+          </div>
         </div>
       </div>
     </div>
   );
-}   
+}

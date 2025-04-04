@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, useInView, useAnimation } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Sparkles,
   Users,
@@ -19,13 +21,59 @@ import {
   Infinity,
   Lightbulb,
   Rocket,
-  Star
+  Star,
+  Check,
+  Play,
+  MousePointerClick
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 export default function FeaturesPage() {
+  // State for active feature and animations
   const [activeFeature, setActiveFeature] = useState(0);
+
+  // Refs for scroll animations
+  const featuresRef = useRef(null);
+  const proFeaturesRef = useRef(null);
+  const ctaRef = useRef(null);
+
+  // Animation controls
+  const featuresControls = useAnimation();
+  const proFeaturesControls = useAnimation();
+  const ctaControls = useAnimation();
+
+  // Check if sections are in view
+  const featuresInView = useInView(featuresRef, { once: false, amount: 0.2 });
+  const proFeaturesInView = useInView(proFeaturesRef, { once: false, amount: 0.2 });
+  const ctaInView = useInView(ctaRef, { once: false, amount: 0.2 });
+
+  // Animate sections when they come into view
+  useEffect(() => {
+    if (featuresInView) featuresControls.start('visible');
+    if (proFeaturesInView) proFeaturesControls.start('visible');
+    if (ctaInView) ctaControls.start('visible');
+  }, [featuresInView, proFeaturesInView, ctaInView, featuresControls, proFeaturesControls, ctaControls]);
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5 }
+    }
+  };
 
   const mainFeatures = [
     {
@@ -115,7 +163,7 @@ export default function FeaturesPage() {
       </div>
 
       {/* Grid Pattern Overlay */}
-      <div 
+      <div
         className="absolute inset-0 bg-grid-pattern opacity-[0.03] bg-[length:30px_30px]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.5 0V30M28.5 0V30M0 1.5H30M0 28.5H30' stroke='%23000' stroke-opacity='0.7' stroke-width='0.5'/%3E%3C/svg%3E")`,
@@ -158,8 +206,8 @@ export default function FeaturesPage() {
               <motion.div
                 key={index}
                 className={`p-6 rounded-2xl cursor-pointer transition-all duration-300 ${
-                  activeFeature === index 
-                    ? 'bg-white shadow-lg scale-105' 
+                  activeFeature === index
+                    ? 'bg-white shadow-lg scale-105'
                     : 'hover:bg-white/50'
                 }`}
                 onClick={() => setActiveFeature(index)}
@@ -323,4 +371,4 @@ export default function FeaturesPage() {
       </div>
     </div>
   );
-} 
+}
