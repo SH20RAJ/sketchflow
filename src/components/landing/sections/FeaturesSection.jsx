@@ -246,9 +246,9 @@ export default function FeaturesSection() {
                 description: 'Your data is protected with enterprise-grade security and compliance features.'
               },
               {
-                icon: <Share2 className="h-6 w-6 text-indigo-500" />,
+                icon: <Share2 className="h-6 w-6 text-indigo-100" />,
                 title: 'Easy Sharing',
-                description: 'Share your projects with anyone, whether they&apos;re team members or external stakeholders.'
+                description: 'Share your projects with anyone, whether they are team members or external stakeholders.'
 
               }
             ].map((feature, index) => (

@@ -38,7 +38,7 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
     const [newTagColor, setNewTagColor] = useState('#4F46E5');
 
     // Fetch all available tags
-    const { data, error, isLoading: isLoadingTags } = useSWR('/api/projects/tags', fetcher);
+    const { data, isLoading: isLoadingTags } = useSWR('/api/projects/tags', fetcher);
     const allTags = data?.tags || [];
 
     // Initialize selected tags with project's current tags
@@ -71,10 +71,20 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
         setShowTagList(true);
     };
 
-    // Hide tag list when clicking outside (except when clicking on the search input)
+    // Create a ref for the tag list container
+    const tagListRef = useRef(null);
+
+    // Hide tag list when clicking outside (except when clicking on the search input or tag buttons)
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (searchInputRef.current && !searchInputRef.current.contains(event.target)) {
+            // Don't close if clicking on search input
+            const isSearchInput = searchInputRef.current && searchInputRef.current.contains(event.target);
+
+            // Don't close if clicking on a tag in the dropdown
+            const isTagButton = tagListRef.current && tagListRef.current.contains(event.target);
+
+            // Only close if clicking outside both the search input and tag list
+            if (!isSearchInput && !isTagButton) {
                 setShowTagList(false);
             }
         };
@@ -85,9 +95,25 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
         };
     }, []);
 
-    const handleAddTag = async (tag) => {
+    const handleAddTag = async (tag, e) => {
+        // Prevent event bubbling to avoid triggering parent elements' click events
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Check if tag is already selected
+        if (selectedTags.some(selectedTag => selectedTag.id === tag.id)) {
+            toast.info(`Tag "${tag.name}" is already added to this project`);
+            return;
+        }
+
+        // Keep the tag list open during the operation
+        setShowTagList(true);
+
         setIsLoading(true);
         try {
+            console.log(`Adding tag ${tag.id} to project ${project.id}`);
             const response = await fetch(`/api/projects/${project.id}/tags`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -95,14 +121,25 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to add tag to project');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to add tag to project');
             }
 
-            setSelectedTags([...selectedTags, tag]);
+            // Update local state
+            setSelectedTags(prev => [...prev, tag]);
+
+            // Don't clear search query to allow adding multiple tags
+            // setSearchQuery('');
+
             toast.success(`Added "${tag.name}" tag to project`);
 
             // Refresh projects data
             await mutate(`/api/projects?tagId=&sortBy=updatedAt&order=desc&search=`);
+
+            // Focus back on the search input to maintain context
+            if (searchInputRef.current) {
+                searchInputRef.current.querySelector('input').focus();
+            }
         } catch (error) {
             console.error('Error adding tag to project:', error);
             toast.error(error.message || 'Failed to add tag to project');
@@ -111,7 +148,13 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
         }
     };
 
-    const handleRemoveTag = async (tagId) => {
+    const handleRemoveTag = async (tagId, e) => {
+        // Prevent event bubbling
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
         setIsLoading(true);
         try {
             const response = await fetch(`/api/projects/${project.id}/tags/${tagId}`, {
@@ -119,10 +162,11 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to remove tag from project');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to remove tag from project');
             }
 
-            setSelectedTags(selectedTags.filter(tag => tag.id !== tagId));
+            setSelectedTags(prev => prev.filter(tag => tag.id !== tagId));
             toast.success('Tag removed from project');
 
             // Refresh projects data
@@ -209,7 +253,7 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
                                     {tag.emoji && <span className="mr-1 opacity-90">{tag.emoji}</span>}
                                     {tag.name}
                                     <button
-                                        onClick={() => handleRemoveTag(tag.id)}
+                                        onClick={(e) => handleRemoveTag(tag.id, e)}
                                         className="ml-1 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity duration-200"
                                         disabled={isLoading}
                                     >
@@ -240,7 +284,7 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
                     </div>
 
                     {showTagList && !isLoadingTags && (
-                        <div className="p-2 border rounded-lg max-h-48 overflow-y-auto space-y-1">
+                        <div ref={tagListRef} className="p-2 border rounded-lg max-h-48 overflow-y-auto space-y-1">
                             {isLoading ? (
                                 <div className="flex items-center justify-center py-4">
                                     <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
@@ -249,7 +293,7 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
                                 clientFilteredTags.map((tag) => (
                                     <button
                                         key={tag.id}
-                                        onClick={() => handleAddTag(tag)}
+                                        onClick={(e) => handleAddTag(tag, e)}
                                         className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2 transition-colors duration-200 group"
                                         disabled={isLoading}
                                     >
@@ -278,7 +322,7 @@ export function AddTagToProjectDialog({ open, onOpenChange, project }) {
                                         .map((tag) => (
                                             <button
                                                 key={tag.id}
-                                                onClick={() => handleAddTag(tag)}
+                                                onClick={(e) => handleAddTag(tag, e)}
                                                 className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2 transition-colors duration-200 group"
                                                 disabled={isLoading}
                                             >
