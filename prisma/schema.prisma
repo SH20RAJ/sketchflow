@@ -94,6 +94,7 @@ model Project {
   originalProjectId String? // For cloned projects
   originalProject  Project?                @relation("ProjectClones", fields: [originalProjectId], references: [id], onDelete: SetNull)
   clones           Project[]               @relation("ProjectClones")
+  embedConfig      ProjectEmbed?
 
   @@index([userId])
   @@index([originalProjectId])
@@ -362,4 +363,21 @@ enum Status {
   PENDING
   ACCEPTED
   REJECTED
+}
+
+// Project embed configuration
+model ProjectEmbed {
+  id             String    @id @default(cuid())
+  projectId      String    @unique
+  project        Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  token          String    @unique
+  accessControl  String    @default("public") // public, token, domain
+  allowedDomains String    @default("") // Comma-separated list of domains
+  expiresAt      DateTime?
+  createdBy      String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([projectId])
+  @@index([token])
 }

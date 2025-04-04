@@ -22,7 +22,8 @@ import {
     UserPlus,
     Activity,
     Clock,
-    RefreshCw
+    RefreshCw,
+    Code
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -50,6 +51,7 @@ import { format } from "date-fns";
 import { debounce } from "lodash";
 import { CollaboratorsDialog } from "@/components/collaboration/CollaboratorsDialog";
 import { ActivityFeed } from "@/components/collaboration/ActivityFeed";
+import { EmbedProjectDialog } from "@/components/projects/EmbedProjectDialog";
 
 
 
@@ -105,6 +107,7 @@ export function EditorNavbar({
     const [isImporting, setIsImporting] = useState(false);
     const [importError, setImportError] = useState('');
     const [showCollaboratorsDialog, setShowCollaboratorsDialog] = useState(false);
+    const [showEmbedDialog, setShowEmbedDialog] = useState(false);
     const [showActivityFeed, setShowActivityFeed] = useState(false);
 
 
@@ -517,20 +520,46 @@ export function EditorNavbar({
                                         />
                                     </div>
                                     {isShared && (
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium">
-                                                Share link
-                                            </label>
-                                            <div className="flex gap-2">
-                                                <Input
-                                                    readOnly
-                                                    value={`${window.location.origin}/project/${projectId}`}
-                                                />
-                                                <Button onClick={copyShareLink}>
-                                                    <Copy className="h-4 w-4" />
-                                                </Button>
+                                        <>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium">
+                                                    Share link
+                                                </label>
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        readOnly
+                                                        value={`${window.location.origin}/project/${projectId}`}
+                                                    />
+                                                    <Button onClick={copyShareLink}>
+                                                        <Copy className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             </div>
-                                        </div>
+
+                                            <div className="pt-2 border-t">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="space-y-1">
+                                                        <h4 className="text-sm font-medium">
+                                                            Embed this project
+                                                        </h4>
+                                                        <p className="text-sm text-gray-500">
+                                                            Add this project to your website or blog
+                                                        </p>
+                                                    </div>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setShowShareDialog(false);
+                                                            setShowEmbedDialog(true);
+                                                        }}
+                                                    >
+                                                        <Code className="h-4 w-4 mr-2" />
+                                                        Get Embed Code
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
                             </DialogContent>
@@ -654,6 +683,15 @@ export function EditorNavbar({
                     projectId={projectId}
                     open={showActivityFeed}
                     onOpenChange={setShowActivityFeed}
+                />
+            )}
+
+            {/* Embed Dialog */}
+            {showEmbedDialog && (
+                <EmbedProjectDialog
+                    project={{ id: projectId, name: projectName }}
+                    isOpen={showEmbedDialog}
+                    onClose={() => setShowEmbedDialog(false)}
                 />
             )}
         </div>
