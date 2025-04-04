@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { LoadingSpinner } from '@/components/ui/loading';
 import { motion } from 'framer-motion';
 
 export default function Loading() {
