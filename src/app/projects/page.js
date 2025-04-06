@@ -71,9 +71,9 @@ export default function ProjectsPage({ searchParams }) {
     return (
       <>
         {/* Premium branded loading experience */}
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <PremiumLoader message="Loading your projects..." />
-        </div>
+        </div> */}
 
         {/* Projects grid skeleton with premium styling */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
