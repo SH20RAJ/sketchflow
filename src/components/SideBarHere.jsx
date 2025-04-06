@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { PlusCircle, FolderOpen, Share2, Settings, LogOut, CreditCard, ChevronRight, Sparkles, FileText, Tag } from "lucide-react";
+import { PlusCircle, FolderOpen, Globe,  Share2, Settings, LogOut, CreditCard, ChevronRight, Sparkles, FileText, Tag } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -127,7 +127,7 @@ export function SideBarHere() {
             <h2 className="mb-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Projects</h2>
             <div className="space-y-1.5">
               <MenuItem href="/projects" icon={FolderOpen}>All Projects</MenuItem>
-              <MenuItem href="/projects/shared" icon={Share2}>Shared Projects</MenuItem>
+              <MenuItem href="/projects/public" icon={Globe}>Public Projects</MenuItem>
               <MenuItem href="/projects/tag-manage" icon={Tag}>Manage Tags</MenuItem>
 
             </div>

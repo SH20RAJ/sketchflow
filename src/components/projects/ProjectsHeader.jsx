@@ -14,6 +14,7 @@ import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { CreateTagDialog } from '@/components/projects/CreateTagDialog';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import useSWR from 'swr';
+import { usePathname } from 'next/navigation';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -28,6 +29,8 @@ export function ProjectsHeader() {
   const currentOrder = searchParams.get('order') || 'desc';
   const { data } = useSWR('/api/projects/tags', fetcher);
   const tags = data?.tags || [];
+  const pathname = usePathname();
+  const showFilters = pathname.endsWith('/projects');
 
   const updateFilters = useCallback((updates) => {
     const params = new URLSearchParams(searchParams);
@@ -108,7 +111,7 @@ export function ProjectsHeader() {
         </div>
 
         {/* Bottom section: Filters and Sorting */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 shadow-sm overflow-hidden">
+       {showFilters && <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 shadow-sm overflow-hidden">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             {/* Tag Filter */}
             <div className="col-span-1 sm:col-span-1 md:col-span-1">
@@ -165,7 +168,7 @@ export function ProjectsHeader() {
               </Button>
             </div>
           </div>
-        </div>
+        </div>}
       </div>
 
       {/* Dialogs */}
