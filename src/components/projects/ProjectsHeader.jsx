@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Plus, Settings, LogOut, SortAsc, SortDesc } from 'lucide-react';
+import { Plus, Settings, LogOut, SortAsc, SortDesc, Menu } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +12,7 @@ import { signOut } from 'next-auth/react';
 import { ProjectSearch } from '@/components/projects/ProjectSearch';
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { CreateTagDialog } from '@/components/projects/CreateTagDialog';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import useSWR from 'swr';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -46,7 +47,13 @@ export function ProjectsHeader() {
         {/* Top section: Title, Search, and Actions */}
         <div className="flex flex-col md:flex-row items-center gap-4 justify-between mb-4">
           <div className="flex items-center justify-between w-full md:w-auto">
-            <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
+            <div className="flex items-center gap-2">
+              {/* Mobile sidebar toggle */}
+              <div className="md:hidden">
+                <SidebarTrigger className="p-2 rounded-md hover:bg-gray-100" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
+            </div>
             <Button
               variant="ghost"
               size="icon"
@@ -59,10 +66,10 @@ export function ProjectsHeader() {
 
           <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
             <div className="w-full md:w-80 lg:w-96">
-              <ProjectSearch />
+              <ProjectSearch className="h-10" />
             </div>
 
-            <div className="flex items-center gap-3 ml-auto">
+            <div className="flex items-center gap-3 ml-auto w-full md:w-auto justify-end">
               <Button
                 className="hidden md:flex gap-2 bg-blue-600 hover:bg-blue-700 text-white"
                 onClick={() => setIsCreateDialogOpen(true)}
@@ -101,10 +108,10 @@ export function ProjectsHeader() {
         </div>
 
         {/* Bottom section: Filters and Sorting */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 shadow-sm">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 shadow-sm overflow-hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             {/* Tag Filter */}
-            <div className="col-span-2 md:col-span-1">
+            <div className="col-span-1 sm:col-span-1 md:col-span-1">
               <Select value={currentTag} onValueChange={(value) => updateFilters({ tagId: value })}>
                 <SelectTrigger className="w-full border-gray-200 focus:border-blue-300 focus:ring-blue-200 h-10">
                   <SelectValue placeholder="All Tags" />
@@ -124,7 +131,7 @@ export function ProjectsHeader() {
             </div>
 
             {/* Sort By */}
-            <div className="col-span-2 md:col-span-1">
+            <div className="col-span-1 sm:col-span-1 md:col-span-1">
               <Select value={currentSort} onValueChange={(value) => updateFilters({ sortBy: value })}>
                 <SelectTrigger className="w-full border-gray-200 focus:border-blue-300 focus:ring-blue-200 h-10">
                   <SelectValue placeholder="Last Updated" />
@@ -138,7 +145,7 @@ export function ProjectsHeader() {
             </div>
 
             {/* Sort Order and Create Tag */}
-            <div className="col-span-2 md:col-span-2 flex justify-end gap-2">
+            <div className="col-span-1 sm:col-span-2 md:col-span-2 flex justify-between sm:justify-end gap-2">
               <Button
                 variant="outline"
                 size="icon"
@@ -154,7 +161,7 @@ export function ProjectsHeader() {
                 className="border-gray-200 hover:bg-gray-100 h-10 flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
-                <span className="hidden md:inline">Create Tag</span>
+                <span className="hidden sm:inline">Create Tag</span>
               </Button>
             </div>
           </div>

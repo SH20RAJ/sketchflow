@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Search, X, Loader2 } from 'lucide-react';
 import { debounce } from 'lodash';
 
-export function ProjectSearch() {
+export function ProjectSearch({ className }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [localSearchQuery, setLocalSearchQuery] = useState(searchParams.get('search') || '');
@@ -64,7 +64,7 @@ export function ProjectSearch() {
                     placeholder="Search projects..."
                     value={localSearchQuery}
                     onChange={handleSearchChange}
-                    className="pl-10 pr-10 border-gray-200 focus:border-blue-300 focus:ring-blue-200 h-10"
+                    className={`pl-10 pr-10 border-gray-200 focus:border-blue-300 focus:ring-blue-200 h-10 ${className || ''}`}
                 />
                 {localSearchQuery && (
                     <Button
