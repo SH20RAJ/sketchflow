@@ -32,7 +32,7 @@ export function CollaboratedProjects({ searchQuery }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = parseInt(searchParams.get('collaboratedPage') || '1', 10);
-  
+
   // Construct API URL with pagination and search parameters
   const getApiUrl = () => {
     const params = new URLSearchParams();
@@ -100,8 +100,8 @@ export function CollaboratedProjects({ searchQuery }) {
 
   return (
     <div className="mt-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Collaborated Projects</h2>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Collaborated Projects</h2>
         <Badge variant="outline" className="flex items-center gap-1 px-3 py-1">
           <Users className="h-3.5 w-3.5" />
           <span>{pagination?.total || 0} Projects</span>
@@ -110,7 +110,7 @@ export function CollaboratedProjects({ searchQuery }) {
 
       {!hasProjects && (
         <Card className="bg-gray-50 border-gray-200">
-          <CardContent className="p-8 text-center">
+          <CardContent className="p-4 sm:p-6 md:p-8 text-center">
             {searchQuery ? (
               <div className="space-y-3">
                 <div className="relative mx-auto w-12 h-12 mb-2">
@@ -140,7 +140,7 @@ export function CollaboratedProjects({ searchQuery }) {
             variants={container}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6"
           >
             <AnimatePresence>
               {projects.map((project) => (

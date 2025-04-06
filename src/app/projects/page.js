@@ -76,8 +76,8 @@ export default function ProjectsPage({ searchParams }) {
         </div> */}
 
         {/* Projects grid skeleton with premium styling */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <PremiumCardSkeleton count={9} showBranding={true} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 px-0 sm:px-0">
+          <PremiumCardSkeleton count={6} showBranding={true} />
         </div>
       </>
     );
@@ -130,7 +130,7 @@ export default function ProjectsPage({ searchParams }) {
       {/* Project Filters moved to header */}
 
       {/* Projects Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 px-0 sm:px-0">
         {projects.map((project) => (
           <ProjectCard
             key={project.id}
