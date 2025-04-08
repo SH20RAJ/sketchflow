@@ -77,7 +77,7 @@ export default function ProjectsPage({ searchParams }) {
 
         {/* Projects grid skeleton with premium styling */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 px-0 sm:px-0">
-          <PremiumCardSkeleton count={6} showBranding={true} />
+          <PremiumCardSkeleton count={9} showBranding={true} />
         </div>
       </>
     );
