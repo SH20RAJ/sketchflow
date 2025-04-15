@@ -51,7 +51,7 @@ export function CollaboratedProjects({ searchQuery }) {
 
   // Handle pagination
   const handlePageChange = (newPage) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('collaboratedPage', newPage.toString());
     router.push(`/projects?${params.toString()}`);
   };
@@ -165,11 +165,6 @@ export function CollaboratedProjects({ searchQuery }) {
                 pagination={{
                   page: pagination.page,
                   totalPages: pagination.totalPages
-                }}
-                createPageURL={(pageNum) => {
-                  const params = new URLSearchParams(searchParams);
-                  params.set('collaboratedPage', pageNum.toString());
-                  return `/projects?${params.toString()}`;
                 }}
               />
             </div>

@@ -19,12 +19,28 @@ export function ProjectPagination({ pagination }) {
     return null;
   }
 
-  const { page, totalPages } = pagination;
+  // Ensure page is a number
+  const page = typeof pagination.page === 'string'
+    ? parseInt(pagination.page, 10)
+    : pagination.page || 1;
 
+  const totalPages = pagination.totalPages || 1;
+
+  // Create URL and handle navigation
   const createPageURL = (pageNumber) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('page', pageNumber.toString());
     return `/projects?${params.toString()}`;
+  };
+
+  // Handle navigation with router.push
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber < 1 || pageNumber > totalPages || pageNumber === page) {
+      return;
+    }
+
+    const url = createPageURL(pageNumber);
+    router.push(url);
   };
 
   // Generate array of page numbers to show
@@ -79,7 +95,11 @@ export function ProjectPagination({ pagination }) {
       <PaginationContent className="flex flex-wrap justify-center">
         <PaginationItem>
           <PaginationPrevious
-            href={page > 1 ? createPageURL(page - 1) : '#'}
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              if (page > 1) handlePageChange(page - 1);
+            }}
             aria-disabled={page <= 1}
             className={page <= 1 ? 'pointer-events-none opacity-50' : ''}
           />
@@ -97,7 +117,11 @@ export function ProjectPagination({ pagination }) {
           return (
             <PaginationItem key={item}>
               <PaginationLink
-                href={createPageURL(item)}
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlePageChange(item);
+                }}
                 isActive={page === item}
               >
                 {item}
@@ -108,7 +132,11 @@ export function ProjectPagination({ pagination }) {
 
         <PaginationItem>
           <PaginationNext
-            href={page < totalPages ? createPageURL(page + 1) : '#'}
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              if (page < totalPages) handlePageChange(page + 1);
+            }}
             aria-disabled={page >= totalPages}
             className={page >= totalPages ? 'pointer-events-none opacity-50' : ''}
           />
