@@ -15,7 +15,11 @@ const DEFAULT_DATA = {
     appState: { viewBackgroundColor: "#ffffff" },
     scrollToContent: true,
   },
-  markdown: ``,
+  markdown: `
+  # Welcome to SketchFlow!
+
+  This is a sample project to help you get started with SketchFlow.
+  `,
   name: "Untitled Project" + Math.floor(Math.random() * 1000),
 };
 
