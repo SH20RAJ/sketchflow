@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, Suspense } from "react";
+import React, { useState, useCallback, useEffect, Suspense, useRef } from "react";
 import { debounce } from "lodash";
 import dynamic from "next/dynamic";
 
@@ -19,6 +19,8 @@ const { restore, restoreAppState, restoreElements } = { restore: () => { }, rest
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ExcalidrawLibraryPanel } from "./ExcalidrawLibraryPanel";
 import {
     Pencil,
     Save,
@@ -34,7 +36,8 @@ import {
     Menu,
     GitFork,
     Tag,
-    Plus
+    Plus,
+    Library
 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import {
@@ -112,6 +115,8 @@ export default function TryEditor({ initialData = {}, readOnly = false }) {
     const [projectName, setProjectName] = useState(
         initialData.name || DEFAULT_DATA.name
     );
+    const [showLibraryPanel, setShowLibraryPanel] = useState(false);
+    const excalidrawRef = useRef(null);
 
     // Load data from localStorage on mount
     useEffect(() => {
@@ -268,42 +273,156 @@ export default function TryEditor({ initialData = {}, readOnly = false }) {
                         <ResizableHandle withHandle />
                         <ResizablePanel defaultSize={layout === "split" ? 70 : 100} minSize={30} className={`min-h-0 ${layout === "markdown" ? "hidden" : ""}`}>
                             <div className="h-full">
-                                <Excalidraw
-                                    initialData={excalidrawData}
-                                    onChange={handleExcalidrawChange}
-                                    viewModeEnabled={readOnly}
-                                    zenModeEnabled={false}
-                                    theme="light"
-                                    UIOptions={{
-                                        canvasActions: {
-                                            saveToActiveFile: false,
-                                            loadScene: false,
-                                            export: false,
-                                            clearCanvas: true,
-                                        }
-                                    }}
-                                />
+                                <div className="relative h-full">
+                                    <Excalidraw
+                                        ref={excalidrawRef}
+                                        initialData={excalidrawData}
+                                        onChange={handleExcalidrawChange}
+                                        viewModeEnabled={readOnly}
+                                        zenModeEnabled={false}
+                                        theme="light"
+                                        UIOptions={{
+                                            canvasActions: {
+                                                saveToActiveFile: false,
+                                                loadScene: false,
+                                                export: false,
+                                                clearCanvas: true,
+                                            }
+                                        }}
+                                    />
+
+                                    {/* Library Button */}
+                                    <div className="absolute top-2 right-2 z-10">
+                                        <Sheet open={showLibraryPanel} onOpenChange={setShowLibraryPanel}>
+                                            <SheetTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="bg-white shadow-sm"
+                                                >
+                                                    <Library className="h-4 w-4 mr-1" />
+                                                    Library
+                                                </Button>
+                                            </SheetTrigger>
+                                            <SheetContent side="right" className="w-[350px] sm:w-[450px] p-0">
+                                                <div className="h-full">
+                                                    <ExcalidrawLibraryPanel
+                                                        onAddToCanvas={(libraryItem) => {
+                                                            if (excalidrawRef.current && libraryItem) {
+                                                                try {
+                                                                    // Add library item to canvas
+                                                                    let elements = [];
+
+                                                                    // Handle both formats: elements array or direct elements
+                                                                    if (libraryItem.elements && Array.isArray(libraryItem.elements)) {
+                                                                        elements = libraryItem.elements;
+                                                                    } else if (Array.isArray(libraryItem)) {
+                                                                        elements = libraryItem;
+                                                                    }
+
+                                                                    if (elements.length > 0) {
+                                                                        // Position elements in the center of the viewport
+                                                                        const appState = excalidrawRef.current.getAppState();
+                                                                        const { width, height } = appState;
+
+                                                                        // Clone elements to avoid modifying the original
+                                                                        const clonedElements = JSON.parse(JSON.stringify(elements));
+
+                                                                        // Add elements to canvas
+                                                                        excalidrawRef.current.updateScene({
+                                                                            elements: clonedElements
+                                                                        });
+                                                                    }
+                                                                } catch (error) {
+                                                                    console.error('Error adding library item to canvas:', error);
+                                                                    toast.error('Failed to add library item to canvas');
+                                                                }
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                            </SheetContent>
+                                        </Sheet>
+                                    </div>
+                                </div>
                             </div>
                         </ResizablePanel>
 
                     </ResizablePanelGroup>
                 ) : layout === "canvas" ? (
                     <div className="h-full">
-                        <Excalidraw
-                            initialData={excalidrawData}
-                            onChange={handleExcalidrawChange}
-                            viewModeEnabled={readOnly}
-                            zenModeEnabled={false}
-                            theme="light"
-                            UIOptions={{
-                                canvasActions: {
-                                    saveToActiveFile: false,
-                                    loadScene: false,
-                                    export: false,
-                                    clearCanvas: true,
-                                }
-                            }}
-                        />
+                        <div className="relative h-full">
+                            <Excalidraw
+                                ref={excalidrawRef}
+                                initialData={excalidrawData}
+                                onChange={handleExcalidrawChange}
+                                viewModeEnabled={readOnly}
+                                zenModeEnabled={false}
+                                theme="light"
+                                UIOptions={{
+                                    canvasActions: {
+                                        saveToActiveFile: false,
+                                        loadScene: false,
+                                        export: false,
+                                        clearCanvas: true,
+                                    }
+                                }}
+                            />
+
+                            {/* Library Button */}
+                            <div className="absolute top-2 right-2 z-10">
+                                <Sheet open={showLibraryPanel} onOpenChange={setShowLibraryPanel}>
+                                    <SheetTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="bg-white shadow-sm"
+                                        >
+                                            <Library className="h-4 w-4 mr-1" />
+                                            Library
+                                        </Button>
+                                    </SheetTrigger>
+                                    <SheetContent side="right" className="w-[350px] sm:w-[450px] p-0">
+                                        <div className="h-full">
+                                            <ExcalidrawLibraryPanel
+                                                onAddToCanvas={(libraryItem) => {
+                                                    if (excalidrawRef.current && libraryItem) {
+                                                        try {
+                                                            // Add library item to canvas
+                                                            let elements = [];
+
+                                                            // Handle both formats: elements array or direct elements
+                                                            if (libraryItem.elements && Array.isArray(libraryItem.elements)) {
+                                                                elements = libraryItem.elements;
+                                                            } else if (Array.isArray(libraryItem)) {
+                                                                elements = libraryItem;
+                                                            }
+
+                                                            if (elements.length > 0) {
+                                                                // Position elements in the center of the viewport
+                                                                const appState = excalidrawRef.current.getAppState();
+                                                                const { width, height } = appState;
+
+                                                                // Clone elements to avoid modifying the original
+                                                                const clonedElements = JSON.parse(JSON.stringify(elements));
+
+                                                                // Add elements to canvas
+                                                                excalidrawRef.current.updateScene({
+                                                                    elements: clonedElements
+                                                                });
+                                                            }
+                                                        } catch (error) {
+                                                            console.error('Error adding library item to canvas:', error);
+                                                            toast.error('Failed to add library item to canvas');
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </SheetContent>
+                                </Sheet>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <MarkdownEditor

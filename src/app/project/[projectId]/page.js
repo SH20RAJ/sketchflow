@@ -34,6 +34,14 @@ export default function ProjectPage({ params }) {
   const [cloning, setCloning] = useState(false);
 
   const fetchProject = useCallback(async () => {
+    // Validate project ID
+    if (!params.projectId) {
+      setError('Invalid project ID');
+      setLoading(false);
+      router.push('/projects');
+      return;
+    }
+
     try {
       const response = await fetch(`/api/projects/${params.projectId}`);
       if (!response.ok) {
@@ -79,6 +87,12 @@ export default function ProjectPage({ params }) {
       return;
     }
 
+    // Validate project ID
+    if (!params.projectId) {
+      toast.error('Cannot clone: Invalid project ID');
+      return;
+    }
+
     setCloning(true);
     try {
       const response = await fetch(`/api/projects/${params.projectId}/clone`, {
@@ -99,6 +113,12 @@ export default function ProjectPage({ params }) {
   };
 
   const copyShareLink = () => {
+    // Validate project ID
+    if (!params.projectId) {
+      toast.error('Cannot share: Invalid project ID');
+      return;
+    }
+
     const shareUrl = `${window.location.origin}/project/${params.projectId}`;
     navigator.clipboard.writeText(shareUrl);
     toast.success('Share link copied to clipboard');
@@ -122,6 +142,14 @@ export default function ProjectPage({ params }) {
     if (status === 'loading') return;
 
     const checkAccess = async () => {
+      // Validate project ID
+      if (!params.projectId) {
+        setError('Invalid project ID');
+        setLoading(false);
+        router.push('/projects');
+        return;
+      }
+
       try {
         // First check access
         const accessResponse = await fetch(`/api/projects/${params.projectId}/access`);

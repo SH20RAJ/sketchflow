@@ -10,7 +10,7 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import {
     Dialog,
     DialogContent,
@@ -161,6 +161,12 @@ export function EditorNavbar({
     const handleExportProject = async () => {
         console.log('Export project called', { projectId, projectName, projectDescription });
 
+        // Validate project ID
+        if (!projectId) {
+            toast.error('Cannot export: Invalid project ID');
+            return;
+        }
+
         try {
             // Fetch the latest project data
             const response = await fetch(`/api/projects/${projectId}`);
@@ -236,6 +242,14 @@ export function EditorNavbar({
      * @param {boolean} createNew - Whether to create a new project or update the current one
      */
     const handleImportProject = async (createNew = false) => {
+        // Validate project ID if updating existing project
+        if (!createNew && !projectId) {
+            setImportError('Cannot import: Invalid project ID');
+            toast.error('Cannot import: Invalid project ID');
+            setIsImporting(false);
+            return;
+        }
+
         setIsImporting(true);
         setImportError('');
 
@@ -337,6 +351,12 @@ export function EditorNavbar({
      * Clones the current project
      */
     const handleCloneProject = async () => {
+        // Validate project ID
+        if (!projectId) {
+            toast.error('Cannot clone: Invalid project ID');
+            return;
+        }
+
         setIsCloning(true);
         try {
             const response = await fetch(`/api/projects/${projectId}/clone`, {

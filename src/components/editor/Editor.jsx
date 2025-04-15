@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import useSWR from "swr";
 import { Excalidraw } from "@excalidraw/excalidraw";
 import { MarkdownEditor } from "./MarkdownEditor";
@@ -8,6 +8,10 @@ import { useRouter } from "next/navigation";
 import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from "../ui/resizable";
 import { toast } from "sonner";
 import { EditorNavbar } from "./EditorNavbar";
+import { ExcalidrawLibraryPanel } from "./ExcalidrawLibraryPanel";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Library } from "lucide-react";
 
 const DEFAULT_DATA = {
   excalidraw: {
@@ -50,6 +54,8 @@ export default function Editor({ projectId, initialData = {}, isOwner = false, i
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [autoSaveInterval, setAutoSaveInterval] = useState(80000); // 30 seconds
+  const [showLibraryPanel, setShowLibraryPanel] = useState(false);
+  const excalidrawRef = useRef(null);
 
   const handleTagsUpdated = async () => {
     await mutate();
@@ -327,18 +333,75 @@ export default function Editor({ projectId, initialData = {}, isOwner = false, i
             defaultSize={layout === 'split' ? 70 : 100}
             className={`min-h-0 ${layout === 'markdown' ? 'hidden' : ''}`}
           >
-            <Excalidraw
-              onChange={handleExcalidrawChange}
-              initialData={excalidrawData}
-              viewModeEnabled={!(isOwner || (isCollaborator && collaboratorRole === 'EDITOR'))}
-              UIOptions={{
-                dockedToolbar: true,
-                toolbarPosition: "left",
-                canvasActions: {
-                  saveToActiveFile: false,
-                }
-              }}
-            />
+            <div className="relative h-full">
+              <Excalidraw
+                ref={excalidrawRef}
+                onChange={handleExcalidrawChange}
+                initialData={excalidrawData}
+                viewModeEnabled={!(isOwner || (isCollaborator && collaboratorRole === 'EDITOR'))}
+                UIOptions={{
+                  dockedToolbar: true,
+                  toolbarPosition: "left",
+                  canvasActions: {
+                    saveToActiveFile: false,
+                  }
+                }}
+              />
+
+              {/* Library Button */}
+              <div className="absolute top-2 right-2 z-10">
+                <Sheet open={showLibraryPanel} onOpenChange={setShowLibraryPanel}>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-white shadow-sm"
+                    >
+                      <Library className="h-4 w-4 mr-1" />
+                      Library
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-[350px] sm:w-[450px] p-0">
+                    <div className="h-full">
+                      <ExcalidrawLibraryPanel
+                        onAddToCanvas={(libraryItem) => {
+                          if (excalidrawRef.current && libraryItem) {
+                            try {
+                              // Add library item to canvas
+                              let elements = [];
+
+                              // Handle both formats: elements array or direct elements
+                              if (libraryItem.elements && Array.isArray(libraryItem.elements)) {
+                                elements = libraryItem.elements;
+                              } else if (Array.isArray(libraryItem)) {
+                                elements = libraryItem;
+                              }
+
+                              if (elements.length > 0) {
+                                // Position elements in the center of the viewport
+                                const appState = excalidrawRef.current.getAppState();
+                                const { width, height } = appState;
+
+                                // Clone elements to avoid modifying the original
+                                const clonedElements = JSON.parse(JSON.stringify(elements));
+
+                                // Add elements to canvas
+                                excalidrawRef.current.updateScene({
+                                  elements: clonedElements
+                                });
+                              }
+                            } catch (error) {
+                              console.error('Error adding library item to canvas:', error);
+                              toast.error('Failed to add library item to canvas');
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            </div>
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
