@@ -17,16 +17,44 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import useSWR from 'swr';
-import { useCallback, useState } from 'react';
+import useSWR, { preload } from 'swr';
+import { useCallback, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
+// Define fetcher
 const fetcher = (...args) => fetch(...args).then(res => res.json());
 
 export default function SpacePage() {
   const params = useParams();
   const router = useRouter();
   const [isCloning, setIsCloning] = useState(false);
+  const username = params.username;
+  
+  // Prefetch data for users that are likely to be visited next
+  useEffect(() => {
+    // Prefetch the current user's space data
+    preload(`/api/space/${username}`, fetcher);
+  }, [username]);
+
+  // Use SWR with enhanced caching
+  const { data: spaceData, error, isLoading } = useSWR(
+    `/api/space/${username}`, 
+    fetcher,
+    {
+      keepPreviousData: true,  // Keep showing previous data while loading
+      revalidateOnMount: true, // Check for updates on mount
+      revalidateIfStale: true, // Revalidate if data is stale
+      dedupingInterval: 60000,  // Cache for 1 minute before refetching
+      onSuccess: (data) => {
+        // Prefetch related projects for faster navigation
+        if (data?.projects?.length) {
+          data.projects.forEach((project) => {
+            preload(`/api/projects/${project.id}`, fetcher);
+          });
+        }
+      }
+    }
+  );
 
   const handleCloneProject = useCallback(async (projectId) => {
     setIsCloning(true);
@@ -60,10 +88,6 @@ export default function SpacePage() {
     }
   }, [router]);
 
-  const username = params.username;
-
-  const { data: spaceData, error } = useSWR(`/api/space/${username}`, fetcher);
-
   if (error) return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-16">
       <div className="container mx-auto px-4 text-center">
@@ -76,7 +100,7 @@ export default function SpacePage() {
     </div>
   );
 
-  if (!spaceData) return (
+  if (isLoading && !spaceData) return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-16">
       <div className="container mx-auto px-4">
         <div className="animate-pulse">
@@ -294,4 +318,4 @@ export default function SpacePage() {
       </div>
     </div>
   );
-} 
+}

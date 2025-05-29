@@ -374,36 +374,38 @@ export default function TagManagePage() {
           )}
         </TabsContent>
 
+        {/* Improve the "Projects" tab content */}
         <TabsContent value="projects" className="mt-6">
           {selectedTag ? (
-            <div className="space-y-6">
-              <div className="bg-gray-50 p-4 rounded-lg border">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <span
-                    className="inline-block w-4 h-4 rounded-full"
-                    style={{ backgroundColor: selectedTag.color || '#4F46E5' }}
-                  ></span>
-                  {selectedTag.emoji && <span className="mr-1">{selectedTag.emoji}</span>}
-                  {selectedTag.name}
-                </h2>
-                <h3 className="text-sm font-medium text-gray-500 mb-3">Add Projects to this Tag</h3>
+            <div className="bg-white rounded-lg border p-6 shadow-sm transition-all">
+              <h2 className="text-2xl font-bold mb-6 flex items-center" style={{ color: selectedTag.color || '#374151' }}>
+                {selectedTag.emoji && <span className="mr-2 text-3xl">{selectedTag.emoji}</span>}
+                {selectedTag.name}
+              </h2>
+              <div className="bg-gray-50 p-5 rounded-lg border mb-8">
+                <h3 className="text-md font-semibold text-gray-700 mb-4">Add Projects to this Tag</h3>
                 <ProjectSelector tagId={selectedTag.id} />
               </div>
-
               <div className="mt-8">
-                <h3 className="text-lg font-medium mb-4">Projects with this Tag</h3>
+                <h3 className="text-xl font-semibold mb-4 flex items-center">
+                  <FileText className="h-5 w-5 mr-2 text-gray-600" />
+                  Projects with this Tag
+                </h3>
                 <TagProjectList tagId={selectedTag.id} />
               </div>
             </div>
           ) : (
-            <Card className="bg-gray-50 border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <FileText className="h-12 w-12 text-gray-400 mb-4" />
+            <Card className="bg-gray-50 border-dashed shadow-sm">
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <FileText className="h-16 w-16 text-gray-300 mb-4" />
                 <h3 className="text-xl font-medium text-gray-700 mb-2">No Tag Selected</h3>
                 <p className="text-gray-500 text-center max-w-md mb-6">
                   Please select a tag to manage its associated projects.
                 </p>
-                <Button onClick={() => setActiveTab('tags')}>
+                <Button
+                  onClick={() => setActiveTab('tags')}
+                  className="bg-blue-500 hover:bg-blue-600 text-white transition-all"
+                >
                   Select a Tag
                 </Button>
               </CardContent>
@@ -412,54 +414,65 @@ export default function TagManagePage() {
         </TabsContent>
       </Tabs>
 
-      {/* Create Tag Dialog */}
+      {/* Improve Create Tag Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={handleCreateDialogChange}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Create New Tag</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl">Create New Tag</DialogTitle>
+            <DialogDescription className="text-gray-500">
               Create a new tag to organize your projects.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleCreateTag} className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Tag Name</Label>
+          <form onSubmit={handleCreateTag} className="space-y-5 py-4">
+            <div className="space-y-3">
+              <Label htmlFor="name" className="text-sm font-medium">Tag Name</Label>
               <Input
                 id="name"
                 placeholder="Enter tag name"
                 value={tagName}
                 onChange={(e) => setTagName(e.target.value)}
+                className="border-gray-300 focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="emoji">Emoji (optional)</Label>
+            <div className="space-y-3">
+              <Label htmlFor="emoji" className="text-sm font-medium">Emoji (optional)</Label>
               <Input
                 id="emoji"
                 placeholder="Enter emoji"
                 value={tagEmoji}
                 onChange={(e) => setTagEmoji(e.target.value)}
+                className="border-gray-300 focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="color">Color</Label>
-              <div className="flex gap-2">
+            <div className="space-y-3">
+              <Label htmlFor="color" className="text-sm font-medium">Color</Label>
+              <div className="flex gap-4 items-center">
                 <Input
                   id="color"
                   type="color"
                   value={tagColor}
                   onChange={(e) => setTagColor(e.target.value)}
-                  className="w-20 h-10 p-1"
+                  className="w-20 h-10 p-1 border-gray-300"
                 />
                 <div
-                  className="flex-1 rounded-md"
+                  className="flex-1 h-10 rounded-md border shadow-sm"
                   style={{ backgroundColor: tagColor }}
                 />
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="pt-4 flex justify-between sm:justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCreateDialogOpen(false)}
+                className="border-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
               <Button
                 type="submit"
                 disabled={isLoading || !tagName.trim()}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
               >
                 {isLoading ? (
                   <>
@@ -475,37 +488,39 @@ export default function TagManagePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Tag Dialog */}
+      {/* Improve Edit Tag Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={handleEditDialogChange}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Tag</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl">Edit Tag</DialogTitle>
+            <DialogDescription className="text-gray-500">
               Update the details of your tag.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleEditTag} className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Tag Name</Label>
+          <form onSubmit={handleEditTag} className="space-y-5 py-4">
+            <div className="space-y-3">
+              <Label htmlFor="edit-name" className="text-sm font-medium">Tag Name</Label>
               <Input
                 id="edit-name"
                 placeholder="Enter tag name"
                 value={tagName}
                 onChange={(e) => setTagName(e.target.value)}
+                className="border-gray-300 focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-emoji">Emoji (optional)</Label>
+            <div className="space-y-3">
+              <Label htmlFor="edit-emoji" className="text-sm font-medium">Emoji (optional)</Label>
               <Input
                 id="edit-emoji"
                 placeholder="Enter emoji"
                 value={tagEmoji}
                 onChange={(e) => setTagEmoji(e.target.value)}
+                className="border-gray-300 focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-color">Color</Label>
-              <div className="flex gap-2">
+            <div className="space-y-3">
+              <Label htmlFor="edit-color" className="text-sm font-medium">Color</Label>
+              <div className="flex gap-4 items-center">
                 <Input
                   id="edit-color"
                   type="color"
@@ -514,15 +529,24 @@ export default function TagManagePage() {
                   className="w-20 h-10 p-1"
                 />
                 <div
-                  className="flex-1 rounded-md"
+                  className="flex-1 h-10 rounded-md border"
                   style={{ backgroundColor: tagColor }}
                 />
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="pt-4 flex justify-between sm:justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+                className="border-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
               <Button
                 type="submit"
                 disabled={isLoading || !tagName.trim()}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
               >
                 {isLoading ? (
                   <>
@@ -538,22 +562,37 @@ export default function TagManagePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Tag Confirmation Dialog */}
+      {/* Improve Delete Tag Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the tag
-              {selectedTag?.name && <strong> "{selectedTag.name}"</strong>} and remove it from all associated projects.
+            <AlertDialogTitle className="text-xl">Delete Tag</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600">
+              Are you sure you want to delete this tag? This action cannot be undone.
+              <div className="mt-4 p-3 bg-gray-50 border rounded-md flex items-center gap-2">
+                {selectedTag?.emoji && (
+                  <span className="text-xl">{selectedTag.emoji}</span>
+                )}
+                <span
+                  className="font-medium"
+                  style={{ color: selectedTag?.color || '#374151' }}
+                >
+                  {selectedTag?.name}
+                </span>
+              </div>
+              {tagProjectCounts[selectedTag?.id] > 0 && (
+                <p className="mt-3 text-amber-600 font-medium">
+                  This tag is used in {tagProjectCounts[selectedTag?.id]} projects. Deleting it will remove the tag from those projects.
+                </p>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="flex justify-between sm:justify-end gap-2">
+            <AlertDialogCancel className="border-gray-300 hover:bg-gray-50">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteTag}
+              className="bg-red-500 hover:bg-red-600 text-white"
               disabled={isLoading}
-              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
             >
               {isLoading ? (
                 <>
@@ -561,7 +600,7 @@ export default function TagManagePage() {
                   Deleting...
                 </>
               ) : (
-                'Delete'
+                'Delete Tag'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

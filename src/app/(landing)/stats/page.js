@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, 
@@ -13,60 +13,41 @@ import {
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import useSWR from 'swr';
+
+const fetcher = (url) => fetch(url).then(res => {
+  if (!res.ok) throw new Error('Failed to fetch stats');
+  return res.json();
+});
 
 export default function StatsPage() {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const { data: session, status } = useSession();
   const router = useRouter();
+  
+  // Use SWR for data fetching with caching
+  const { data: stats, error, isLoading } = useSWR(
+    status === 'authenticated' ? '/api/stats' : null,
+    fetcher,
+    {
+      keepPreviousData: true,
+      revalidateOnFocus: false,
+      revalidateIfStale: true,
+      dedupingInterval: 300000, // Cache for 5 minutes
+    }
+  );
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
-      return;
-    }
-
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/stats');
-        if (!response.ok) throw new Error('Failed to fetch stats');
-        const data = await response.json();
-        setStats(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (status === 'authenticated') {
-      fetchStats();
     }
   }, [status, router]);
 
-  if (loading) {
+  if (isLoading && !stats) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
           <p className="text-gray-600">Loading statistics...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Error: {error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="text-blue-600 hover:underline"
-          >
-            Try again
-          </button>
         </div>
       </div>
     );

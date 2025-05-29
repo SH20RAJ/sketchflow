@@ -75,53 +75,42 @@ export function TagProjectList({ tagId }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {projects.map((project) => (
-        <Card
-          key={project.id}
-          className="group hover:shadow-md transition-all duration-200"
-          style={{
-            backgroundColor: project.color ? `${project.color}10` : '#F3F4F6',
-            borderColor: project.color ? `${project.color}30` : '#E5E7EB'
-          }}
-        >
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-2">
-                {project.emoji ? (
-                  <span className="text-xl">{project.emoji}</span>
-                ) : (
-                  <FolderOpen
-                    className="h-5 w-5"
-                    style={{ color: project.color || '#374151' }}
-                  />
-                )}
-                <CardTitle className="text-lg">
-                  {project.name}
-                </CardTitle>
-              </div>
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => router.push(`/project/${project.id}`)}
+        <Card key={project.id} className="mb-4 hover:shadow-md transition-all duration-200">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div
+                  className="w-10 h-10 rounded-md flex items-center justify-center text-xl"
+                  style={{ backgroundColor: `${project.color}15` || '#F3F4F615' }}
                 >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                  onClick={() => handleRemoveProject(project.id)}
-                  disabled={isProcessing}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
+                  {project.emoji || '📄'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <Link
+                    href={`/project/${project.id}`}
+                    className="font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors truncate block"
+                  >
+                    {project.name}
+                  </Link>
+                  {project.description && (
+                    <p className="text-sm text-gray-600 line-clamp-1">{project.description}</p>
+                  )}
+                </div>
               </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-red-500 hover:text-red-700 hover:bg-red-50 ml-2"
+                onClick={() => handleRemoveProject(project.id)}
+                disabled={isProcessing}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
             {project.description && (
-              <p className="text-sm text-gray-600 mb-2 line-clamp-2">{project.description}</p>
+              <p className="text-sm text-gray-600 mb-3 line-clamp-2">{project.description}</p>
             )}
             <div className="flex flex-wrap gap-1.5 mt-2">
               {project.projectTags && project.projectTags
@@ -136,12 +125,17 @@ export function TagProjectList({ tagId }) {
                       borderColor: `${tag.color}30` || '#E5E7EB30'
                     }}
                     className="hover:opacity-90 transition-all duration-200 cursor-pointer border text-xs font-medium px-2 py-0.5 rounded-full"
-                    onClick={() => router.push(`/projects/tag-manage?tagId=${tag.id}`)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      router.push(`/projects/tag-manage?tagId=${tag.id}`);
+                    }}
                   >
-                    {tag.emoji && <span className="mr-1 opacity-90">{tag.emoji}</span>}
-                    {tag.name}
+                    {tag.emoji && <span className="mr-1">{tag.emoji}</span>}
+                    <span className="truncate">{tag.name}</span>
                   </Badge>
-                ))}
+                ))
+              }
             </div>
           </CardContent>
         </Card>
